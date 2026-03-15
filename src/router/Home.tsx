@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar";
 import { Toaster } from "sonner";
 import { NotificationProvider } from "../components/Notification/NotificationContext";
 import { FiscalYearProvider } from "../hooks/Budget/useFiscalYear";
+import BudgetChatbot from "@/components/chatbot/BudgetChatBot";
 
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -27,7 +28,7 @@ export default function Home() {
           isMobile={isMobile}
         />
         <Outlet />
-
+        <BudgetChatbot />
         <Toaster position="top-right" expand richColors closeButton />
       </FiscalYearProvider>
     </NotificationProvider>
