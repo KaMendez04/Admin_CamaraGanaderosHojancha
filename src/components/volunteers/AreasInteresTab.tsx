@@ -5,22 +5,12 @@ interface AreasInteresTabProps {
   tipoSolicitante: "INDIVIDUAL" | "ORGANIZACION";
 }
 
-export function AreasInteresTab({
-  areasInteres,
-  tipoSolicitante,
-}: AreasInteresTabProps) {
-  const colorClasses =
-    tipoSolicitante === "INDIVIDUAL" || tipoSolicitante === "ORGANIZACION"
-      ? "bg-[#E6EDC8] text-[#5A7018]"
-      : "bg-[#E6C3B4] text-[#8C3A33]";
-
+export function AreasInteresTab({ areasInteres }: AreasInteresTabProps) {
   if (!areasInteres || areasInteres.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="text-[#556B2F] text-lg mb-2">
-          📋 No hay áreas de interés registradas
-        </div>
-        <p className="text-sm text-[#556B2F] opacity-75">
+        <p className="text-[#556B2F] text-sm font-medium mb-1">📋 No hay áreas de interés registradas</p>
+        <p className="text-xs text-[#556B2F] opacity-75">
           Las áreas de interés aparecerán aquí una vez sean definidas
         </p>
       </div>
@@ -29,17 +19,18 @@ export function AreasInteresTab({
 
   return (
     <div>
-      <h4 className="text-lg font-bold text-[#33361D] mb-4">
-        Áreas de Interés
-      </h4>
-      <div className="flex flex-wrap gap-3">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-1 h-4 rounded-full bg-[#5B732E]" />
+        <h4 className="text-xs font-bold uppercase tracking-widest text-[#5B732E]">Áreas de Interés</h4>
+      </div>
+      <div className="flex flex-wrap gap-2 pl-3">
         {areasInteres.map((area) => (
-          <div
+          <span
             key={area.idAreaInteres}
-            className={`px-4 py-2 rounded-full text-sm font-semibold shadow-sm hover:shadow-md transition-shadow ${colorClasses}`}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-[#EAEFE0] text-[#33361D]"
           >
             {area.nombreArea}
-          </div>
+          </span>
         ))}
       </div>
     </div>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { Solicitud } from "../../schemas/adminSolicitudes";
 import { FincaAccordion } from "./FincaAccordion";
-import { Download, FolderOpen } from "lucide-react";
+import { Download, FolderOpen, X, Clock, CheckCircle, XCircle } from "lucide-react";
 import { useDownloadSolicitudPDF } from "../../hooks/associates/useDownloadSolicitudPDF";
 import { useSolicitudHasDocs, useDocsLinkBySolicitud } from "../../hooks/associates/useSolicitudDocsLink";
 import { toast } from "sonner";
@@ -16,57 +16,106 @@ type Props = {
 
 type Tab = "info" | "finca";
 
+const STATUS_CONFIG = {
+  PENDIENTE: {
+    label: "Pendiente",
+    sublabel: "En revisión",
+    icon: Clock,
+    pill: "bg-yellow-100 text-yellow-800",
+    dot: "bg-yellow-500",
+    bar: "bg-yellow-400",
+    iconBg: "bg-yellow-100",
+    iconColor: "text-yellow-700",
+  },
+  APROBADO: {
+    label: "Aprobada",
+    sublabel: "Solicitud aceptada",
+    icon: CheckCircle,
+    pill: "bg-[#E6EDC8] text-[#5A7018]",
+    dot: "bg-[#5A7018]",
+    bar: "bg-[#5B732E]",
+    iconBg: "bg-[#E6EDC8]",
+    iconColor: "text-[#5B732E]",
+  },
+  RECHAZADO: {
+    label: "Rechazada",
+    sublabel: "Solicitud denegada",
+    icon: XCircle,
+    pill: "bg-[#F7E9E6] text-[#8C3A33]",
+    dot: "bg-[#8C3A33]",
+    bar: "bg-[#8C3A33]",
+    iconBg: "bg-[#F7E9E6]",
+    iconColor: "text-[#8C3A33]",
+  },
+} as const;
+
+const formatDate = (dateString: string) =>
+  new Date(dateString).toLocaleDateString("es-CR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+function InfoField({ label, value, wide = false }: { label: string; value: string; wide?: boolean }) {
+  return (
+    <div className={wide ? "col-span-2" : ""}>
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-[#556B2F] mb-1">{label}</p>
+      <p className="text-sm font-medium text-[#33361D]">{value}</p>
+    </div>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-1 h-4 rounded-full bg-[#5B732E]" />
+        <h4 className="text-xs font-bold uppercase tracking-widest text-[#5B732E]">{title}</h4>
+      </div>
+      <div className="grid grid-cols-2 gap-x-6 gap-y-4 pl-3">{children}</div>
+    </div>
+  );
+}
+
+function LoadingSkeleton({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-8" onClick={(e) => e.stopPropagation()}>
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#5B732E]" />
+          <p className="mt-4 text-[#556B2F] font-medium">Cargando detalles...</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Props) {
   const [selectedTab, setSelectedTab] = useState<Tab>("info");
   const openSolicitudPDF = useDownloadSolicitudPDF();
 
-  // ✅ Hooks siempre arriba, antes de cualquier return
   const docsLink = useDocsLinkBySolicitud();
   const { data: hasDocs, isLoading: checkingDocs } = useSolicitudHasDocs(
     solicitud ? Number(solicitud.idSolicitud) : null
   );
 
   useLockBodyScroll(open);
-    
+
   if (!open) return null;
+  if (isLoading || !solicitud) return <LoadingSkeleton onClose={onClose} />;
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("es-CR", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  if (isLoading || !solicitud) {
-    return (
-      <div
-        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-        onClick={onClose}
-      >
-        <div
-          className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl p-8"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#5B732E]"></div>
-            <p className="mt-4 text-[#556B2F] font-medium">Cargando detalles...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const status = STATUS_CONFIG[solicitud.estado];
+  const StatusIcon = status.icon;
+  const hasFincas = solicitud.asociado.fincas && solicitud.asociado.fincas.length > 0;
+  const nucleoFamiliar = solicitud.asociado.nucleoFamiliar;
 
   const personalFields = [
     { label: "Cédula", value: solicitud.persona.cedula },
-    {
-      label: "Nombre completo",
-      value: `${solicitud.persona.nombre} ${solicitud.persona.apellido1} ${solicitud.persona.apellido2}`,
-    },
+    { label: "Nombre completo", value: `${solicitud.persona.nombre} ${solicitud.persona.apellido1} ${solicitud.persona.apellido2}` },
     { label: "Fecha de nacimiento", value: formatDate(solicitud.persona.fechaNacimiento) },
     { label: "Teléfono", value: solicitud.persona.telefono },
     { label: "Email", value: solicitud.persona.email },
-    { label: "Dirección", value: solicitud.persona.direccion || "—" },
+    { label: "Dirección", value: solicitud.persona.direccion || "—", wide: true },
   ];
 
   const asociadoFields = [
@@ -75,86 +124,68 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
     { label: "CVO", value: solicitud.asociado.CVO || "—" },
   ];
 
-  const nucleoFamiliar = solicitud.asociado.nucleoFamiliar;
-
   return (
     <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="bg-gradient-to-r from-[#F8F9F3] to-[#EAEFE0] p-6 border-b border-[#EAEFE0] rounded-t-2xl">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h3 className="text-2xl font-bold text-[#33361D]">Detalles de la Solicitud</h3>
-              <div className="mt-2 flex items-center gap-2">
-                <span
-                  className={`px-3 py-1 rounded-lg text-sm font-bold ${
-                    solicitud.estado === "PENDIENTE"
-                      ? "bg-yellow-100 text-yellow-800"
-                      : solicitud.estado === "APROBADO"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
-                  }`}
-                >
-                  {solicitud.estado}
-                </span>
 
-                <div className="flex items-center gap-1.5">
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      solicitud.estado === "PENDIENTE"
-                        ? "bg-yellow-500"
-                        : solicitud.estado === "APROBADO"
-                        ? "bg-green-500"
-                        : "bg-red-500"
-                    }`}
-                  />
-                  <span className="text-xs text-gray-600 font-medium">
-                    {solicitud.estado === "PENDIENTE"
-                      ? "En revisión"
-                      : solicitud.estado === "APROBADO"
-                      ? "Aceptada"
-                      : "Rechazada"}
-                  </span>
-                </div>
+        {/* ── HEADER ── */}
+        <div className="bg-gradient-to-r from-[#F8F9F3] to-[#EAEFE0] px-6 pt-5 pb-4 border-b border-[#EAEFE0]">
+
+          {/* Row 1: icon + name + badge + close */}
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className={`flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center ${status.iconBg}`}>
+                <StatusIcon className={`w-4 h-4 ${status.iconColor}`} />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-[#556B2F] uppercase tracking-wider mb-0.5">
+                  Solicitud de asociación
+                </p>
+                <h3 className="text-xl font-bold text-[#33361D] leading-tight">
+                  {solicitud.persona.nombre} {solicitud.persona.apellido1} {solicitud.persona.apellido2}
+                </h3>
+                <p className="text-[11px] text-[#556B2F] mt-0.5">
+                  {solicitud.persona.cedula} · {formatDate(solicitud.createdAt)}
+                </p>
               </div>
             </div>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold ${status.pill}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
+                {status.label}
+              </span>
+              <button
+                onClick={onClose}
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-[#556B2F] hover:bg-[#EAEFE0] transition"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
-          {/* BOTONES */}
-          <div className="flex flex-wrap gap-2 justify-start">
-            {/* ✅ Descargar PDF */}
+          {/* Row 2: action buttons — compact */}
+          <div className="flex gap-2 mt-3">
             <button
               onClick={() => openSolicitudPDF.mutate(Number(solicitud?.idSolicitud))}
               disabled={openSolicitudPDF.isPending}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#5B732E] text-white text-xs font-semibold hover:bg-[#556B2F] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {openSolicitudPDF.isPending ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Generando PDF...
-                </>
+                <><div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />Generando...</>
               ) : (
-                <>
-                  <Download className="w-4 h-4" />
-                  Descargar PDF
-                </>
+                <><Download className="w-3 h-3" />Descargar PDF</>
               )}
             </button>
 
-            {/* Documentos: skeleton → botón → texto */}
             {checkingDocs ? (
-              <div className="h-9 w-36 rounded-xl bg-gray-200 animate-pulse" />
+              <div className="h-7 w-32 rounded-lg bg-[#EAEFE0] animate-pulse" />
             ) : hasDocs ? (
               <button
                 onClick={() => {
@@ -167,30 +198,24 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
                   });
                 }}
                 disabled={docsLink.isPending}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#33361D] text-white font-semibold hover:bg-[#2b2d18] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#33361D] text-white text-xs font-semibold hover:bg-[#2b2d18] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {docsLink.isPending ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Abriendo...
-                  </>
+                  <><div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />Abriendo...</>
                 ) : (
-                  <>
-                    <FolderOpen className="w-4 h-4" />
-                    Ver documentos
-                  </>
+                  <><FolderOpen className="w-3 h-3" />Ver documentos</>
                 )}
               </button>
             ) : (
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 border border-gray-200 text-gray-500 text-sm font-medium">
-                <FolderOpen className="w-4 h-4 opacity-50" />
-                No se adjuntaron documentos
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#EAEFE0] text-[#556B2F] text-xs font-medium">
+                <FolderOpen className="w-3 h-3 opacity-50" />
+                Sin documentos adjuntos
               </div>
             )}
           </div>
         </div>
 
-        {/* Tabs */}
+        {/* ── TABS ── */}
         <div className="flex border-b border-[#EAEFE0] px-6 bg-white">
           <button
             onClick={() => setSelectedTab("info")}
@@ -202,7 +227,7 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
           >
             Información General
           </button>
-          {solicitud.asociado.fincas && solicitud.asociado.fincas.length > 0 && (
+          {hasFincas && (
             <button
               onClick={() => setSelectedTab("finca")}
               className={`px-4 py-3 font-semibold text-sm transition ${
@@ -216,127 +241,80 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
           )}
         </div>
 
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {/* TAB: INFORMACIÓN GENERAL */}
-          {selectedTab === "info" && (
-            <div className="space-y-6">
-              {/* Información Personal */}
+        {/* ── BODY ── */}
+        <div className="flex-1 overflow-y-auto px-7 py-5 space-y-6">
+
+          {solicitud.estado === "RECHAZADO" && solicitud.motivo && (
+            <div className="rounded-xl bg-[#F7E9E6] border border-[#E8C5C0] p-4 flex gap-3">
+              <XCircle className="w-4 h-4 text-[#8C3A33] flex-shrink-0 mt-0.5" />
               <div>
-                <h4 className="text-lg font-bold text-[#33361D] mb-3">Información Personal</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {personalFields.map((field, idx) => (
-                    <div key={idx} className="rounded-xl bg-[#F8F9F3] p-4">
-                      <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                        {field.label}
-                      </div>
-                      <div className="text-base text-[#33361D] font-medium">{field.value}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Datos del Asociado */}
-              <div>
-                <h4 className="text-lg font-bold text-[#33361D] mb-3">Datos del Asociado</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {asociadoFields.map((field, idx) => (
-                    <div key={idx} className="rounded-xl bg-[#F8F9F3] p-4">
-                      <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                        {field.label}
-                      </div>
-                      <div className="text-base text-[#33361D] font-medium">{field.value}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Núcleo Familiar */}
-              {nucleoFamiliar && (
-                <div>
-                  <h4 className="text-lg font-bold text-[#33361D] mb-3">Núcleo Familiar</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="rounded-xl bg-[#F8F9F3] p-4">
-                      <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Hombres</div>
-                      <div className="text-base text-[#33361D] font-medium">{nucleoFamiliar.nucleoHombres}</div>
-                    </div>
-                    <div className="rounded-xl bg-[#F8F9F3] p-4">
-                      <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Mujeres</div>
-                      <div className="text-base text-[#33361D] font-medium">{nucleoFamiliar.nucleoMujeres}</div>
-                    </div>
-                    <div className="rounded-xl bg-[#FEF6E0] p-4">
-                      <div className="text-xs font-bold text-[#C19A3D] tracking-wider uppercase mb-1">Total</div>
-                      <div className="text-base text-[#33361D] font-medium">{nucleoFamiliar.nucleoTotal}</div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Estado de Solicitud */}
-              <div>
-                <h4 className="text-lg font-bold text-[#33361D] mb-3">Estado de Solicitud</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="rounded-xl bg-[#F8F9F3] p-4">
-                    <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">Estado</div>
-                    <div className="text-base text-[#33361D] font-medium">{solicitud.estado}</div>
-                  </div>
-                  <div className="rounded-xl bg-[#F8F9F3] p-4">
-                    <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                      Fecha de solicitud
-                    </div>
-                    <div className="text-base text-[#33361D] font-medium">{formatDate(solicitud.createdAt)}</div>
-                  </div>
-
-                  {/* Motivo de rechazo - si existe */}
-                  {solicitud.motivo && (
-                    <div className="rounded-xl bg-red-50 p-4 md:col-span-2 border border-red-200">
-                      <div className="text-xs font-bold text-red-700 tracking-wider uppercase mb-1">
-                        Motivo de rechazo
-                      </div>
-                      <div className="text-base text-red-900 font-medium">{solicitud.motivo}</div>
-                    </div>
-                  )}
-                </div>
+                <p className="text-[10px] font-bold text-[#8C3A33] uppercase tracking-widest mb-0.5">Motivo de rechazo</p>
+                <p className="text-sm text-[#8C3A33]">{solicitud.motivo}</p>
               </div>
             </div>
           )}
 
-          {/* TAB: FINCA */}
-          {selectedTab === "finca" && (
-            <div>
-              {solicitud.asociado.fincas && solicitud.asociado.fincas.length > 0 ? (
-                <div className="space-y-4">
-                  {solicitud.asociado.fincas.map((finca, idx) => (
-                    <FincaAccordion
-                      key={finca.idFinca}
-                      finca={finca}
-                      isFirst={idx === 0}
-                      esPropietario={solicitud.asociado.esPropietario ?? false}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="text-[#556B2F] text-lg mb-2">🏡 No hay fincas registradas</div>
-                  <p className="text-sm text-[#556B2F] opacity-75">
-                    Las fincas del asociado aparecerán aquí una vez sean registradas
-                  </p>
-                </div>
+          {selectedTab === "info" && (
+            <>
+              <Section title="Información Personal">
+                {personalFields.map((f, i) => (
+                  <InfoField key={i} label={f.label} value={f.value} wide={(f as any).wide} />
+                ))}
+              </Section>
+
+              <div className="border-t border-[#EAEFE0]" />
+
+              <Section title="Datos del Asociado">
+                {asociadoFields.map((f, i) => (
+                  <InfoField key={i} label={f.label} value={f.value} />
+                ))}
+              </Section>
+
+              {nucleoFamiliar && (
+                <>
+                  <div className="border-t border-[#EAEFE0]" />
+                  <Section title="Núcleo Familiar">
+                    <InfoField label="Hombres" value={String(nucleoFamiliar.nucleoHombres)} />
+                    <InfoField label="Mujeres" value={String(nucleoFamiliar.nucleoMujeres)} />
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-[#C19A3D] mb-1">Total</p>
+                      <p className="text-sm font-medium text-[#33361D]">{nucleoFamiliar.nucleoTotal}</p>
+                    </div>
+                  </Section>
+                </>
               )}
+
+              <div className="border-t border-[#EAEFE0]" />
+
+              <Section title="Estado de la Solicitud">
+                <InfoField label="Estado" value={status.label} />
+                <InfoField label="Fecha de solicitud" value={formatDate(solicitud.createdAt)} />
+              </Section>
+            </>
+          )}
+
+          {selectedTab === "finca" && (
+            <div className="space-y-3">
+              {solicitud.asociado.fincas?.map((finca, idx) => (
+                <FincaAccordion
+                  key={finca.idFinca}
+                  finca={finca}
+                  isFirst={idx === 0}
+                  esPropietario={solicitud.asociado.esPropietario ?? false}
+                />
+              ))}
             </div>
           )}
         </div>
 
-        {/* Footer */}
-        <div className="border-t border-[#EAEFE0] px-6 py-4 bg-[#F8F9F3]">
-          <div className="flex justify-end">
-            <button
-              onClick={onClose}
-              className="px-6 py-3 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm"
-            >
-              Cerrar
-            </button>
-          </div>
+        {/* ── FOOTER ── */}
+        <div className="px-6 py-3 border-t border-[#EAEFE0] bg-[#F8F9F3] flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-5 py-2 rounded-xl bg-[#5B732E] text-white text-sm font-semibold hover:bg-[#556B2F] transition shadow-sm"
+          >
+            Cerrar
+          </button>
         </div>
       </div>
     </div>

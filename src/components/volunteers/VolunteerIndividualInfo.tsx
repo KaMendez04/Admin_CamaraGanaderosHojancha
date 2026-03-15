@@ -5,104 +5,48 @@ interface VolunteerIndividualInfoProps {
   formatDate: (dateString: string) => string;
 }
 
-export function VolunteerIndividualInfo({
-  voluntario,
-  formatDate,
-}: VolunteerIndividualInfoProps) {
+function InfoField({ label, value, wide = false }: { label: string; value: React.ReactNode; wide?: boolean }) {
+  return (
+    <div className={wide ? "col-span-2" : ""}>
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-[#556B2F] mb-1">{label}</p>
+      <p className="text-sm font-medium text-[#33361D]">{value || "—"}</p>
+    </div>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-1 h-4 rounded-full bg-[#5B732E]" />
+        <h4 className="text-xs font-bold uppercase tracking-widest text-[#5B732E]">{title}</h4>
+      </div>
+      <div className="grid grid-cols-2 gap-x-6 gap-y-4 pl-3">{children}</div>
+    </div>
+  );
+}
+
+export function VolunteerIndividualInfo({ voluntario, formatDate }: VolunteerIndividualInfoProps) {
   return (
     <>
-      {/* Información Personal */}
-      <div>
-        <h4 className="text-lg font-bold text-[#33361D] mb-3">
-          Información Personal
-        </h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="rounded-xl bg-[#F8F9F3] p-4">
-            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-              Nombre Completo
-            </div>
-            <div className="text-base text-[#33361D] font-medium">
-              {voluntario.persona.nombre} {voluntario.persona.apellido1}{" "}
-              {voluntario.persona.apellido2}
-            </div>
-          </div>
-          <div className="rounded-xl bg-[#F8F9F3] p-4">
-            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-              Cédula
-            </div>
-            <div className="text-base text-[#33361D] font-medium">
-              {voluntario.persona.cedula}
-            </div>
-          </div>
-          <div className="rounded-xl bg-[#F8F9F3] p-4">
-            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-              Email
-            </div>
-            <div className="text-base text-[#33361D] font-medium">
-              {voluntario.persona.email}
-            </div>
-          </div>
-          <div className="rounded-xl bg-[#F8F9F3] p-4">
-            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-              Teléfono
-            </div>
-            <div className="text-base text-[#33361D] font-medium">
-              {voluntario.persona.telefono}
-            </div>
-          </div>
-          <div className="rounded-xl bg-[#F8F9F3] p-4">
-            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-              Nacionalidad
-            </div>
-            <div className="text-base text-[#33361D] font-medium">
-              {voluntario.nacionalidad}
-            </div>
-          </div>
-          {voluntario.persona.fechaNacimiento && (
-            <div className="rounded-xl bg-[#F8F9F3] p-4">
-              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-                Fecha de Nacimiento
-              </div>
-              <div className="text-base text-[#33361D] font-medium">
-                {formatDate(voluntario.persona.fechaNacimiento)}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      <Section title="Información Personal">
+        <InfoField label="Nombre Completo" value={`${voluntario.persona.nombre} ${voluntario.persona.apellido1} ${voluntario.persona.apellido2}`} />
+        <InfoField label="Cédula" value={voluntario.persona.cedula} />
+        <InfoField label="Email" value={voluntario.persona.email} />
+        <InfoField label="Teléfono" value={voluntario.persona.telefono} />
+        <InfoField label="Nacionalidad" value={voluntario.nacionalidad} />
+        {voluntario.persona.fechaNacimiento && (
+          <InfoField label="Fecha de Nacimiento" value={formatDate(voluntario.persona.fechaNacimiento)} />
+        )}
+      </Section>
 
-      {/* Perfil del Voluntario */}
-      <div>
-        <h4 className="text-lg font-bold text-[#33361D] mb-3">
-          Perfil del Voluntario
-        </h4>
-        <div className="space-y-4">
-          <div className="rounded-xl bg-[#F8F9F3] p-4">
-            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-              Motivación
-            </div>
-            <div className="text-base text-[#33361D] font-medium">
-              {voluntario.motivacion}
-            </div>
-          </div>
-          <div className="rounded-xl bg-[#F8F9F3] p-4">
-            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-              Habilidades
-            </div>
-            <div className="text-base text-[#33361D] font-medium">
-              {voluntario.habilidades}
-            </div>
-          </div>
-          <div className="rounded-xl bg-[#F8F9F3] p-4">
-            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase mb-1">
-              Experiencia
-            </div>
-            <div className="text-base text-[#33361D] font-medium">
-              {voluntario.experiencia}
-            </div>
-          </div>
-        </div>
-      </div>
+      <div className="border-t border-[#EAEFE0]" />
+
+      <Section title="Perfil del Voluntario">
+        <InfoField label="Motivación" value={voluntario.motivacion} wide />
+        <InfoField label="Habilidades" value={voluntario.habilidades} wide />
+        <InfoField label="Experiencia" value={voluntario.experiencia} wide />
+      </Section>
     </>
   );
 }
