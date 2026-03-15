@@ -52,7 +52,6 @@ export default function CloudinaryUploadSheet({
       return () => cancelAnimationFrame(raf);
     }
 
-    // Salida: marcar como cerrando, quitar visibilidad
     setIsClosing(true);
     setIsVisible(false);
 
@@ -64,21 +63,6 @@ export default function CloudinaryUploadSheet({
     return () => clearTimeout(timeout);
   }, [open]);
 
-  useEffect(() => {
-    if (!isMounted) return;
-
-    const originalOverflow = document.body.style.overflow;
-    const originalTouchAction = document.body.style.touchAction;
-
-    document.body.style.overflow = "hidden";
-    document.body.style.touchAction = "none";
-
-    return () => {
-      document.body.style.overflow = originalOverflow;
-      document.body.style.touchAction = originalTouchAction;
-    };
-  }, [isMounted]);
-
   if (!isMounted) return null;
 
   const handleFiles = (files: FileList | null) => {
@@ -88,7 +72,6 @@ export default function CloudinaryUploadSheet({
 
   return (
     <div className="fixed inset-0 z-[120] overflow-hidden">
-      {/* Overlay: entra suave, sale más rápido */}
       <div
         style={{
           transition: isClosing
@@ -103,7 +86,6 @@ export default function CloudinaryUploadSheet({
         }}
       />
 
-      {/* Sheet: entrada con spring suave, salida limpia y rápida */}
       <aside
         style={{
           transition: isClosing

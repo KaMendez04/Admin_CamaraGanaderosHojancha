@@ -44,6 +44,40 @@ export default function CloudinaryMediaPage() {
     });
   }, [queue]);
 
+  useEffect(() => {
+    const body = document.body;
+    const html = document.documentElement;
+    const shouldLock = !!selected || isUploadSheetOpen;
+
+    if (shouldLock) {
+      body.style.overflow = "hidden";
+      html.style.overflow = "hidden";
+      body.style.touchAction = "none";
+    } else {
+      body.style.overflow = "";
+      html.style.overflow = "";
+      body.style.touchAction = "";
+    }
+
+    return () => {
+      body.style.overflow = "";
+      html.style.overflow = "";
+      body.style.touchAction = "";
+    };
+  }, [selected, isUploadSheetOpen]);
+
+  useEffect(() => {
+    if (!selected && !isUploadSheetOpen) {
+      const id = window.setTimeout(() => {
+        document.body.style.overflow = "";
+        document.documentElement.style.overflow = "";
+        document.body.style.touchAction = "";
+      }, 50);
+
+      return () => clearTimeout(id);
+    }
+  }, [selected, isUploadSheetOpen, queue]);
+
   const items = useMemo(() => {
     const arr = Array.isArray(gallery.data) ? gallery.data : [];
     return [...arr].sort((a: any, b: any) => {
@@ -159,7 +193,10 @@ export default function CloudinaryMediaPage() {
         </div>
       </div>
 
-      <CloudinaryMediaModal selected={selected} onClose={() => setSelected(null)} />
+      <CloudinaryMediaModal
+        selected={selected}
+        onClose={() => setSelected(null)}
+      />
 
       <CloudinaryUploadSheet
         open={isUploadSheetOpen}
