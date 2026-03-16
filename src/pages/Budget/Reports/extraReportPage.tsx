@@ -94,7 +94,7 @@ const handleDownloadPDF = async () => {
             <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">
               TOTAL
             </div>
-            <div className="mt-2 text-3xl font-bold text-[#5B732E]">
+            <div className="mt-2 font-bold text-[#5B732E] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">
               {fmt(totals.totalAmount)}
             </div>
           </div>
@@ -103,7 +103,7 @@ const handleDownloadPDF = async () => {
             <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">
               USADO
             </div>
-            <div className="mt-2 text-3xl font-bold text-[#5B732E]">
+            <div className="mt-2 font-bold text-[#5B732E] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">
               {fmt(totals.totalUsed)}
             </div>
           </div>
@@ -112,7 +112,7 @@ const handleDownloadPDF = async () => {
             <div className="text-xs font-bold text-[#C6A14B] tracking-wider uppercase">
               RESTANTE
             </div>
-            <div className="mt-2 text-3xl font-bold text-[#C19A3D]">
+            <div className="mt-2 font-bold text-[#C19A3D] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">
               {fmt(totals.totalRemaining)}
             </div>
           </div>

@@ -5,7 +5,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useSpendsList } from "../../../hooks/Budget/spend/useSpendCatalog";
 import { GenericTable } from "../../GenericTable";
 import { useUpdateSpend } from "../../../hooks/Budget/spend/useSpendMutation";
-import { BirthDatePicker } from "../../ui/birthDayPicker"; // ✅ NUEVO
+import { BirthDatePicker } from "../../ui/birthDayPicker";
+import { CharCounter } from "../../CharCounter";
 
 function formatMoneyCR(v: string | number) {
   const n = Number(v ?? 0);
@@ -82,6 +83,8 @@ export default function SpendList({ subTypeId }: Props) {
   const amountRef = useRef<string>("");
   const dateRef = useRef<string>("");
 
+  const MAX_AMOUNT_LENGTH = 20;
+
   const rows = useMemo(() => {
     const all = (q.data ?? []) as Row[];
     if (!subTypeId) return all;
@@ -143,17 +146,17 @@ export default function SpendList({ subTypeId }: Props) {
 
           return (
             <BirthDatePicker
-                value={draftDate}
-                onChange={(v) => {
-                  setDraftDate(v)
-                  dateRef.current = v
-                }}
-                placeholder="Seleccione una fecha"
-                disabled={mUpdate.loading}
-                className="w-full"
-                helperText=""
-                triggerClassName="min-w-[240px] w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#708C3E]"
-              />
+              value={draftDate}
+              onChange={(v) => {
+                setDraftDate(v);
+                dateRef.current = v;
+              }}
+              placeholder="Seleccione una fecha"
+              disabled={mUpdate.loading}
+              className="w-full"
+              helperText=""
+              triggerClassName="min-w-[240px] w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#708C3E]"
+            />
           );
         },
       },
@@ -172,22 +175,26 @@ export default function SpendList({ subTypeId }: Props) {
           if (!isEditing) return formatMoneyCR(r.amount);
 
           return (
-            <input
-              className="w-full max-w-[220px] rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#708C3E]"
-              value={draftAmount}
-              onChange={(e) => {
-                const sanitized = e.target.value.replace(/[^0-9.,]/g, "");
-                setDraftAmount(sanitized);
-                amountRef.current = sanitized;
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") cancelEdit();
-                if (e.key === "Enter") saveEdit(r);
-              }}
-              placeholder="₡0,00"
-              inputMode="decimal"
-              autoFocus
-            />
+            <div className="w-full max-w-[220px]">
+              <input
+                className="w-full max-w-[220px] rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#708C3E]"
+                value={draftAmount}
+                maxLength={MAX_AMOUNT_LENGTH}
+                onChange={(e) => {
+                  const sanitized = e.target.value.replace(/[^0-9.,]/g, "");
+                  setDraftAmount(sanitized);
+                  amountRef.current = sanitized;
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") cancelEdit();
+                  if (e.key === "Enter") saveEdit(r);
+                }}
+                placeholder="₡0,00"
+                inputMode="decimal"
+                autoFocus
+              />
+              <CharCounter value={draftAmount} max={MAX_AMOUNT_LENGTH} />
+            </div>
           );
         },
       },

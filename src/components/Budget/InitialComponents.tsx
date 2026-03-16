@@ -29,14 +29,14 @@ export function StatCard({
         : { text: "text-[#C19A3D]", ring: "ring-[#FEF6E0]", icon: "text-[#C6A14B]", bg: "bg-[#FEF6E0]" }
 
   return (
-    <div className={`rounded-2xl ${palette.bg} ring-1 ${palette.ring} shadow-sm p-5`}>
+    <div className={`min-w-0 rounded-2xl ${palette.bg} ring-1 ${palette.ring} shadow-sm p-5`}>
       <div className="flex items-start justify-between">
         <p className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">{title}</p>
         {icon === "down" && <TrendingDown className={`h-5 w-5 ${palette.icon}`} />}
         {icon === "up" && <TrendingUp className={`h-5 w-5 ${palette.icon}`} />}
         {icon === "bars" && <BarChart3 className={`h-5 w-5 ${palette.icon}`} />}
       </div>
-      <div className={`mt-2 text-3xl font-bold tracking-wide ${palette.text}`}>{crc(value)}</div>
+      <div className={`mt-2 min-w-0 font-bold leading-tight whitespace-nowrap text-[clamp(0.8rem,1.8vw,2rem)] ${palette.text}`}>{crc(value)}</div>
     </div>
   )
 }

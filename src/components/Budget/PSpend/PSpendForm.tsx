@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Plus } from "lucide-react";
 import {
   useDepartments,
   usePSpendSubTypes,
@@ -9,6 +8,9 @@ import { useCreatePSpendEntry } from "../../../hooks/Budget/pSpend/usePSpendMuta
 import type { CreatePSpendDTO } from "../../../models/Budget/PSpendType";
 import { parseCR, useMoneyInput } from "../../../hooks/Budget/useMoneyInput";
 import { CustomSelect } from "../../CustomSelect";
+import { ActionButtons } from "../../ActionButtons";
+import { showSuccessAlert } from "@/utils/alerts";
+
 
 type Props = { onSuccess?: (createdId: number) => void; disabled?: boolean };
 
@@ -46,11 +48,28 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
     setTypeId("");
     setSubTypeId("");
   }, [departmentId]);
+
   useEffect(() => {
     setSubTypeId("");
   }, [typeId]);
 
   const create = useCreatePSpendEntry();
+
+  const isSubmitting = Boolean(
+    (create as any).isPending ??
+      (create as any).isLoading ??
+      (create as any).loading
+  );
+
+  function resetForm() {
+    setErrors({});
+    setDepartmentId("");
+    setTypeId("");
+    setSubTypeId("");
+    if ("setValue" in money && typeof (money as any).setValue === "function") {
+      (money as any).setValue("");
+    }
+  }
 
   async function onSubmit() {
     setErrors({});
@@ -60,14 +79,11 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
     if (!amountStr || amount <= 0) return setErrors((e) => ({ ...e, amount: "Monto requerido" }));
 
     const payload: CreatePSpendDTO = { pSpendSubTypeId: Number(subTypeId), amount };
+
     try {
       const res = await create.mutate(payload);
-      if ("setValue" in money && typeof (money as any).setValue === "function") {
-        (money as any).setValue("");
-      }
-      setDepartmentId("");
-      setTypeId("");
-      setSubTypeId("");
+      resetForm();
+      await showSuccessAlert("La proyección se registró correctamente.");
       onSuccess?.(res.id);
     } catch (err: any) {
       setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo registrar la proyección" }));
@@ -128,16 +144,24 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
         {errors.amount && <p className="text-xs text-red-600">{errors.amount}</p>}
       </div>
 
-      {/* Separador y Botón */}
+      {/* Separador y Botones */}
       <div className="pt-4 border-t border-gray-100">
-        <button
-          onClick={onSubmit}
-          disabled={disabled || !departmentId || !typeId || !subTypeId || !amountStr || amount <= 0}
-          className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-4 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Plus className="h-4 w-4" />
-          Registrar proyección
-        </button>
+        <div className="flex justify-end">
+          <ActionButtons
+            onSave={onSubmit}
+            onCancel={resetForm}
+            showSave
+            showCancel
+            showText
+            saveText="Registrar proyección de egreso"
+            cancelText="Cancelar"
+            disabled={disabled || !departmentId || !typeId || !subTypeId || !amountStr || amount <= 0}
+            isSaving={isSubmitting}
+            requireConfirmCancel={false}
+            requireConfirmSave={false}
+          />
+        </div>
+
         {errors.api && <p className="text-xs text-red-600 mt-3">{errors.api}</p>}
       </div>
     </div>

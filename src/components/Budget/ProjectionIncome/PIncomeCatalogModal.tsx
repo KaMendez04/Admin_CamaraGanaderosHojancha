@@ -20,6 +20,7 @@ import {
 
 import PIncomeList from "./PIncomeList";
 import { useBodyScrollLock } from "@/hooks/modals/useBodyScrollLock";
+import { CharCounter } from "../../CharCounter";
 
 type Props = {
   open: boolean;
@@ -39,8 +40,8 @@ export default function CatalogModal({
   defaultIncomeTypeId,
   inline = false,
 }: Props) {
-
   const [openAmountModal, setOpenAmountModal] = useState(false);
+  const MAX_CATALOG_NAME_LENGTH = 50;
 
   // ===== EDIT: Departamento =====
   const [editDepartmentId, setEditDepartmentId] = useState<number | "">("");
@@ -342,7 +343,7 @@ export default function CatalogModal({
   const shouldLockScroll = (!inline && open) || openAmountModal;
   useBodyScrollLock(shouldLockScroll);
 
-    useEffect(() => {
+  useEffect(() => {
     if (!open) return;
 
     setErrors({});
@@ -396,17 +397,21 @@ export default function CatalogModal({
               </div>
 
               <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row">
-                <input
-                  className="w-full min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
-                  placeholder="Nuevo departamento"
-                  value={newDepartment}
-                  onChange={(e) => setNewDepartment(e.target.value)}
-                />
+                <div className="w-full min-w-0 flex-1">
+                  <input
+                    className="w-full min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
+                    placeholder="Nuevo departamento"
+                    value={newDepartment}
+                    maxLength={MAX_CATALOG_NAME_LENGTH}
+                    onChange={(e) => setNewDepartment(e.target.value)}
+                  />
+                  <CharCounter value={newDepartment} max={MAX_CATALOG_NAME_LENGTH} />
+                </div>
                 <button
                   type="button"
                   onClick={handleCreateDepartment}
                   disabled={mCreateDept.loading || !newDepartment.trim()}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#708C3E] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 md:w-auto"
+                  className="inline-flex w-full self-start items-center justify-center gap-2 rounded-xl bg-[#708C3E] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 md:w-auto"
                   title="Crear departamento"
                 >
                   <Plus className="h-4 w-4" />
@@ -429,18 +434,22 @@ export default function CatalogModal({
               </div>
 
               <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row">
-                <input
-                  className="w-full min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
-                  placeholder="Nuevo nombre"
-                  value={editDepartmentName}
-                  onChange={(e) => setEditDepartmentName(e.target.value)}
-                  disabled={!editDepartmentId}
-                />
+                <div className="w-full min-w-0 flex-1">
+                  <input
+                    className="w-full min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
+                    placeholder="Nuevo nombre"
+                    value={editDepartmentName}
+                    maxLength={MAX_CATALOG_NAME_LENGTH}
+                    onChange={(e) => setEditDepartmentName(e.target.value)}
+                    disabled={!editDepartmentId}
+                  />
+                  <CharCounter value={editDepartmentName} max={MAX_CATALOG_NAME_LENGTH} />
+                </div>
                 <button
                   type="button"
                   onClick={handleUpdateDepartment}
                   disabled={mUpdateDept.loading || !editDepartmentId || !editDepartmentName.trim()}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#6B7A3A] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 md:w-auto"
+                  className="inline-flex w-full self-start items-center justify-center gap-2 rounded-xl bg-[#6B7A3A] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 md:w-auto"
                   title="Guardar cambios"
                 >
                   Guardar
@@ -482,13 +491,17 @@ export default function CatalogModal({
               </div>
 
               <div className="flex w-full flex-col gap-2 md:flex-row">
-                <input
-                  className="w-full min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E] disabled:bg-gray-100"
-                  placeholder="Nuevo nombre"
-                  value={editTypeName}
-                  onChange={(e) => setEditTypeName(e.target.value)}
-                  disabled={!editTypeId}
-                />
+                <div className="w-full min-w-0 flex-1">
+                  <input
+                    className="w-full min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E] disabled:bg-gray-100"
+                    placeholder="Nuevo nombre"
+                    value={editTypeName}
+                    maxLength={MAX_CATALOG_NAME_LENGTH}
+                    onChange={(e) => setEditTypeName(e.target.value)}
+                    disabled={!editTypeId}
+                  />
+                  <CharCounter value={editTypeName} max={MAX_CATALOG_NAME_LENGTH} />
+                </div>
                 <button
                   type="button"
                   onClick={handleUpdateType}
@@ -498,7 +511,7 @@ export default function CatalogModal({
                     !editTypeId ||
                     !editTypeName.trim()
                   }
-                  className="inline-flex w-full items-center justify-center rounded-xl bg-[#6B7A3A] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 md:w-auto"
+                  className="inline-flex w-full self-start items-center justify-center rounded-xl bg-[#6B7A3A] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 md:w-auto"
                   title="Guardar cambios"
                 >
                   Guardar
@@ -550,13 +563,17 @@ export default function CatalogModal({
             </div>
 
             <div className="flex w-full flex-col gap-2 md:flex-row">
-              <input
-                className="w-full min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E] disabled:bg-gray-100"
-                placeholder="Nuevo nombre del subtipo"
-                value={editSubTypeName}
-                onChange={(e) => setEditSubTypeName(e.target.value)}
-                disabled={!editSubTypeId}
-              />
+              <div className="w-full min-w-0 flex-1">
+                <input
+                  className="w-full min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E] disabled:bg-gray-100"
+                  placeholder="Nuevo nombre del subtipo"
+                  value={editSubTypeName}
+                  maxLength={MAX_CATALOG_NAME_LENGTH}
+                  onChange={(e) => setEditSubTypeName(e.target.value)}
+                  disabled={!editSubTypeId}
+                />
+                <CharCounter value={editSubTypeName} max={MAX_CATALOG_NAME_LENGTH} />
+              </div>
               <button
                 type="button"
                 onClick={handleUpdateSubType}
@@ -567,7 +584,7 @@ export default function CatalogModal({
                   !editSubTypeId ||
                   !editSubTypeName.trim()
                 }
-                className="inline-flex w-full items-center justify-center rounded-xl bg-[#6B7A3A] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 md:w-auto"
+                className="inline-flex w-full self-start items-center justify-center rounded-xl bg-[#6B7A3A] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 md:w-auto"
                 title="Guardar cambios"
               >
                 Guardar
@@ -576,7 +593,6 @@ export default function CatalogModal({
 
             {errors.editSubType && <p className="text-xs text-red-600">{errors.editSubType}</p>}
 
-            {/* botón debajo del ÚLTIMO INPUT */}
             <div className="pt-2">
               <button
                 type="button"
@@ -607,18 +623,22 @@ export default function CatalogModal({
                 </div>
 
                 <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row">
-                  <input
-                    className="w-full min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E] disabled:bg-gray-100"
-                    placeholder="Nuevo tipo"
-                    value={newType}
-                    onChange={(e) => setNewType(e.target.value)}
-                    disabled={!departmentId}
-                  />
+                  <div className="w-full min-w-0 flex-1">
+                    <input
+                      className="w-full min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E] disabled:bg-gray-100"
+                      placeholder="Nuevo tipo"
+                      value={newType}
+                      maxLength={MAX_CATALOG_NAME_LENGTH}
+                      onChange={(e) => setNewType(e.target.value)}
+                      disabled={!departmentId}
+                    />
+                    <CharCounter value={newType} max={MAX_CATALOG_NAME_LENGTH} />
+                  </div>
                   <button
                     type="button"
                     onClick={handleCreateType}
                     disabled={mCreateType.loading || !newType.trim() || !departmentId}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#708C3E] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 md:w-auto"
+                    className="inline-flex w-full self-start items-center justify-center gap-2 rounded-xl bg-[#708C3E] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 md:w-auto"
                     title="Crear tipo"
                   >
                     <Plus className="h-4 w-4" />
@@ -634,18 +654,22 @@ export default function CatalogModal({
               <label className="text-sm font-medium text-gray-800">Subtipo</label>
 
               <div className="flex w-full flex-col gap-2 md:flex-row">
-                <input
-                  className="w-full min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E] disabled:bg-gray-100"
-                  placeholder="Nuevo subtipo"
-                  value={newSubType}
-                  onChange={(e) => setNewSubType(e.target.value)}
-                  disabled={!typeId}
-                />
+                <div className="w-full min-w-0 flex-1">
+                  <input
+                    className="w-full min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E] disabled:bg-gray-100"
+                    placeholder="Nuevo subtipo"
+                    value={newSubType}
+                    maxLength={MAX_CATALOG_NAME_LENGTH}
+                    onChange={(e) => setNewSubType(e.target.value)}
+                    disabled={!typeId}
+                  />
+                  <CharCounter value={newSubType} max={MAX_CATALOG_NAME_LENGTH} />
+                </div>
                 <button
                   type="button"
                   onClick={handleCreateSubType}
                   disabled={mCreateSub.loading || !newSubType.trim() || !typeId}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#708C3E] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 md:w-auto"
+                  className="inline-flex w-full self-start items-center justify-center gap-2 rounded-xl bg-[#708C3E] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 md:w-auto"
                   title="Crear subtipo"
                 >
                   <Plus className="h-4 w-4" />
@@ -677,7 +701,6 @@ export default function CatalogModal({
             </div>
 
             <div className="min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
-              {/* muestra la tabla */}
               <PIncomeList subTypeId={typeof editSubTypeId === "number" ? editSubTypeId : undefined} />
             </div>
 
@@ -695,10 +718,8 @@ export default function CatalogModal({
     </>
   );
 
-  // inline = desplegable sin card interno
   if (inline) return inner;
 
-  //modal normal (create/edit en modal) queda igual que antes
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
       <div className="flex w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-gray-100 max-h-[calc(100vh-2rem)]">

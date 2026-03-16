@@ -160,7 +160,7 @@ export default function IncomeReportPage() {
               <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">
                 Total Ingresos
               </div>
-              <div className="mt-2 text-3xl font-bold text-[#5B732E]">
+              <div className="mt-2 font-bold text-[#5B732E] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">
                 {crc(totals?.total ?? 0)}
               </div>
             </div>
@@ -281,21 +281,21 @@ export default function IncomeReportPage() {
           <div className="mt-6 rounded-3xl bg-[#FBFDF7] ring-1 ring-[#E8EEDB] p-5 md:p-6 mb-6">
             <div className="mt-2 flex flex-col md:flex-row md:items-center gap-3">
               <div className="md:ml-auto flex flex-wrap gap-3">
-                <button
-                  onClick={handlePreviewPDF}
-                  disabled={isPdfGenerating}
-                  className="flex-1 min-w-[140px] md:flex-none px-5 py-3 rounded-xl border-2 border-[#C19A3D] text-[#C19A3D] font-semibold hover:bg-[#FEF6E0] transition disabled:opacity-60"
-                >
-                  Ver PDF
-                </button>
+            <button
+              onClick={handlePreviewPDF}
+              disabled={isPdfGenerating || isDownloading}
+              className="flex-1 min-w-[140px] md:flex-none px-5 py-3 rounded-xl border-2 border-[#C19A3D] text-[#C19A3D] font-semibold hover:bg-[#FEF6E0] transition disabled:opacity-60"
+            >
+              {isPdfGenerating && !isDownloading ? "Abriendo..." : "Ver PDF"}
+            </button>
 
-                <button
-                  onClick={handleDownloadPDF}
-                  disabled={isDownloading || isPdfGenerating}
-                  className="flex-1 min-w-[160px] md:flex-none px-5 py-3 rounded-xl bg-[#C19A3D] text-white font-semibold hover:bg-[#C6A14B] transition disabled:opacity-50 shadow-sm"
-                >
-                  {isDownloading || isPdfGenerating ? "Descargando…" : "Descargar PDF"}
-                </button>
+              <button
+                onClick={handleDownloadPDF}
+                disabled={isDownloading}
+                className="flex-1 min-w-[160px] md:flex-none px-5 py-3 rounded-xl bg-[#C19A3D] text-white font-semibold hover:bg-[#C6A14B] transition disabled:opacity-50 shadow-sm"
+              >
+                {isDownloading ? "Descargando…" : "Descargar PDF"}
+              </button>
 
                 <button
                   onClick={handleDownloadExcel}

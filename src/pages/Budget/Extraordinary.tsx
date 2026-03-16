@@ -15,6 +15,7 @@ import {
 import ExtraordinayList from "../../components/Budget/Extraordinary/extraordinayList"
 import { ActionButtons } from "../../components/ActionButtons"
 import { parseCR, useMoneyInput } from "@/hooks/Budget/useMoneyInput"
+import { showSuccessAlert } from "@/utils/alerts"
 
 export default function BudgetExtraordinary() {
   const [openForm, setOpenForm] = useState(true)
@@ -36,17 +37,18 @@ export default function BudgetExtraordinary() {
       const amountNumber = parseCR(parsed.data.amount)
 
       try {
-        await createMutation.mutateAsync({
-          name: name.trim(),
-          amount: String(amountNumber),
-          date: date || undefined,
-        })
+            await createMutation.mutateAsync({
+              name: name.trim(),
+              amount: String(amountNumber),
+              date: date || undefined,
+            })
 
-        form.reset()
-        money.setValue("")
-      } catch (error) {
-        console.error("Error creating extraordinary:", error)
-      }
+            form.reset()
+            money.setValue("")
+            await showSuccessAlert("El movimiento extraordinario se registró correctamente.")
+          } catch (error) {
+            console.error("Error creating extraordinary:", error)
+          }
     },
   })
 

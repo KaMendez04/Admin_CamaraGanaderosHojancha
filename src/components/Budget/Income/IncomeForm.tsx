@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Plus } from "lucide-react";
 import { parseCR, useMoneyInput } from "../../../hooks/Budget/useMoneyInput";
 import { CustomSelect } from "../../CustomSelect";
 
@@ -11,9 +10,12 @@ import type { CreateIncomeDTO } from "../../../models/Budget/IncomeType";
 import { usePIncomeTypes, usePIncomeSubTypes } from "../../../hooks/Budget/projectionIncome/useIncomeProjectionCatalog";
 import {
   useEnsureIncomeSubTypeFromProjection,
-  useEnsureIncomeTypeFromProjection, // ✅
+  useEnsureIncomeTypeFromProjection,
 } from "../../../hooks/Budget/projectionIncome/useIncomeProjectionMutations";
 import { BirthDatePicker } from "@/components/ui/birthDayPicker";
+import { ActionButtons } from "../../ActionButtons";
+import { showSuccessAlert } from "@/utils/alerts";
+
 
 type Props = {
   onSuccess?: (createdId: number) => void;
@@ -93,9 +95,8 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
         value: `r:${s.id}` as OriginId,
       }));
     }
-    // si elegiste TYPE de proyección, aquí vienen subtypes de proyección
     return (projSubTypes.data ?? []).map((s) => ({
-      label: s.name, // 👈 opcional: sin "(Proyección)" porque ya se ve arriba
+      label: s.name,
       value: `p:${s.id}` as OriginId,
     }));
   }, [typeParsed, realSubTypes.data, projSubTypes.data]);
@@ -113,8 +114,37 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
   // ===== Mutations =====
   const createIncome = useCreateIncomeEntry();
 
-  const ensureTypeFromProj = useEnsureIncomeTypeFromProjection(); // ✅
+  const ensureTypeFromProj = useEnsureIncomeTypeFromProjection();
   const ensureSubFromProj = useEnsureIncomeSubTypeFromProjection();
+
+  const isSubmitting = Boolean(
+    (createIncome as any).isPending ??
+      (createIncome as any).isLoading ??
+      (createIncome as any).loading ??
+      (ensureTypeFromProj as any).isPending ??
+      (ensureTypeFromProj as any).isLoading ??
+      (ensureTypeFromProj as any).loading ??
+      (ensureSubFromProj as any).isPending ??
+      (ensureSubFromProj as any).isLoading ??
+      (ensureSubFromProj as any).loading
+  );
+
+  function resetForm() {
+    setErrors({});
+    setDepartmentId("");
+    setTypeKey("");
+    setSubTypeKey("");
+
+    if ("setValue" in money && typeof (money as any).setValue === "function") {
+      (money as any).setValue("");
+    }
+
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    setDate(`${yyyy}-${mm}-${dd}`);
+  }
 
   async function onSubmit() {
     setErrors({});
@@ -134,14 +164,11 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
 
       let realIncomeSubTypeId: number;
 
-      // ✅ SOLO AQUÍ creamos (si hace falta) los catálogos reales basados en proyección
       if (sParsed.origin === "p") {
-        // 1) asegurar type real desde type proyección (por si el backend lo necesita)
         if (tParsed.origin === "p") {
           await ensureTypeFromProj.mutate(tParsed.id);
         }
 
-        // 2) asegurar subtipo real desde subtipo proyección
         const ensuredSub = await ensureSubFromProj.mutate(sParsed.id);
         realIncomeSubTypeId = Number((ensuredSub as any).id);
       } else {
@@ -156,20 +183,8 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
 
       const res = await createIncome.mutate(payload);
 
-      // reset UI
-      if ("setValue" in money && typeof (money as any).setValue === "function") {
-        (money as any).setValue("");
-      }
-      setDepartmentId("");
-      setTypeKey("");
-      setSubTypeKey("");
-
-      const d = new Date();
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, "0");
-      const dd = String(d.getDate()).padStart(2, "0");
-      setDate(`${yyyy}-${mm}-${dd}`);
-
+      resetForm();
+      await showSuccessAlert("El ingreso se registró correctamente.");
       onSuccess?.(res.id);
     } catch (err: any) {
       setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo registrar el ingreso" }));
@@ -217,23 +232,24 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
         {errors.subTypeId && <p className="text-xs text-red-600">{errors.subTypeId}</p>}
       </div>
 
-{/* Fecha */}
-<div className="flex flex-col gap-2">
-  <label className="text-sm font-medium text-[#33361D]">Fecha</label>
+      {/* Fecha */}
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-[#33361D]">Fecha</label>
 
-  <BirthDatePicker
-    value={date}
-    onChange={(iso) => setDate(iso)}
-    disabled={disabled}
-    placeholder="Seleccione una fecha"
-    error={errors.date}
-    helperText=""
-    triggerClassName="rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
-    className="w-full"
-  />
+        <BirthDatePicker
+          value={date}
+          onChange={(iso) => setDate(iso)}
+          disabled={disabled}
+          placeholder="Seleccione una fecha"
+          error={errors.date}
+          helperText=""
+          triggerClassName="rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
+          className="w-full"
+        />
 
-  {errors.date && <p className="text-xs text-red-600">{errors.date}</p>}
-</div>
+        {errors.date && <p className="text-xs text-red-600">{errors.date}</p>}
+      </div>
+
       {/* Monto */}
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-[#33361D]">Monto</label>
@@ -248,14 +264,22 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
       </div>
 
       <div className="pt-4 border-t border-gray-100">
-        <button
-          onClick={onSubmit}
-          disabled={disabled || !departmentId || !typeKey || !subTypeKey || !amountStr || amount <= 0 || !date}
-          className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-4 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Plus className="h-4 w-4" />
-          Registrar Ingreso
-        </button>
+        <div className="flex justify-end">
+          <ActionButtons
+            onSave={onSubmit}
+            onCancel={resetForm}
+            showSave
+            showCancel
+            showText
+            saveText="Registrar Ingreso"
+            cancelText="Cancelar"
+            disabled={disabled || !departmentId || !typeKey || !subTypeKey || !amountStr || amount <= 0 || !date}
+            isSaving={isSubmitting}
+            requireConfirmCancel={false}
+            requireConfirmSave={false}
+          />
+        </div>
+
         {errors.api && <p className="text-xs text-red-600 mt-3">{errors.api}</p>}
       </div>
     </div>
