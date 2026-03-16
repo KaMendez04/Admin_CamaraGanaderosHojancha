@@ -13,26 +13,26 @@ export function ModuleCard({
   const navigate = useNavigate()
 
   return (
-    <div className="relative bg-white border border-gray-200 rounded-lg p-4 flex flex-col shadow-sm hover:shadow-md transition-all duration-200">
+    <div className="relative min-w-0 bg-white border border-gray-200 rounded-lg p-4 flex flex-col shadow-sm hover:shadow-md transition-all duration-200">
       {/* Icono arriba-derecha más pequeño */}
       <div className="absolute top-3 right-3">
         <IconComponent className="h-6 w-6 text-gray-500" />
       </div>
 
       {/* Contenido compacto */}
-      <div className="flex-1 mb-3 pr-3">
+      <div className="flex-1 mb-3 pr-3 min-w-0">
         <h3 className="text-base font-semibold text-gray-900 mb-1">{title}</h3>
         <p className="text-xs text-gray-600 mb-2">{description}</p>
         
         {subtitle !== undefined && (
-          <div className="text-2xl font-bold text-gray-800">
-            {isLoading ? (
-              <span className="text-gray-400">...</span>
-            ) : (
-              subtitle
-            )}
-          </div>
-        )}
+        <div className="min-w-0 max-w-full overflow-hidden text-ellipsis font-bold text-gray-800 text-[clamp(0.7rem,1.35vw,1.35rem)] leading-tight whitespace-nowrap tracking-tight">
+          {isLoading ? (
+            <span className="text-gray-400">...</span>
+          ) : (
+            subtitle
+          )}
+        </div>
+      )}
       </div>
 
       {/* Botón compacto */}

@@ -162,7 +162,7 @@ export default function PSpendProjectionsPage() {
               <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">
                 Total egresos (Proyectado)
               </div>
-              <div className="mt-2 text-3xl font-bold text-[#5B732E]">
+              <div className="mt-2 font-bold text-[#5B732E] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">
                 {crc(totals.projected)}
               </div>
             </div>
@@ -171,7 +171,7 @@ export default function PSpendProjectionsPage() {
               <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">
                 Total real
               </div>
-              <div className="mt-2 text-3xl font-bold text-[#5B732E]">
+              <div className="mt-2 font-bold text-[#5B732E] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">
                 {crc(totals.real)}
               </div>
             </div>
@@ -180,7 +180,7 @@ export default function PSpendProjectionsPage() {
               <div className="text-xs font-bold text-[#C6A14B] tracking-wider uppercase">
                 Diferencia (Proy - Real)
               </div>
-              <div className="mt-2 text-3xl font-bold text-[#C19A3D]">
+              <div className="mt-2 font-bold text-[#C19A3D] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">
                 {crc(totals.difference)}
               </div>
             </div>

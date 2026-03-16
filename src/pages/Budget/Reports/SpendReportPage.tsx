@@ -166,7 +166,7 @@ export default function SpendReportPage() {
             <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">
               Total Egresos
             </div>
-            <div className="mt-2 text-3xl font-bold text-[#5B732E]">
+            <div className="mt-2 font-bold text-[#5B732E] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">
               {crc(totals?.total ?? 0)}
             </div>
           </div>
@@ -285,22 +285,20 @@ export default function SpendReportPage() {
         <div className="mt-6 rounded-3xl bg-[#FBFDF7] ring-1 ring-[#E8EEDB] p-5 md:p-6 mb-6">
           <div className="mt-2 flex flex-col md:flex-row md:items-center gap-3">
             <div className="md:ml-auto flex flex-wrap gap-3">
-              <button
-                onClick={handlePreviewPDF}
-                disabled={pdfMutation.isPending}
-                className="rounded-2xl border-2 border-[#C19A3D] text-[#C19A3D] font-semibold px-6 py-3 hover:bg-[#FEF6E0] transition disabled:opacity-60"
-              >
-                Ver PDF
-              </button>
+            <button
+              onClick={handlePreviewPDF}
+              disabled={pdfMutation.isPending || isDownloading}
+              className="rounded-2xl border-2 border-[#C19A3D] text-[#C19A3D] font-semibold px-6 py-3 hover:bg-[#FEF6E0] transition disabled:opacity-60"
+            >
+              {pdfMutation.isPending && !isDownloading ? "Abriendo..." : "Ver PDF"}
+            </button>
 
               <button
                 onClick={handleDownloadPDF}
-                disabled={isDownloading || pdfMutation.isPending}
+                disabled={isDownloading}
                 className="rounded-2xl bg-[#C19A3D] text-white font-semibold px-6 py-3 hover:bg-[#C6A14B] transition shadow-sm disabled:opacity-60"
               >
-                {isDownloading || pdfMutation.isPending
-                  ? "Descargando…"
-                  : "Descargar PDF"}
+                {isDownloading ? "Descargando…" : "Descargar PDF"}
               </button>
 
               <button

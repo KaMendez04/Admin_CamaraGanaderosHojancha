@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Plus } from "lucide-react";
 import { CustomSelect } from "../../CustomSelect";
 import { parseCR, useMoneyInput } from "../../../hooks/Budget/useMoneyInput";
 
@@ -18,6 +17,9 @@ import {
 
 import type { CreateSpendDTO } from "../../../models/Budget/SpendType";
 import { BirthDatePicker } from "@/components/ui/birthDayPicker";
+import { ActionButtons } from "../../ActionButtons";
+import { showSuccessAlert } from "@/utils/alerts";
+
 
 type Props = {
   onSuccess?: (createdId: number) => void;
@@ -126,6 +128,32 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
   const createSpend = useCreateSpendEntry();
   const ensureSubFromProj = useEnsureSpendSubTypeFromProjection();
 
+  const isSubmitting = Boolean(
+    (createSpend as any).isPending ??
+      (createSpend as any).isLoading ??
+      (createSpend as any).loading ??
+      (ensureSubFromProj as any).isPending ??
+      (ensureSubFromProj as any).isLoading ??
+      (ensureSubFromProj as any).loading
+  );
+
+  function resetForm() {
+    setErrors({});
+    setDepartmentId("");
+    setTypeKey("");
+    setSubTypeKey("");
+
+    if ("setValue" in money && typeof (money as any).setValue === "function") {
+      (money as any).setValue("");
+    }
+
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    setDate(`${yyyy}-${mm}-${dd}`);
+  }
+
   async function onSubmit() {
     setErrors({});
 
@@ -144,9 +172,7 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
 
       let realSpendSubTypeId: number;
 
-      // ✅ si el subtipo viene de proyección -> ensure (igual que Income)
       if (sParsed.origin === "p") {
-
         const ensuredSub = await ensureSubFromProj.mutate(sParsed.id);
         realSpendSubTypeId = Number((ensuredSub as any).id);
       } else {
@@ -161,20 +187,8 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
 
       const res = await createSpend.mutate(payload);
 
-      // reset UI
-      if ("setValue" in money && typeof (money as any).setValue === "function") {
-        (money as any).setValue("");
-      }
-      setDepartmentId("");
-      setTypeKey("");
-      setSubTypeKey("");
-
-      const d = new Date();
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, "0");
-      const dd = String(d.getDate()).padStart(2, "0");
-      setDate(`${yyyy}-${mm}-${dd}`);
-
+      resetForm();
+      await showSuccessAlert("El egreso se registró correctamente.");
       onSuccess?.(res.id);
     } catch (err: any) {
       setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo registrar el egreso" }));
@@ -222,26 +236,24 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
         {errors.subTypeId && <p className="text-xs text-red-600">{errors.subTypeId}</p>}
       </div>
 
-{/* Fecha */}
-<div className="flex flex-col gap-2">
-  <label className="text-sm font-medium text-[#33361D]">Fecha</label>
+      {/* Fecha */}
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-[#33361D]">Fecha</label>
 
-  <BirthDatePicker
-    value={date}
-    onChange={(iso) => setDate(iso)}
-    disabled={disabled}
-    placeholder="Seleccione una fecha"
-    error={errors.date}
-    // ✅ para eventos: no permitir fechas pasadas (si eso quieres)
-    minDate={new Date().toISOString().slice(0, 10)}
-    helperText=""
-    // ✅ aplica el estilo “input” al botón interno (no al wrapper)
-    triggerClassName="rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
-    className="w-full"
-  />
+        <BirthDatePicker
+          value={date}
+          onChange={(iso) => setDate(iso)}
+          disabled={disabled}
+          placeholder="Seleccione una fecha"
+          error={errors.date}
+          minDate={new Date().toISOString().slice(0, 10)}
+          helperText=""
+          triggerClassName="rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
+          className="w-full"
+        />
 
-  {errors.date && <p className="text-xs text-red-600">{errors.date}</p>}
-</div>
+        {errors.date && <p className="text-xs text-red-600">{errors.date}</p>}
+      </div>
 
       {/* Monto */}
       <div className="flex flex-col gap-2">
@@ -257,14 +269,22 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
       </div>
 
       <div className="pt-4 border-t border-gray-100">
-        <button
-          onClick={onSubmit}
-          disabled={disabled || !departmentId || !typeKey || !subTypeKey || !amountStr || amount <= 0 || !date}
-          className="inline-flex items-center gap-2 rounded-xl bg-[#708C3E] px-4 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Plus className="h-4 w-4" />
-          Registrar egreso
-        </button>
+        <div className="flex justify-end">
+          <ActionButtons
+            onSave={onSubmit}
+            onCancel={resetForm}
+            showSave
+            showCancel
+            showText
+            saveText="Registrar egreso"
+            cancelText="Cancelar"
+            disabled={disabled || !departmentId || !typeKey || !subTypeKey || !amountStr || amount <= 0 || !date}
+            isSaving={isSubmitting}
+            requireConfirmCancel={false}
+            requireConfirmSave={false}
+          />
+        </div>
+
         {errors.api && <p className="text-xs text-red-600 mt-3">{errors.api}</p>}
       </div>
     </div>
