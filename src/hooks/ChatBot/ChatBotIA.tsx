@@ -1,4 +1,4 @@
-import type { Lang } from "@/components/chatbot/ChatBotBank";
+import type { Lang } from "@/components/chatbot/banks/Home&BankBudget";
 
 export const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY ?? "";
 
