@@ -16,8 +16,8 @@ import { callGroq, type Message } from "@/hooks/ChatBot/ChatBotIA";
 // ============================================================
 const BUTTON_SIZE = 52;
 const PILL_WIDTH = 180;
-const PANEL_MAX_W = 400;
-const PANEL_MAX_H = 600;
+const PANEL_MAX_W = 360;
+const PANEL_MAX_H = 480;
 
 // Breakpoints (match Tailwind md = 768)
 const MD = 768;
@@ -104,12 +104,13 @@ export default function BudgetChatbot({
       if (mobile) {
         setShellSize({
           w: window.innerWidth - 16,
-          h: Math.min(window.innerHeight * 0.82, 640),
+          h: Math.min(window.innerHeight * 0.75, 520),
         });
       } else {
         setShellSize({
           w: Math.min(PANEL_MAX_W, window.innerWidth - 32),
-          h: Math.min(PANEL_MAX_H, window.innerHeight - 56),
+          // 64px navbar + 28px bottom gap + some breathing room
+          h: Math.min(PANEL_MAX_H, window.innerHeight - 64 - 28 - 16),
         });
       }
     };
@@ -343,7 +344,7 @@ export default function BudgetChatbot({
   if (typeof document === "undefined") return null;
 
   return createPortal(
-    <div id="chatbot-portal-root" style={{ isolation: "isolate" }}>
+    <>
       <style>{`
         @keyframes chatbotBounce {
           0%, 60%, 100% { transform: translateY(0); }
@@ -355,8 +356,6 @@ export default function BudgetChatbot({
           background: #c8d2b8;
           border-radius: 4px;
         }
-        /* Prevent backdrop-filter + will-change compositing flip bug in Chrome/WebKit */
-        #chatbot-portal-root { isolation: isolate; }
       `}</style>
 
       {showLauncher && !sidebarOpen && (
@@ -580,7 +579,7 @@ export default function BudgetChatbot({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>,
+    </>,
     document.body
   );
 }
