@@ -354,32 +354,32 @@ const GENERAL_CONTEXT: ChatbotContextConfig = {
   key: "general",
   routePrefixes: [],
   ui: buildUI({
-    esSubtitle: "Sistema Administrativo",
-    enSubtitle: "Administrative System",
+    esSubtitle: "Panel de Inicio",
+    enSubtitle: "Home Dashboard",
     esWelcome:
-      "Hola, soy tu asistente del sistema.\nPuedo ayudarte según el módulo donde te encuentres.",
+      "¡Hola! Soy tu asistente del panel de inicio.\nPuedo ayudarte con las tarjetas de módulos, las gráficas y cómo navegar al lugar que necesitas.",
     enWelcome:
-      "Hello, I'm your system assistant.\nI can help you depending on the module you are using.",
+      "Hello! I'm your home dashboard assistant.\nI can help you with the module cards, the charts, and how to navigate to where you need to go.",
   }),
   suggestions: {
     es: [
-      "¿Dónde estoy dentro del sistema?",
-      "¿Cómo uso este módulo?",
-      "¿Qué puedo hacer aquí?",
-      "¿Cómo encuentro una opción?",
+      "¿Qué muestra el panel de inicio?",
+      "¿Qué significa el saldo en la tarjeta de Presupuesto?",
+      "¿Qué muestra la gráfica de barras?",
+      "¿Cómo voy a un módulo desde aquí?",
     ],
     en: [
-      "Where am I in the system?",
-      "How do I use this module?",
-      "What can I do here?",
-      "How do I find an option?",
+      "What does the home dashboard show?",
+      "What does the balance on the Budget card mean?",
+      "What does the bar chart show?",
+      "How do I go to a module from here?",
     ],
   },
   qaBank: QA_BANK_PRINCIPAL,
   relatedQuestions: RELATED_QUESTIONS_PRINCIPAL,
   aiContext: {
-    es: "El usuario está en una sección general del sistema administrativo.",
-    en: "The user is in a general section of the administrative system.",
+    es: "El usuario está en el panel de inicio (dashboard principal). La pantalla muestra: tarjetas de acceso rápido a módulos (Contenido Público solo ADMIN, Personal Activo con conteo, Asociados con solicitudes pendientes, Voluntarios con solicitudes pendientes, Presupuesto con saldo del año fiscal activo), una gráfica de barras comparando ingresos vs egresos por departamento de los últimos 30 días, y una gráfica de pastel con la distribución porcentual de ingresos por departamento. Responde ÚNICAMENTE sobre esto: las tarjetas, las gráficas, los datos que muestran, el período que cubren (últimos 30 días) y la navegación hacia otros módulos. No hables de presupuesto, ingresos o egresos como si el usuario estuviera en esos módulos.",
+    en: "The user is on the home dashboard. The screen shows: quick-access module cards (Public Content ADMIN only, Active Staff with count, Associates with pending requests, Volunteers with pending requests, Budget with active fiscal year balance), a bar chart comparing income vs expenses by department for the last 30 days, and a pie chart with the percentage distribution of income by department. Answer ONLY about this: the cards, the charts, the data they show, the period they cover (last 30 days) and navigation to other modules. Do not talk about budget, income or expenses as if the user were in those modules.",
   },
 };
 export const QA_BANK_EDITION: QAEntry[] = [
@@ -729,13 +729,11 @@ const CHATBOT_CONTEXTS: ChatbotContextConfig[] = [
         "¿Cómo subo un archivo?",
         "¿Cómo veo imágenes o videos?",
         "¿Cómo elimino un recurso?",
-        "¿Cómo busco un archivo?",
       ],
       en: [
         "How do I upload a file?",
         "How do I view images or videos?",
         "How do I delete a resource?",
-        "How do I search for a file?",
       ],
     },
     qaBank: QA_BANK_MEDIA,

@@ -98,8 +98,8 @@ export const QA_BANK_ASSOCIATES: QAEntry[] = [
   {
     keywords: ["activar asociado", "desactivar asociado", "inhabilitar asociado", "estado asociado", "interruptor asociado", "activate associate", "deactivate associate"],
     answer: {
-      es: "🔘 **Activar o Desactivar un Asociado**\n\n1. Abre el formulario de edición (ícono ✏️).\n2. En la parte superior verás un **interruptor** con el estado actual.\n3. Haz clic en el interruptor:\n   • **Verde (activo)** → pasa a **gris (inactivo)**.\n   • **Gris (inactivo)** → pasa a **verde (activo)**.\n4. Aparece una ventana de **confirmación** — confírmala.\n\n⚠️ Un asociado inactivo no puede acceder a la plataforma.",
-      en: "🔘 **Activate or Deactivate an Associate**\n\n1. Open the edit form (✏️ icon).\n2. At the top you'll see a **toggle switch** with the current status.\n3. Click the toggle:\n   • **Green (active)** → becomes **gray (inactive)**.\n   • **Gray (inactive)** → becomes **green (active)**.\n4. A **confirmation** window appears — confirm it.\n\n⚠️ An inactive associate cannot access the platform.",
+      es: "🔘 **Activar o Desactivar un Asociado**\n\n1. Abre el formulario de edición (ícono ✏️).\n2. En la parte superior verás un **interruptor** con el estado actual.\n3. Haz clic en el interruptor:\n   • **Verde (activo)** → pasa a **gris (inactivo)**.\n   • **Gris (inactivo)** → pasa a **verde (activo)**.\n4. Aparece una ventana de **confirmación** — confírmala.\n\n",
+      en: "🔘 **Activate or Deactivate an Associate**\n\n1. Open the edit form (✏️ icon).\n2. At the top you'll see a **toggle switch** with the current status.\n3. Click the toggle:\n   • **Green (active)** → becomes **gray (inactive)**.\n   • **Gray (inactive)** → becomes **green (active)**.\n4. A **confirmation** window appears — confirm it.\n\n",
     },
   },
 
@@ -116,8 +116,8 @@ export const QA_BANK_ASSOCIATES: QAEntry[] = [
   {
     keywords: ["rol asociados", "no puedo aprobar", "no puedo editar asociado", "no veo botón asociado", "junta asociados", "permissions associates"],
     answer: {
-      es: "🔐 **Roles y Permisos en Asociados**\n\n• **ADMIN** — puede ver, aprobar, rechazar, editar y cambiar el estado.\n• **JUNTA** — solo puede **ver** la información. No puede aprobar, rechazar ni editar.\n\nSi no ves el botón de editar o aprobar, tu usuario tiene el rol **JUNTA**.\n\n💡 Para cambiar permisos, contacta al administrador del sistema.",
-      en: "🔐 **Roles and Permissions in Associates**\n\n• **ADMIN** — can view, approve, reject, edit and change status.\n• **JUNTA** — can only **view** information. Cannot approve, reject or edit.\n\nIf you don't see the edit or approve button, your user has the **JUNTA** role.\n\n💡 To change permissions, contact the system administrator.",
+      es: "🔐 **Roles y Permisos en Asociados**\n\n• **ADMIN** — puede ver, aprobar, rechazar, editar y cambiar el estado.\n• **JUNTA** — solo puede **ver** la información. No puede aprobar, rechazar ni editar.\n\nSi no ves el botón de editar o aprobar, tu usuario tiene el rol **JUNTA**.\n\n",
+      en: "🔐 **Roles and Permissions in Associates**\n\n• **ADMIN** — can view, approve, reject, edit and change status.\n• **JUNTA** — can only **view** information. Cannot approve, reject or edit.\n\nIf you don't see the edit or approve button, your user has the **JUNTA** role.\n\n",
     },
   },
 
@@ -134,8 +134,8 @@ export const QA_BANK_ASSOCIATES: QAEntry[] = [
   {
     keywords: ["necesidades asociado", "observaciones asociado", "necesidades y observaciones", "needs associate"],
     answer: {
-      es: "📝 **Necesidades y Observaciones**\n\n1. Abre el detalle del asociado (ícono del ojo 👁️).\n2. Haz clic en la pestaña **'Necesidades y Observaciones'**.\n3. Aparece la lista numerada de necesidades del asociado.\n\n💡 Si dice 'No hay necesidades registradas', aún no tiene observaciones en el sistema.",
-      en: "📝 **Needs and Observations**\n\n1. Open the associate detail (eye icon 👁️).\n2. Click the **'Necesidades y Observaciones'** tab.\n3. The numbered list of needs appears.\n\n💡 If it says 'No hay necesidades registradas', no observations have been added yet.",
+      es: "📝 **Necesidades y Observaciones**\n\n1. Abre el detalle del asociado (ícono del ojo 👁️).\n2. Haz clic en la pestaña **'Necesidades y Observaciones'**.\n3. Aparece la lista numerada de necesidades del asociado.",
+      en: "📝 **Needs and Observations**\n\n1. Open the associate detail (eye icon 👁️).\n2. Click the **'Necesidades y Observaciones'** tab.\n3. The numbered list of needs appears.",
     },
   },
 

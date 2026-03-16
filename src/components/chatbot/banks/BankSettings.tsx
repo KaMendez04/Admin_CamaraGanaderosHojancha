@@ -87,8 +87,8 @@ export const QA_BANK_SETTINGS: QAEntry[] = [
   {
     keywords: ["contraseña segura", "requisitos contraseña", "strong password", "password requirements", "cómo crear contraseña"],
     answer: {
-      es: "🔑 **Requisitos de Contraseña Segura**\n\nLa contraseña debe cumplir:\n\n✅ Al menos **8 caracteres**\n✅ Al menos una **letra mayúscula** (A, B, C...)\n✅ Al menos una **letra minúscula** (a, b, c...)\n✅ Al menos un **número** (1, 2, 3...)\n✅ Al menos un **símbolo** (!, @, #, $...)\n✅ Máximo **75 caracteres**\n\nEjemplo válido: `MiClave2024!`",
-      en: "🔑 **Strong Password Requirements**\n\nThe password must meet:\n\n✅ At least **8 characters**\n✅ At least one **uppercase letter** (A, B, C...)\n✅ At least one **lowercase letter** (a, b, c...)\n✅ At least one **number** (1, 2, 3...)\n✅ At least one **symbol** (!, @, #, $...)\n✅ Maximum **75 characters**\n\nValid example: `MiClave2024!`",
+      es: "🔑 **Requisitos de Contraseña Segura**\n\nLa contraseña debe cumplir:\n\n✅ Al menos **8 caracteres**\n✅ Al menos una **letra mayúscula** (A, B, C...)\n✅ Al menos una **letra minúscula** (a, b, c...)\n✅ Al menos un **número** (1, 2, 3...)\n✅ Al menos un **símbolo** (!, @, #, $...)\n✅ Máximo **75 caracteres**\n\nEjemplo válido: `MiClave2026!`",
+      en: "🔑 **Strong Password Requirements**\n\nThe password must meet:\n\n✅ At least **8 characters**\n✅ At least one **uppercase letter** (A, B, C...)\n✅ At least one **lowercase letter** (a, b, c...)\n✅ At least one **number** (1, 2, 3...)\n✅ At least one **symbol** (!, @, #, $...)\n✅ Maximum **75 characters**\n\nValid example: `MiClave2026!`",
     },
   },
 
@@ -96,8 +96,8 @@ export const QA_BANK_SETTINGS: QAEntry[] = [
   {
     keywords: ["no veo usuarios", "no aparece usuarios", "don't see users tab", "no tengo acceso usuarios", "falta sección usuarios"],
     answer: {
-      es: "👁️ **No veo la sección de Usuarios**\n\nLa sección **'Usuarios'** en Configuración solo es visible para el rol **ADMIN**.\n\nSi tu rol es **JUNTA**, esta sección no aparece porque no tienes permiso para gestionarla.\n\n💡 Si crees que deberías tener acceso, contacta al administrador del sistema para que revise tu rol.",
-      en: "👁️ **I don't see the Users section**\n\nThe **'Usuarios'** section in Settings is only visible for the **ADMIN** role.\n\nIf your role is **JUNTA**, this section doesn't appear because you don't have permission to manage it.\n\n💡 If you think you should have access, contact the system administrator to review your role.",
+      es: "👁️ **No veo la sección de Usuarios**\n\nLa sección **'Usuarios'** en Configuración solo es visible para el rol **ADMIN**.\n\nSi tu rol es **JUNTA**, esta sección no aparece porque no tienes permiso para gestionarla.",
+      en: "👁️ **I don't see the Users section**\n\nThe **'Usuarios'** section in Settings is only visible for the **ADMIN** role.\n\nIf your role is **JUNTA**, this section doesn't appear because you don't have permission to manage it.",
     },
   },
 ];

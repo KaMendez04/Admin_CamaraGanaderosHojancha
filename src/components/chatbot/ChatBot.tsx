@@ -19,6 +19,9 @@ const PILL_WIDTH = 180;
 const PANEL_MAX_W = 400;
 const PANEL_MAX_H = 600;
 
+// Breakpoints (match Tailwind md = 768)
+const MD = 768;
+
 // ============================================================
 // FORMAT MESSAGE
 // ============================================================
@@ -75,6 +78,10 @@ export default function BudgetChatbot({
   const idRef = useRef(1);
 
   const shouldReduceMotion = useReducedMotion();
+  // Track isMobile as state so it updates correctly on resize
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < MD : false
+  );
 
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
@@ -91,11 +98,20 @@ export default function BudgetChatbot({
   useEffect(() => {
     const updateShellSize = () => {
       if (typeof window === "undefined") return;
+      const mobile = window.innerWidth < MD;
+      setIsMobile(mobile);
 
-      setShellSize({
-        w: Math.min(PANEL_MAX_W, window.innerWidth - 32),
-        h: Math.min(PANEL_MAX_H, window.innerHeight - 56),
-      });
+      if (mobile) {
+        setShellSize({
+          w: window.innerWidth - 16,
+          h: Math.min(window.innerHeight * 0.82, 640),
+        });
+      } else {
+        setShellSize({
+          w: Math.min(PANEL_MAX_W, window.innerWidth - 32),
+          h: Math.min(PANEL_MAX_H, window.innerHeight - 56),
+        });
+      }
     };
 
     updateShellSize();
@@ -196,7 +212,11 @@ export default function BudgetChatbot({
         .filter((q) => q.trim().toLowerCase() !== userText.trim().toLowerCase())
         .slice(0, 4);
 
-      setRelatedQuestions(related);
+      const fallback = suggestions
+        .filter((q) => q.trim().toLowerCase() !== userText.trim().toLowerCase())
+        .slice(0, 4);
+
+      setRelatedQuestions(related.length > 0 ? related : fallback);
 
       setMessages((prev) => [
         ...prev,
@@ -225,6 +245,9 @@ export default function BudgetChatbot({
   const formatTime = (d: Date) =>
     d.toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit" });
 
+  const mobileRadiusOpen  = isMobile ? "16px 16px 0 0" : 24;
+  const mobileRadiusClose = isMobile ? "16px 16px 0 0" : 14;
+
   const shellInitial = {
     width: BUTTON_SIZE,
     height: BUTTON_SIZE,
@@ -235,13 +258,13 @@ export default function BudgetChatbot({
     ? {
         width: shellSize.w,
         height: shellSize.h,
-        borderRadius: 24,
+        borderRadius: mobileRadiusOpen,
         transition: { duration: 0.16 },
       }
     : {
         width: [BUTTON_SIZE, PILL_WIDTH, shellSize.w],
         height: [BUTTON_SIZE, BUTTON_SIZE, shellSize.h],
-        borderRadius: [14, 18, 24],
+        borderRadius: [14, 18, mobileRadiusOpen],
         transition: {
           duration: 0.66,
           times: [0, 0.42, 1],
@@ -253,13 +276,13 @@ export default function BudgetChatbot({
     ? {
         width: BUTTON_SIZE,
         height: BUTTON_SIZE,
-        borderRadius: 14,
+        borderRadius: mobileRadiusClose,
         transition: { duration: 0.15 },
       }
     : {
         width: [shellSize.w, PILL_WIDTH, BUTTON_SIZE],
         height: [shellSize.h, BUTTON_SIZE, BUTTON_SIZE],
-        borderRadius: [24, 18, 14],
+        borderRadius: [mobileRadiusOpen, 18, 14],
         transition: {
           duration: 0.52,
           times: [0, 0.6, 1],
@@ -320,51 +343,45 @@ export default function BudgetChatbot({
   if (typeof document === "undefined") return null;
 
   return createPortal(
-    <>
+    <div id="chatbot-portal-root" style={{ isolation: "isolate" }}>
       <style>{`
         @keyframes chatbotBounce {
           0%, 60%, 100% { transform: translateY(0); }
           30% { transform: translateY(-4px); }
         }
-
         .chatbot-msg-area::-webkit-scrollbar { width: 4px; }
         .chatbot-msg-area::-webkit-scrollbar-track { background: transparent; }
         .chatbot-msg-area::-webkit-scrollbar-thumb {
           background: #c8d2b8;
           border-radius: 4px;
         }
+        /* Prevent backdrop-filter + will-change compositing flip bug in Chrome/WebKit */
+        #chatbot-portal-root { isolation: isolate; }
       `}</style>
 
       {showLauncher && !sidebarOpen && (
-        <motion.button
+        <button
           onClick={openChat}
           title={lang === "es" ? "Ayuda" : "Help"}
           aria-label={lang === "es" ? "Abrir asistente" : "Open assistant"}
-          initial={{ opacity: 0, scale: 0.94, y: 8 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0 }}
-          transition={{
-            type: "spring",
-            stiffness: 320,
-            damping: 24,
-          }}
-          whileTap={{ scale: 0.96 }}
-          className="fixed bottom-7 right-7 z-[9999] flex h-[52px] w-[52px] items-center justify-center rounded-[14px] bg-[#6F8A2D] shadow-[0_4px_14px_rgba(111,138,45,0.28)] transition-all duration-150 hover:-translate-y-0.5 hover:bg-[#637C27] hover:shadow-[0_8px_20px_rgba(111,138,45,0.34)]"
+          className="fixed bottom-5 right-5 z-[9999] flex h-[52px] w-[52px] items-center justify-center rounded-[14px] bg-[#6F8A2D] shadow-[0_4px_14px_rgba(111,138,45,0.28)] transition-all duration-200 hover:bg-[#637C27] hover:shadow-[0_8px_20px_rgba(111,138,45,0.34)] active:scale-95 md:bottom-7 md:right-7"
         >
           <MessageCircle size={22} color="white" strokeWidth={1.8} />
-        </motion.button>
+        </button>
       )}
 
       <AnimatePresence onExitComplete={handleShellExitComplete}>
         {open && (
-          <motion.div
+        <motion.div
             key="budget-chatbot-shell"
             ref={chatWindowRef}
             initial={shellInitial}
             animate={shellAnimate}
             exit={shellExit}
-            className="fixed bottom-7 right-7 z-[9999] overflow-hidden bg-[#6F8A2D]"
+            className="fixed z-[9999] overflow-hidden bg-[#6F8A2D]"
             style={{
+              bottom: isMobile ? 0 : 28,
+              right: isMobile ? 8 : 28,
               boxShadow:
                 "0 8px 48px rgba(0,0,0,0.14), 0 1px 4px rgba(0,0,0,0.06)",
             }}
@@ -410,7 +427,7 @@ export default function BudgetChatbot({
                     <button
                       key={l}
                       onClick={() => setLang(l)}
-                      className={`rounded-md px-2 py-1 text-[11px] tracking-[0.02em] transition-all ${
+                      className={`rounded-md px-2 py-1.5 text-[12px] tracking-[0.02em] transition-all ${
                         lang === l
                           ? "bg-white/20 font-semibold text-white"
                           : "bg-transparent font-normal text-white/55"
@@ -424,14 +441,14 @@ export default function BudgetChatbot({
                 <button
                   onClick={closeChat}
                   aria-label={lang === "es" ? "Cerrar" : "Close"}
-                  className="flex shrink-0 items-center justify-center rounded-md p-1 text-white/65 transition-colors hover:text-white"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-white/65 transition-colors hover:text-white"
                 >
-                  <ChevronDown size={18} strokeWidth={2} />
+                  <ChevronDown size={20} strokeWidth={2} />
                 </button>
               </div>
 
               {/* MESSAGES */}
-              <div className="chatbot-msg-area min-h-0 flex-1 overflow-y-auto bg-[#F2F5EC] p-4">
+              <div className="chatbot-msg-area min-h-0 flex-1 overflow-y-auto bg-[#F2F5EC] p-3 md:p-4">
                 <div className="flex flex-col gap-3">
                   {messages.map((msg) => (
                     <div
@@ -441,7 +458,7 @@ export default function BudgetChatbot({
                       }`}
                     >
                       <div
-                        className={`max-w-[82%] px-[13px] py-[10px] text-[13px] leading-[1.6] ${
+                        className={`max-w-[88%] px-[13px] py-[10px] text-[13px] leading-[1.65] md:max-w-[82%] ${
                           msg.role === "user"
                             ? "rounded-[12px_12px_3px_12px] bg-gradient-to-r from-[#6F8A2D] to-[#556B1A] text-[#F8FFF1] shadow-[0_4px_14px_rgba(86,107,26,0.24)]"
                             : "rounded-[12px_12px_12px_3px] border border-[#DCE4CF] bg-white text-[#27303F] shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
@@ -489,7 +506,7 @@ export default function BudgetChatbot({
                           <button
                             key={s}
                             onClick={() => sendMessage(s)}
-                            className="flex items-center justify-between gap-2 rounded-lg border border-[#DCE4CF] bg-white px-3 py-2 text-left text-[12px] text-[#3B4454] transition-all duration-150 hover:border-[#B8C99B] hover:bg-[#F5F9EF] hover:text-[#556B1A]"
+                            className="flex min-h-[44px] items-center justify-between gap-2 rounded-lg border border-[#DCE4CF] bg-white px-3 py-2.5 text-left text-[13px] text-[#3B4454] transition-all duration-150 hover:border-[#B8C99B] hover:bg-[#F5F9EF] hover:text-[#556B1A] md:min-h-0 md:py-2 md:text-[12px]"
                           >
                             <span>{s}</span>
                             <span className="shrink-0 text-[11px] text-[#A0A8B5]">
@@ -508,13 +525,12 @@ export default function BudgetChatbot({
                           ? "También te puede servir"
                           : "You may also ask"}
                       </p>
-
                       <div className="flex flex-wrap gap-2">
                         {relatedQuestions.map((question) => (
                           <button
                             key={question}
                             onClick={() => sendMessage(question)}
-                            className="rounded-full border border-[#D6E0C7] bg-white px-3 py-1.5 text-[12px] text-[#4A5565] transition-all hover:border-[#B7C98F] hover:bg-[#F4F8EC] hover:text-[#556B1A]"
+                            className="min-h-[36px] rounded-full border border-[#D6E0C7] bg-white px-3 py-1.5 text-[12px] text-[#4A5565] transition-all hover:border-[#B7C98F] hover:bg-[#F4F8EC] hover:text-[#556B1A]"
                           >
                             {question}
                           </button>
@@ -528,7 +544,10 @@ export default function BudgetChatbot({
               </div>
 
               {/* INPUT */}
-              <div className="flex shrink-0 items-center gap-2 border-t border-[#DCE4CF] bg-white px-[14px] py-3">
+              <div
+                className="flex shrink-0 items-center gap-2 border-t border-[#DCE4CF] bg-white px-3 py-2.5 md:px-[14px] md:py-3"
+                style={{ paddingBottom: isMobile ? "max(10px, env(safe-area-inset-bottom))" : undefined }}
+              >
                 <input
                   ref={inputRef}
                   value={input}
@@ -538,21 +557,20 @@ export default function BudgetChatbot({
                   }
                   placeholder={ui.placeholder}
                   disabled={loading}
-                  className="flex-1 rounded-lg border border-[#DCE4CF] bg-[#FAFCF7] px-3 py-[9px] text-[13px] text-[#27303F] outline-none transition-colors placeholder:text-[#98A2B3] focus:border-[#6F8A2D] focus:bg-white"
+                  className="flex-1 rounded-lg border border-[#DCE4CF] bg-[#FAFCF7] px-3 py-[10px] text-[14px] text-[#27303F] outline-none transition-colors placeholder:text-[#98A2B3] focus:border-[#6F8A2D] focus:bg-white md:py-[9px] md:text-[13px]"
                 />
-
                 <button
                   onClick={() => sendMessage()}
                   disabled={!input.trim() || loading}
                   aria-label={lang === "es" ? "Enviar" : "Send"}
-                  className={`flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-lg transition-all ${
+                  className={`flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg transition-all md:h-[34px] md:w-[34px] ${
                     input.trim() && !loading
                       ? "cursor-pointer bg-[#6F8A2D] hover:bg-[#637C27]"
                       : "cursor-not-allowed bg-[#EEF2E6]"
                   }`}
                 >
                   <Send
-                    size={14}
+                    size={15}
                     color={input.trim() && !loading ? "white" : "#A0A8B5"}
                     strokeWidth={2}
                   />
@@ -562,7 +580,7 @@ export default function BudgetChatbot({
           </motion.div>
         )}
       </AnimatePresence>
-    </>,
+    </div>,
     document.body
   );
 }

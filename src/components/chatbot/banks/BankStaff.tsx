@@ -96,8 +96,8 @@ export const QA_BANK_STAFF: QAEntry[] = [
   {
     keywords: ["rol personal", "no puedo editar personal", "no veo botón personal", "junta personal", "permissions staff", "no puedo agregar personal"],
     answer: {
-      es: "🔐 **Roles y Permisos en Personal**\n\n• **ADMIN** — puede ver, agregar y editar empleados.\n• **JUNTA** — solo puede **ver** la información. No puede agregar ni editar.\n\nSi no ves el botón **+** o el ícono de editar, tu usuario tiene el rol **JUNTA**.\n\n💡 Para cambiar permisos, contacta al administrador del sistema.",
-      en: "🔐 **Roles and Permissions in Staff**\n\n• **ADMIN** — can view, add and edit employees.\n• **JUNTA** — can only **view** information. Cannot add or edit.\n\nIf you don't see the **+** button or the edit icon, your user has the **JUNTA** role.\n\n💡 To change permissions, contact the system administrator.",
+      es: "🔐 **Roles y Permisos en Personal**\n\n• **ADMIN** — puede ver, agregar y editar empleados.\n• **JUNTA** — solo puede **ver** la información. No puede agregar ni editar.\n\nSi no ves el botón **+** o el ícono de editar, tu usuario tiene el rol **JUNTA**.",
+      en: "🔐 **Roles and Permissions in Staff**\n\n• **ADMIN** — can view, add and edit employees.\n• **JUNTA** — can only **view** information. Cannot add or edit.\n\nIf you don't see the **+** button or the edit icon, your user has the **JUNTA** role.",
     },
   },
 ];

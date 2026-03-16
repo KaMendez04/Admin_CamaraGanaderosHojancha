@@ -12,41 +12,47 @@ export interface Message {
 }
 
 
-const SYSTEM_PROMPT = `Eres un asistente profesional para un sistema administrativo de presupuesto llamado "Sistema de Presupuesto".
-El sistema tiene las siguientes secciones:
-- Inicio: resumen general con totales de ingresos, egresos y saldo.
-- Ingresos: registro de ingresos reales (departamento → tipo → subtipo → fecha → monto).
-- Egresos: registro de egresos reales (misma estructura que ingresos).
-- Proyección de Ingresos: estimaciones de ingresos esperados.
-- Proyección de Egresos: estimaciones de gastos planeados.
-- Extraordinarios: movimientos especiales (donaciones, rifas) con saldo asignable a ingresos.
-- Reportes: comparación real vs proyectado, exportación PDF y Excel, con filtros por fecha, departamento, tipo, subtipo.
-- Catálogos: administración de tipos y subtipos de ingresos/egresos.
-- Año Fiscal: selector y gestión del año activo.
+const BASE_RULES = `
+Eres un asistente de ayuda para un sistema administrativo interno.
 
-Reglas:
-- Responde SIEMPRE en el idioma que el usuario ha seleccionado manualmente (español o inglés).
+Reglas estrictas:
+- Responde ÚNICAMENTE sobre lo que describe el contexto del módulo actual que se te indica abajo.
+- Si la pregunta del usuario no tiene relación con ese contexto, responde: "No tengo información sobre eso en este módulo. Por favor navega al módulo correspondiente o contacta al administrador."
+- NO inventes funcionalidades, rutas, botones ni procesos que no estén descritos en el contexto.
+- NO asumas que el usuario está en otro módulo distinto al indicado.
 - Usa lenguaje claro y sencillo — los usuarios pueden no tener experiencia con computadoras.
-- Usa listas con viñetas para estructurar respuestas.
 - Da pasos numerados cuando expliques un proceso.
-- Si no sabes algo, di "No tengo información sobre eso. Por favor contacta al administrador del sistema."
-- Máximo 200 palabras por respuesta.`;
+- Usa listas con viñetas para estructurar respuestas.
+- Máximo 200 palabras por respuesta.
+- Responde SIEMPRE en el idioma indicado (español o inglés).
+`;
 
 // ============================================================
 // GROQ FALLBACK
 // ============================================================
 
-export async function callGroq(userMessage: string, _history: Message[], lang: Lang): Promise<string> {
+export async function callGroq(
+  userMessage: string,
+  _history: Message[],
+  lang: Lang,
+  moduleContext?: string
+): Promise<string> {
   if (!GROQ_API_KEY) {
     return lang === "es"
       ? "⚠️ No se encontró VITE_GROQ_API_KEY en el .env"
       : "⚠️ VITE_GROQ_API_KEY was not found in .env";
   }
 
+  // Build system prompt: base rules + dynamic module context from ChatBot.tsx
+  const contextBlock = moduleContext
+    ? `\n\nCONTEXTO DEL MÓDULO ACTUAL:\n${moduleContext}`
+    : "";
+  const systemPrompt = `${BASE_RULES}${contextBlock}`;
+
   const messages = [
     {
       role: "system",
-      content: SYSTEM_PROMPT,
+      content: systemPrompt,
     },
     {
       role: "user",

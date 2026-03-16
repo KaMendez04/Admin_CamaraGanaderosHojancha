@@ -115,7 +115,7 @@ export function AppSidebar({ isOpen, setIsOpen, isMobile }: Props) {
       {/* Overlay */}
       <div
         className={[
-          "fixed inset-0 z-[90] bg-[#2E321B]/45 backdrop-blur-[2px] transition-opacity",
+          "fixed inset-0 z-[90] bg-[#2E321B]/50 transition-opacity",
           isOpen ? "opacity-100" : "pointer-events-none opacity-0",
         ].join(" ")}
         onClick={() => setIsOpen(false)}
@@ -127,9 +127,9 @@ export function AppSidebar({ isOpen, setIsOpen, isMobile }: Props) {
         ref={sidebarRef}
         className={[
           "fixed left-0 top-0 z-[100] h-dvh w-64",
-          "bg-[#FAF9F5]/96 backdrop-blur-md text-[#2E321B]",
+          "bg-[#FAF9F5] text-[#2E321B]",
           "border-r border-[#E6E1D6] shadow-2xl",
-          "transition-transform duration-300 will-change-transform",
+          "transition-transform duration-300",
           isOpen ? "translate-x-0" : "-translate-x-full",
           "flex flex-col",
         ].join(" ")}

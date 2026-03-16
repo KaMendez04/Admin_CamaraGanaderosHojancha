@@ -131,21 +131,12 @@ export const QA_BANK_EDITION: QAEntry[] = [
     },
   },
 
-  // ── CANCELAR SIN GUARDAR ─────────────────────────────────
-  {
-    keywords: ["cancelar cambios", "perder cambios", "cancel changes", "no guardar", "descartar cambios", "restore original"],
-    answer: {
-      es: "↩️ **Cancelar sin Guardar**\n\nCuando haces cambios y presionas **'Cancelar'**:\n\n1. Si hay cambios no guardados, el sistema te preguntará si estás seguro.\n2. Confirma para descartar los cambios — los campos vuelven a sus valores originales.\n\n⚠️ Una vez que confirmas la cancelación, los cambios se pierden permanentemente.\n\n💡 Si quieres conservar los cambios, haz clic en **'Guardar'** antes de cancelar.",
-      en: "↩️ **Cancel Without Saving**\n\nWhen you make changes and press **'Cancelar'**:\n\n1. If there are unsaved changes, the system will ask if you're sure.\n2. Confirm to discard the changes — the fields return to their original values.\n\n⚠️ Once you confirm the cancellation, the changes are permanently lost.\n\n💡 If you want to keep the changes, click **'Guardar'** before canceling.",
-    },
-  },
-
   // ── ACCESO (SOLO ADMIN) ──────────────────────────────────
   {
     keywords: ["acceso edición", "quién puede editar", "solo admin edición", "edition access", "who can edit"],
     answer: {
-      es: "🔐 **Acceso al Módulo de Edición**\n\nEl módulo de **Edición de Contenido** solo está disponible para usuarios con rol **ADMIN**.\n\nSi tienes rol **JUNTA**, no verás la opción de **'Contenido Público'** en el panel de inicio y no podrás acceder a ninguna sección de edición.\n\n💡 Para obtener acceso, contacta al administrador del sistema.",
-      en: "🔐 **Access to the Edition Module**\n\nThe **Content Edition** module is only available for users with the **ADMIN** role.\n\nIf you have the **JUNTA** role, you won't see the **'Contenido Público'** option on the home dashboard and cannot access any edition section.\n\n💡 To get access, contact the system administrator.",
+      es: "🔐 **Acceso al Módulo de Edición**\n\nEl módulo de **Edición de Contenido** solo está disponible para usuarios con rol **ADMIN**.\n\nSi tienes rol **JUNTA**, no verás la opción de **'Contenido Público'** en el panel de inicio y no podrás acceder a ninguna sección de edición.",
+      en: "🔐 **Access to the Edition Module**\n\nThe **Content Edition** module is only available for users with the **ADMIN** role.\n\nIf you have the **JUNTA** role, you won't see the **'Contenido Público'** option on the home dashboard and cannot access any edition section.",
     },
   },
 ];

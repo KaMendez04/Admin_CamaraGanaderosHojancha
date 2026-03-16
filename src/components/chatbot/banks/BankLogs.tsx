@@ -1,220 +1,223 @@
-import type { QAEntry } from "./Home&BankBudget";   
+import type { QAEntry } from "./Home&BankBudget";
 
-// ============================================================
-// QA_BANK_EDITION
-// ============================================================
-export const QA_BANK_EDITION: QAEntry[] = [
+export const QA_BANK_LOGS: QAEntry[] = [
 
-  // ── QUÉ ES ESTE MÓDULO ───────────────────────────────────
+  // ── NAVEGACIÓN ───────────────────────────────────────────
   {
-    keywords: ["qué es edición", "qué es contenido público", "what is edition", "public content", "editar sitio web", "módulo edición"],
+    keywords: ["módulo bitácora", "dónde está bitácora", "cómo llego a bitácora", "logs module", "where is logs", "acceder bitácora"],
     answer: {
-      es: "🌐 **Módulo de Edición de Contenido**\n\nDesde aquí editas el contenido que aparece en el **sitio web público** de la organización.\n\nPuedes editar estas secciones:\n• **Página Principal** — descripción de inicio.\n• **Sobre Nosotros** — quiénes somos, misión y visión.\n• **Servicios** — crear, editar y eliminar servicios.\n• **Asociados** — encabezado, beneficios y requisitos.\n• **Voluntarios** — encabezado, beneficios y requisitos.\n• **Eventos** — crear, editar y eliminar eventos.\n• **Preguntas Frecuentes (FAQ)** — crear, editar y eliminar FAQs.\n\n💡 Solo los usuarios con rol **ADMIN** tienen acceso a este módulo.",
-      en: "🌐 **Content Edition Module**\n\nFrom here you edit the content that appears on the organization's **public website**.\n\nYou can edit these sections:\n• **Página Principal** — home description.\n• **Sobre Nosotros** — who we are, mission and vision.\n• **Servicios** — create, edit and delete services.\n• **Asociados** — header, benefits and requirements.\n• **Voluntarios** — header, benefits and requirements.\n• **Eventos** — create, edit and delete events.\n• **Preguntas Frecuentes (FAQ)** — create, edit and delete FAQs.\n\n💡 Only users with the **ADMIN** role have access to this module.",
+      es: "📋 **Módulo de Bitácora**\n\nPara llegar a esta sección:\n\n1. Mira el menú en la parte superior de la pantalla.\n2. Haz clic en **'Bitácora'**.\n3. Verás el panel lateral con dos secciones: **Presupuesto** y **Usuarios**.\n\n💡 Esta sección es exclusiva para el rol **ADMIN**. Si no la ves en el menú, tu usuario no tiene acceso.",
+      en: "📋 **Logs Module**\n\nTo get to this section:\n\n1. Look at the menu at the top of the screen.\n2. Click on **'Bitácora'**.\n3. You'll see the side panel with two sections: **Presupuesto** and **Usuarios**.\n\n💡 This section is exclusive to the **ADMIN** role. If you don't see it in the menu, your user does not have access.",
     },
   },
 
-  // ── NAVEGAR ENTRE SECCIONES ──────────────────────────────
+  // ── SECCIONES DE BITÁCORA ────────────────────────────────
   {
-    keywords: ["cómo navego edición", "menú edición", "cambiar sección edición", "navigate edition", "edition menu", "barra navegación edición"],
+    keywords: ["secciones bitácora", "tipos bitácora", "presupuesto vs usuarios bitácora", "log sections", "bitácora presupuesto", "bitácora usuarios"],
     answer: {
-      es: "🗺️ **Navegar entre Secciones de Edición**\n\nEn la parte superior de cada página de edición hay una **barra de navegación** con accesos a todas las secciones editables.\n\nHaz clic en el nombre de la sección que quieres editar para ir directamente a ella.\n\n💡 En cada página de edición hay un botón **'Regresar'** en la parte inferior derecha para volver al panel de inicio.",
-      en: "🗺️ **Navigate Between Edition Sections**\n\nAt the top of each edition page there is a **navigation bar** with access to all editable sections.\n\nClick the name of the section you want to edit to go directly to it.\n\n💡 On each edition page there is a **'Regresar'** button at the bottom right to return to the home dashboard.",
+      es: "🗂️ **Secciones de la Bitácora**\n\nEl módulo tiene dos secciones separadas:\n\n• **Presupuesto** — registra todos los cambios en ingresos, egresos, proyecciones y movimientos extraordinarios.\n• **Usuarios** — registra acciones sobre cuentas de usuario: creaciones, ediciones, activaciones, cambios de contraseña, etc.\n\nUsa el menú lateral izquierdo para cambiar entre una y otra.",
+      en: "🗂️ **Log Sections**\n\nThe module has two separate sections:\n\n• **Presupuesto** — records all changes to income, expenses, projections and extraordinary movements.\n• **Usuarios** — records actions on user accounts: creations, edits, activations, password changes, etc.\n\nUse the left side menu to switch between them.",
     },
   },
 
-  // ── PÁGINA PRINCIPAL ─────────────────────────────────────
+  // ── VER LISTA DE REGISTROS ───────────────────────────────
   {
-    keywords: ["editar página principal", "editar descripción inicio", "edit main page", "principal edition", "descripción principal"],
+    keywords: ["ver registros bitácora", "lista bitácora", "tabla bitácora", "view logs", "registros sistema"],
     answer: {
-      es: "🏠 **Editar la Página Principal**\n\n1. Ve a **Edición → Página Principal**.\n2. Verás el **Título** (fijo, no se puede cambiar).\n3. En el campo **Descripción**, escribe o modifica el texto (máximo 250 caracteres).\n4. Haz clic en **'Guardar cambios'**.\n\n⚠️ El título de la organización es fijo y no se puede editar.",
-      en: "🏠 **Edit the Main Page**\n\n1. Go to **Edición → Página Principal**.\n2. You'll see the **Title** (fixed, cannot be changed).\n3. In the **Descripción** field, write or modify the text (maximum 250 characters).\n4. Click **'Guardar cambios'**.\n\n⚠️ The organization title is fixed and cannot be edited.",
+      es: "📋 **Ver Registros de la Bitácora**\n\nLa tabla de registros muestra las siguientes columnas:\n\n• **Fecha** — cuándo ocurrió el cambio.\n• **Usuario** — quién realizó la acción (nombre y correo).\n• **Módulo** — sección del sistema afectada.\n• **Entidad** — tipo de dato modificado (ingreso, egreso, etc.).\n• **Acción** — tipo de cambio (Creación, Actualización, Eliminación, etc.).\n• **Descripción** — resumen automático del cambio.\n• **Detalle** — ícono para ver información completa del registro.\n\n💡 Abajo de la tabla verás cuántos resultados se encontraron.",
+      en: "📋 **View Log Records**\n\nThe records table shows the following columns:\n\n• **Fecha** — when the change occurred.\n• **Usuario** — who performed the action (name and email).\n• **Módulo** — system section affected.\n• **Entidad** — type of data modified (income, expense, etc.).\n• **Acción** — type of change (Creation, Update, Deletion, etc.).\n• **Descripción** — automatic summary of the change.\n• **Detalle** — icon to view complete record information.\n\n💡 Below the table you'll see how many results were found.",
     },
   },
 
-  // ── SOBRE NOSOTROS ───────────────────────────────────────
+  // ── VER DETALLE DE UN REGISTRO ───────────────────────────
   {
-    keywords: ["editar sobre nosotros", "quiénes somos", "misión visión", "edit about us", "about us edition", "misión organización"],
+    keywords: ["ver detalle bitácora", "abrir registro bitácora", "detalle log", "view log detail", "información completa bitácora"],
     answer: {
-      es: "📖 **Editar Sobre Nosotros**\n\n1. Ve a **Edición → Sobre Nosotros**.\n2. Verás tres campos:\n   • **¿Quiénes somos?** — descripción de la organización.\n   • **Misión** — la misión institucional.\n   • **Visión** — la visión de la organización.\n3. Modifica los campos que necesites (máximo 1000 caracteres cada uno).\n4. Haz clic en **'Guardar cambios'**.\n\n💡 El contador debajo de cada campo muestra cuántos caracteres te quedan.",
-      en: "📖 **Edit About Us**\n\n1. Go to **Edición → Sobre Nosotros**.\n2. You'll see three fields:\n   • **¿Quiénes somos?** — description of the organization.\n   • **Misión** — the institutional mission.\n   • **Visión** — the organization's vision.\n3. Modify the fields you need (maximum 1000 characters each).\n4. Click **'Guardar cambios'**.\n\n💡 The counter below each field shows how many characters you have left.",
+      es: "🔍 **Ver el Detalle de un Registro**\n\n1. En la tabla, ubica el registro que quieres revisar.\n2. Haz clic en el ícono del **ojo** 👁️ en la columna **Detalle**.\n3. Se abre una ventana con:\n   • **Información general** — fecha, usuario, módulo, acción, descripción.\n   • **Cambios detectados** — valores anteriores y nuevos (monto, fecha, nombre, etc.).\n   • **Snapshot anterior** — estado del dato antes del cambio.\n   • **Snapshot nuevo** — estado del dato después del cambio.\n\n💡 Los campos resaltados en amarillo indican los valores que cambiaron.",
+      en: "🔍 **View a Record's Detail**\n\n1. In the table, find the record you want to review.\n2. Click the **eye icon** 👁️ in the **Detalle** column.\n3. A window opens with:\n   • **Información general** — date, user, module, action, description.\n   • **Cambios detectados** — previous and new values (amount, date, name, etc.).\n   • **Snapshot anterior** — state of the data before the change.\n   • **Snapshot nuevo** — state of the data after the change.\n\n💡 Fields highlighted in yellow indicate values that changed.",
     },
   },
 
-  // ── SERVICIOS — CREAR ────────────────────────────────────
+  // ── SNAPSHOTS ────────────────────────────────────────────
   {
-    keywords: ["crear servicio", "nuevo servicio", "agregar servicio", "create service", "add service", "nuevo servicio sitio web"],
+    keywords: ["snapshot bitácora", "qué es snapshot", "antes después bitácora", "valor anterior nuevo", "snapshot anterior nuevo"],
     answer: {
-      es: "➕ **Crear un Nuevo Servicio**\n\n1. Ve a **Edición → Servicios**.\n2. En la sección superior **'Crear Nuevo Servicio'**, llena:\n   • **Título** del servicio.\n   • **Descripción** del servicio.\n3. Haz clic en **'Crear servicio'**.\n\n💡 El nuevo servicio aparecerá en la lista de edición y en el sitio web público.\n💡 Respeta los límites de caracteres mostrados debajo de cada campo.",
-      en: "➕ **Create a New Service**\n\n1. Go to **Edición → Servicios**.\n2. In the upper **'Crear Nuevo Servicio'** section, fill in:\n   • **Título** of the service.\n   • **Descripción** of the service.\n3. Click **'Crear servicio'**.\n\n💡 The new service will appear in the edit list and on the public website.\n💡 Respect the character limits shown below each field.",
+      es: "📸 **Snapshots (Antes y Después)**\n\nDentro del detalle de cada registro encontrarás dos tarjetas:\n\n• **Snapshot anterior** — cómo estaba el dato *antes* del cambio.\n• **Snapshot nuevo** — cómo quedó el dato *después* del cambio.\n\nCada campo aparece en su propia tarjeta. Los campos que **cambiaron** se resaltan en color amarillo para que los identifiques fácilmente.\n\n💡 Si el registro fue una **creación**, el snapshot anterior estará vacío.",
+      en: "📸 **Snapshots (Before and After)**\n\nInside each record's detail you'll find two cards:\n\n• **Snapshot anterior** — how the data looked *before* the change.\n• **Snapshot nuevo** — how the data looks *after* the change.\n\nEach field appears in its own card. Fields that **changed** are highlighted in yellow so you can identify them easily.\n\n💡 If the record was a **creation**, the previous snapshot will be empty.",
     },
   },
 
-  // ── SERVICIOS — EDITAR / ELIMINAR ────────────────────────
+  // ── BUSCAR EN BITÁCORA ───────────────────────────────────
   {
-    keywords: ["editar servicio", "eliminar servicio", "edit service", "delete service", "modificar servicio"],
+    keywords: ["buscar bitácora", "buscar registro", "search logs", "filtrar bitácora", "buscar por usuario bitácora"],
     answer: {
-      es: "✏️🗑️ **Editar o Eliminar un Servicio**\n\n1. Ve a **Edición → Servicios**.\n2. En la sección inferior **'Editar Servicio'**, usa el selector para elegir el servicio.\n3. Modifica el **título** o la **descripción**.\n4. Para guardar → haz clic en **'Guardar cambios'**.\n5. Para eliminar → haz clic en **'Eliminar'** y confirma la acción.\n\n⚠️ La eliminación es permanente y no se puede deshacer.",
-      en: "✏️🗑️ **Edit or Delete a Service**\n\n1. Go to **Edición → Servicios**.\n2. In the lower **'Editar Servicio'** section, use the selector to choose the service.\n3. Modify the **title** or **description**.\n4. To save → click **'Guardar cambios'**.\n5. To delete → click **'Eliminar'** and confirm the action.\n\n⚠️ Deletion is permanent and cannot be undone.",
+      es: "🔍 **Buscar en la Bitácora**\n\n1. En la sección de Bitácora, ubica el panel de **Filtros** en la parte superior.\n2. Escribe en el campo **Buscar** el término que necesitas:\n   • Nombre o correo del usuario.\n   • Descripción del cambio.\n   • Tipo de entidad o acción.\n3. La tabla se actualiza automáticamente con los resultados.\n\n💡 Puedes combinar la búsqueda de texto con los demás filtros (módulo, acción, entidad, fechas) para resultados más precisos.",
+      en: "🔍 **Search in Logs**\n\n1. In the Logs section, find the **Filters** panel at the top.\n2. Type in the **Buscar** field what you need:\n   • Username or email.\n   • Change description.\n   • Entity or action type.\n3. The table updates automatically with the results.\n\n💡 You can combine text search with the other filters (module, action, entity, dates) for more precise results.",
     },
   },
 
-  // ── ASOCIADOS — EDITAR ───────────────────────────────────
+  // ── FILTROS BITÁCORA PRESUPUESTO ─────────────────────────
   {
-    keywords: ["editar sección asociados", "encabezado asociados", "beneficios asociados", "requisitos asociados", "edition associates", "edit associates section"],
+    keywords: ["filtros bitácora presupuesto", "filtrar por módulo", "filtrar por entidad", "filtrar por acción bitácora", "budget log filters"],
     answer: {
-      es: "👥 **Editar la Sección de Asociados**\n\nEsta sección tiene tres bloques con sus propios botones de guardar:\n\n**1. Encabezado:**\n• Edita el título y la descripción de la sección.\n• Haz clic en **'Guardar'** en ese bloque.\n\n**2. Beneficios:**\n• Usa el selector para elegir qué beneficio editar.\n• Cambia el título o la descripción.\n• Haz clic en **'Guardar'** en ese bloque.\n\n**3. Requisitos:**\n• Usa el selector para elegir qué requisito editar.\n• Modifica el texto.\n• Haz clic en **'Guardar'** en ese bloque.\n\n💡 Cada bloque se guarda de forma independiente.",
-      en: "👥 **Edit the Associates Section**\n\nThis section has three blocks with their own save buttons:\n\n**1. Header:**\n• Edit the section title and description.\n• Click **'Guardar'** in that block.\n\n**2. Benefits:**\n• Use the selector to choose which benefit to edit.\n• Change the title or description.\n• Click **'Guardar'** in that block.\n\n**3. Requirements:**\n• Use the selector to choose which requirement to edit.\n• Modify the text.\n• Click **'Guardar'** in that block.\n\n💡 Each block is saved independently.",
+      es: "🎛️ **Filtros de Bitácora de Presupuesto**\n\nEl panel de filtros tiene las siguientes opciones:\n\n• **Buscar** — texto libre (usuario, descripción, entidad, acción).\n• **Módulo** — filtra por sección: Presupuesto real, Proyectado, Extraordinarios o Usuarios.\n• **Acción** — tipo de cambio: Creación, Actualización, Eliminación, Asignación, etc.\n• **Entidad** — dato modificado: Ingreso real, Egreso real, Ingreso proyectado, etc.\n• **Desde / Hasta** — rango de fechas.\n\nHaz clic en **Limpiar filtros** para resetear todo.",
+      en: "🎛️ **Budget Log Filters**\n\nThe filter panel has the following options:\n\n• **Buscar** — free text (user, description, entity, action).\n• **Módulo** — filter by section: Real budget, Projected, Extraordinary or Users.\n• **Acción** — type of change: Creation, Update, Deletion, Allocation, etc.\n• **Entidad** — modified data: Real income, Real expense, Projected income, etc.\n• **Desde / Hasta** — date range.\n\nClick **Limpiar filtros** to reset everything.",
     },
   },
 
-  // ── VOLUNTARIOS — EDITAR ─────────────────────────────────
+  // ── FILTROS BITÁCORA USUARIOS ────────────────────────────
   {
-    keywords: ["editar sección voluntarios", "encabezado voluntarios", "beneficios voluntarios", "requisitos voluntarios", "edition volunteers", "edit volunteers section"],
+    keywords: ["filtros bitácora usuarios", "filtrar logs usuarios", "user log filters", "buscar cambios usuario"],
     answer: {
-      es: "🙋 **Editar la Sección de Voluntarios**\n\nFunciona igual que la sección de Asociados — tiene tres bloques independientes:\n\n1. Ve a **Edición → Voluntarios**.\n2. Edita el **Encabezado** (título y descripción) y guarda.\n3. Elige un **Beneficio** con el selector, edítalo y guarda.\n4. Elige un **Requisito** con el selector, edítalo y guarda.\n\n💡 Cada bloque tiene su propio botón **'Guardar'** — no se guardan todos juntos.",
-      en: "🙋 **Edit the Volunteers Section**\n\nWorks the same as the Associates section — it has three independent blocks:\n\n1. Go to **Edición → Voluntarios**.\n2. Edit the **Header** (title and description) and save.\n3. Choose a **Benefit** with the selector, edit it and save.\n4. Choose a **Requirement** with the selector, edit it and save.\n\n💡 Each block has its own **'Guardar'** button — they don't all save together.",
+      es: "🎛️ **Filtros de Bitácora de Usuarios**\n\nEn la sección **Usuarios** de la bitácora, los filtros disponibles son:\n\n• **Buscar** — texto libre: nombre del actor, usuario afectado, descripción.\n• **Acción** — tipo de evento: Creación, Actualización, Activación, Desactivación, Cambio de contraseña, Solicitud/Confirmación de cambio de correo.\n• **Desde / Hasta** — rango de fechas.\n\nHaz clic en **Limpiar filtros** para resetear todo.",
+      en: "🎛️ **User Log Filters**\n\nIn the **Usuarios** section of the logs, the available filters are:\n\n• **Buscar** — free text: actor name, affected user, description.\n• **Acción** — event type: Creation, Update, Activation, Deactivation, Password change, Email change request/confirmation.\n• **Desde / Hasta** — date range.\n\nClick **Limpiar filtros** to reset everything.",
     },
   },
 
-  // ── EVENTOS — CREAR ──────────────────────────────────────
+  // ── ACCIONES DISPONIBLES ─────────────────────────────────
   {
-    keywords: ["crear evento", "nuevo evento", "agregar evento", "create event", "add event", "nuevo evento sitio web"],
+    keywords: ["tipos de acción bitácora", "qué es creación bitácora", "qué es actualización bitácora", "qué es eliminación bitácora", "action types logs", "asignación bitácora"],
     answer: {
-      es: "📅 **Crear un Nuevo Evento**\n\n1. Ve a **Edición → Eventos**.\n2. En la sección superior **'Crear Nuevo Evento'**, llena los datos del evento:\n   • Nombre, descripción, fecha, lugar, etc.\n3. Haz clic en **'Crear evento'**.\n\n💡 El nuevo evento aparecerá en el sitio web público.\n💡 Respeta los límites de caracteres indicados.",
-      en: "📅 **Create a New Event**\n\n1. Go to **Edición → Eventos**.\n2. In the upper **'Crear Nuevo Evento'** section, fill in the event data:\n   • Name, description, date, location, etc.\n3. Click **'Crear evento'**.\n\n💡 The new event will appear on the public website.\n💡 Respect the indicated character limits.",
+      es: "🏷️ **Tipos de Acción en la Bitácora**\n\nCada registro muestra una etiqueta de color indicando el tipo de cambio:\n\n• 🟢 **Creación** — se agregó un nuevo dato al sistema.\n• 🔵 **Actualización** — se modificó un dato existente.\n• 🔴 **Eliminación** — se eliminó un dato del sistema.\n• 🟡 **Asignación** — se asignó un monto a una partida.\n• 🟠 **Asignación a ingreso** — un extraordinario fue asignado a un ingreso.\n• **Activación / Desactivación** — cambio de estado de un usuario.\n• **Cambio de contraseña** — usuario cambió su contraseña.",
+      en: "🏷️ **Action Types in Logs**\n\nEach record shows a color label indicating the type of change:\n\n• 🟢 **Creación** — a new record was added to the system.\n• 🔵 **Actualización** — an existing record was modified.\n• 🔴 **Eliminación** — a record was deleted from the system.\n• 🟡 **Asignación** — an amount was allocated to a budget line.\n• 🟠 **Asignación a ingreso** — an extraordinary was assigned to an income.\n• **Activación / Desactivación** — a user's status changed.\n• **Cambio de contraseña** — a user changed their password.",
     },
   },
 
-  // ── EVENTOS — EDITAR / ELIMINAR ──────────────────────────
+  // ── BITÁCORA DE USUARIOS (COLUMNAS) ─────────────────────
   {
-    keywords: ["editar evento", "eliminar evento", "edit event", "delete event", "modificar evento"],
+    keywords: ["columnas bitácora usuarios", "realizado por", "usuario afectado", "actor bitácora", "target user log"],
     answer: {
-      es: "✏️🗑️ **Editar o Eliminar un Evento**\n\n1. Ve a **Edición → Eventos**.\n2. En la sección inferior **'Editar Evento'**, usa el selector para elegir el evento.\n3. Modifica los campos necesarios.\n4. Para guardar → haz clic en **'Guardar cambios'**.\n5. Para eliminar → haz clic en **'Eliminar'** y confirma.\n\n⚠️ La eliminación es permanente.",
-      en: "✏️🗑️ **Edit or Delete an Event**\n\n1. Go to **Edición → Eventos**.\n2. In the lower **'Editar Evento'** section, use the selector to choose the event.\n3. Modify the necessary fields.\n4. To save → click **'Guardar cambios'**.\n5. To delete → click **'Eliminar'** and confirm.\n\n⚠️ Deletion is permanent.",
+      es: "👤 **Bitácora de Usuarios — Columnas**\n\nLa tabla de bitácora de usuarios muestra:\n\n• **Fecha** — cuándo ocurrió el evento.\n• **Realizado por** — usuario que ejecutó la acción (nombre y correo).\n• **Usuario afectado** — cuenta sobre la que se hizo el cambio (nombre y correo).\n• **Acción** — tipo de evento (creación, activación, cambio de contraseña, etc.).\n• **Descripción** — resumen automático de los cambios detectados.\n• **Detalle** — ícono 👁️ para ver la información completa.",
+      en: "👤 **User Logs — Columns**\n\nThe user logs table shows:\n\n• **Fecha** — when the event occurred.\n• **Realizado por** — user who performed the action (name and email).\n• **Usuario afectado** — account on which the change was made (name and email).\n• **Acción** — event type (creation, activation, password change, etc.).\n• **Descripción** — automatic summary of detected changes.\n• **Detalle** — 👁️ icon to view complete information.",
     },
   },
 
-  // ── FAQ — CREAR ──────────────────────────────────────────
+  // ── FILTRAR POR FECHA ────────────────────────────────────
   {
-    keywords: ["crear faq", "nueva pregunta frecuente", "agregar faq", "create faq", "add faq", "nueva pregunta"],
+    keywords: ["filtrar por fecha bitácora", "rango fechas bitácora", "desde hasta bitácora", "date range logs", "buscar por fecha bitácora"],
     answer: {
-      es: "❓ **Crear una Nueva Pregunta Frecuente (FAQ)**\n\n1. Ve a **Edición → Preguntas Frecuentes**.\n2. En la sección superior **'Crear Nueva Pregunta Frecuente'**, llena:\n   • **Pregunta** (máximo 75 caracteres).\n   • **Respuesta** (máximo 250 caracteres).\n3. Haz clic en **'Crear pregunta'**.\n\n💡 La nueva FAQ aparecerá en el sitio web público en la sección de preguntas frecuentes.",
-      en: "❓ **Create a New FAQ**\n\n1. Go to **Edición → Preguntas Frecuentes**.\n2. In the upper **'Crear Nueva Pregunta Frecuente'** section, fill in:\n   • **Pregunta** (maximum 75 characters).\n   • **Respuesta** (maximum 250 characters).\n3. Click **'Crear pregunta'**.\n\n💡 The new FAQ will appear on the public website in the frequently asked questions section.",
+      es: "📅 **Filtrar por Fecha en la Bitácora**\n\n1. En el panel de **Filtros**, ubica los campos **Desde** y **Hasta**.\n2. Haz clic en **Desde** y selecciona la fecha de inicio del rango.\n3. Haz clic en **Hasta** y selecciona la fecha de fin del rango.\n4. La tabla se actualiza automáticamente mostrando solo los registros dentro de ese período.\n\n💡 Puedes usar solo **Desde** o solo **Hasta** para filtrar desde una fecha en adelante o hasta una fecha específica.",
+      en: "📅 **Filter by Date in Logs**\n\n1. In the **Filters** panel, find the **Desde** and **Hasta** fields.\n2. Click **Desde** and select the start date of the range.\n3. Click **Hasta** and select the end date of the range.\n4. The table updates automatically showing only records within that period.\n\n💡 You can use only **Desde** or only **Hasta** to filter from a date forward or up to a specific date.",
     },
   },
 
-  // ── FAQ — EDITAR / ELIMINAR ──────────────────────────────
+  // ── PAGINACIÓN ───────────────────────────────────────────
   {
-    keywords: ["editar faq", "eliminar faq", "edit faq", "delete faq", "modificar pregunta frecuente", "editar pregunta frecuente"],
+    keywords: ["página bitácora", "siguiente página bitácora", "paginación bitácora", "navegar tabla bitácora", "más registros bitácora"],
     answer: {
-      es: "✏️🗑️ **Editar o Eliminar una FAQ**\n\n1. Ve a **Edición → Preguntas Frecuentes**.\n2. En la sección inferior **'Editar Pregunta Frecuente'**, usa el selector para elegir la FAQ.\n3. Modifica la **pregunta** o la **respuesta**.\n4. Para guardar → haz clic en **'Guardar cambios'**.\n5. Para eliminar → haz clic en **'Eliminar'** y confirma.\n\n⚠️ La eliminación es permanente y no se puede deshacer.",
-      en: "✏️🗑️ **Edit or Delete a FAQ**\n\n1. Go to **Edición → Preguntas Frecuentes**.\n2. In the lower **'Editar Pregunta Frecuente'** section, use the selector to choose the FAQ.\n3. Modify the **question** or **answer**.\n4. To save → click **'Guardar cambios'**.\n5. To delete → click **'Eliminar'** and confirm.\n\n⚠️ Deletion is permanent and cannot be undone.",
+      es: "📄 **Navegar entre Páginas de la Bitácora**\n\n1. Busca los botones de paginación **debajo de la tabla**.\n2. Haz clic en la flecha **→** para ir a la siguiente página.\n3. Haz clic en la flecha **←** para regresar.\n4. El texto **'Página X de Y'** indica en qué página estás.\n\n💡 Cada página muestra hasta **8 registros**. Si buscas algo específico, usa los filtros para reducir los resultados.",
+      en: "📄 **Navigating Log Pages**\n\n1. Look for the pagination buttons **below the table**.\n2. Click the **→** arrow to go to the next page.\n3. Click the **←** arrow to go back.\n4. The text **'Página X de Y'** shows which page you're on.\n\n💡 Each page shows up to **8 records**. If you're looking for something specific, use the filters to narrow down the results.",
     },
   },
 
-  // ── BENEFICIOS E ÍCONOS ──────────────────────────────────
+  // ── LIMPIAR FILTROS ──────────────────────────────────────
   {
-    keywords: ["ícono beneficio", "icono no editable", "benefit icon", "icon not editable", "cambiar ícono"],
+    keywords: ["limpiar filtros bitácora", "resetear filtros bitácora", "quitar filtros bitácora", "clear filters logs"],
     answer: {
-      es: "🎨 **Íconos de Beneficios**\n\nEn las secciones de Asociados y Voluntarios, cada beneficio tiene un ícono visual.\n\n⚠️ Los íconos **no se pueden cambiar** desde esta interfaz — son fijos para cada beneficio.\n\nSolo puedes editar el **título** y la **descripción** de cada beneficio. El ícono se muestra como referencia visual.",
-      en: "🎨 **Benefit Icons**\n\nIn the Associates and Volunteers sections, each benefit has a visual icon.\n\n⚠️ Icons **cannot be changed** from this interface — they are fixed for each benefit.\n\nYou can only edit the **title** and **description** of each benefit. The icon is shown as a visual reference.",
+      es: "🧹 **Limpiar Filtros de la Bitácora**\n\n1. En el panel de **Filtros**, busca el botón **'Limpiar filtros'** (esquina inferior derecha del panel).\n2. Haz clic en él.\n3. Todos los filtros se resetean: búsqueda, módulo, entidad, acción y fechas vuelven a sus valores predeterminados.\n4. La tabla mostrará todos los registros disponibles nuevamente.",
+      en: "🧹 **Clear Log Filters**\n\n1. In the **Filters** panel, find the **'Limpiar filtros'** button (bottom right of the panel).\n2. Click it.\n3. All filters reset: search, module, entity, action and dates return to their default values.\n4. The table will show all available records again.",
     },
   },
 
-  // ── LÍMITES DE CARACTERES ────────────────────────────────
+  // ── ROLES / ACCESO ───────────────────────────────────────
   {
-    keywords: ["límite caracteres", "caracteres restantes", "character limit", "cuántos caracteres puedo", "máximo caracteres"],
+    keywords: ["acceso bitácora", "quién puede ver bitácora", "rol bitácora", "permisos bitácora", "junta bitácora", "log access"],
     answer: {
-      es: "🔢 **Límites de Caracteres**\n\nCada campo tiene un límite máximo de caracteres:\n\n• **Descripción principal**: 250 caracteres\n• **Quiénes somos / Misión / Visión**: 1000 caracteres\n• **Pregunta (FAQ)**: 75 caracteres\n• **Respuesta (FAQ)**: 250 caracteres\n• **Beneficio título**: varía según configuración\n• **Beneficio descripción**: varía según configuración\n• **Requisito**: varía según configuración\n\n💡 Debajo de cada campo hay un contador que muestra cuántos caracteres te quedan.",
-      en: "🔢 **Character Limits**\n\nEach field has a maximum character limit:\n\n• **Main description**: 250 characters\n• **Who we are / Mission / Vision**: 1000 characters\n• **Question (FAQ)**: 75 characters\n• **Answer (FAQ)**: 250 characters\n• **Benefit title**: varies by configuration\n• **Benefit description**: varies by configuration\n• **Requirement**: varies by configuration\n\n💡 Below each field there is a counter showing how many characters you have left.",
+      es: "🔐 **Acceso a la Bitácora**\n\n• **ADMIN** — acceso completo a ambas secciones: Presupuesto y Usuarios.\n• **JUNTA** — acceso **solo** a la sección de **Presupuesto**. No puede ver la bitácora de Usuarios.\n• Otros roles — no tienen acceso al módulo de Bitácora.\n\nLa bitácora es de **solo lectura**: nadie puede editar ni eliminar registros desde esta sección.",
+      en: "🔐 **Log Access**\n\n• **ADMIN** — full access to both sections: Presupuesto and Usuarios.\n• **JUNTA** — access **only** to the **Presupuesto** section. Cannot view the Users log.\n• Other roles — no access to the Logs module.\n\nThe log is **read-only**: no one can edit or delete records from this section.",
     },
   },
 
-  // ── CANCELAR SIN GUARDAR ─────────────────────────────────
+  // ── QUÉ SE REGISTRA ──────────────────────────────────────
   {
-    keywords: ["cancelar cambios", "perder cambios", "cancel changes", "no guardar", "descartar cambios", "restore original"],
+    keywords: ["qué registra bitácora", "qué guarda bitácora", "cambios registrados", "what does log track", "log qué captura"],
     answer: {
-      es: "↩️ **Cancelar sin Guardar**\n\nCuando haces cambios y presionas **'Cancelar'**:\n\n1. Si hay cambios no guardados, el sistema te preguntará si estás seguro.\n2. Confirma para descartar los cambios — los campos vuelven a sus valores originales.\n\n⚠️ Una vez que confirmas la cancelación, los cambios se pierden permanentemente.\n\n💡 Si quieres conservar los cambios, haz clic en **'Guardar'** antes de cancelar.",
-      en: "↩️ **Cancel Without Saving**\n\nWhen you make changes and press **'Cancelar'**:\n\n1. If there are unsaved changes, the system will ask if you're sure.\n2. Confirm to discard the changes — the fields return to their original values.\n\n⚠️ Once you confirm the cancellation, the changes are permanently lost.\n\n💡 If you want to keep the changes, click **'Guardar'** before canceling.",
-    },
-  },
-
-  // ── ACCESO (SOLO ADMIN) ──────────────────────────────────
-  {
-    keywords: ["acceso edición", "quién puede editar", "solo admin edición", "edition access", "who can edit"],
-    answer: {
-      es: "🔐 **Acceso al Módulo de Edición**\n\nEl módulo de **Edición de Contenido** solo está disponible para usuarios con rol **ADMIN**.\n\nSi tienes rol **JUNTA**, no verás la opción de **'Contenido Público'** en el panel de inicio y no podrás acceder a ninguna sección de edición.\n\n💡 Para obtener acceso, contacta al administrador del sistema.",
-      en: "🔐 **Access to the Edition Module**\n\nThe **Content Edition** module is only available for users with the **ADMIN** role.\n\nIf you have the **JUNTA** role, you won't see the **'Contenido Público'** option on the home dashboard and cannot access any edition section.\n\n💡 To get access, contact the system administrator.",
+      es: "📝 **¿Qué registra la Bitácora?**\n\nEl sistema guarda automáticamente un registro cada vez que:\n\n**Presupuesto:**\n• Se crea, edita o elimina un ingreso o egreso real.\n• Se crea, edita o elimina una proyección de ingreso o egreso.\n• Se registra o asigna un movimiento extraordinario.\n\n**Usuarios:**\n• Se crea, edita, activa o desactiva un usuario.\n• Se cambia la contraseña de un usuario.\n• Se solicita o confirma un cambio de correo electrónico.\n\n💡 No es necesario hacer nada — el sistema lo registra solo.",
+      en: "📝 **What does the Log track?**\n\nThe system automatically saves a record every time:\n\n**Budget:**\n• A real income or expense is created, edited or deleted.\n• A projected income or expense is created, edited or deleted.\n• An extraordinary movement is recorded or assigned.\n\n**Users:**\n• A user is created, edited, activated or deactivated.\n• A user's password is changed.\n• An email change is requested or confirmed.\n\n💡 No action needed — the system records it automatically.",
     },
   },
 ];
 
 // ============================================================
-// RELATED_QUESTIONS_EDITION
+// RELATED_QUESTIONS_LOGS
 // ============================================================
-export const RELATED_QUESTIONS_EDITION: Record<
+export const RELATED_QUESTIONS_LOGS: Record<
   string,
   { es: string[]; en: string[]; keywords: string[] }
 > = {
-  paginaPrincipal: {
-    keywords: ["página principal", "descripción inicio", "main page", "principal edition"],
+  navegacionLogs: {
+    keywords: ["bitácora", "logs", "módulo", "sección", "acceder"],
     es: [
-      "¿Cómo edito la página principal?",
-      "¿Se puede cambiar el título de la organización?",
-      "¿Cuántos caracteres tiene la descripción principal?",
-      "¿Cómo regreso al inicio después de editar?",
+      "¿Cuántas secciones tiene la bitácora?",
+      "¿Quién puede acceder a la bitácora?",
+      "¿Qué registra la bitácora automáticamente?",
+      "¿Cómo llego al módulo de bitácora?",
     ],
     en: [
-      "How do I edit the main page?",
-      "Can the organization title be changed?",
-      "How many characters does the main description have?",
-      "How do I go back to home after editing?",
+      "How many sections does the log have?",
+      "Who can access the logs?",
+      "What does the log track automatically?",
+      "How do I get to the logs module?",
     ],
   },
-  serviciosEventos: {
-    keywords: ["servicio", "evento", "crear", "eliminar", "service", "event", "create", "delete"],
+  filtroBusquedaLogs: {
+    keywords: ["filtrar", "buscar", "fecha", "módulo filtro", "acción filtro", "entidad filtro"],
     es: [
-      "¿Cómo creo un nuevo servicio?",
-      "¿Cómo elimino un servicio?",
-      "¿Cómo creo un nuevo evento?",
-      "¿Cómo elimino un evento?",
+      "¿Cómo filtro por módulo en la bitácora?",
+      "¿Cómo filtro por rango de fechas?",
+      "¿Cómo busco un registro específico?",
+      "¿Cómo limpio los filtros de la bitácora?",
     ],
     en: [
-      "How do I create a new service?",
-      "How do I delete a service?",
-      "How do I create a new event?",
-      "How do I delete an event?",
+      "How do I filter by module in the logs?",
+      "How do I filter by date range?",
+      "How do I search for a specific record?",
+      "How do I clear log filters?",
     ],
   },
-  faq: {
-    keywords: ["faq", "pregunta frecuente", "frequently asked", "question answer"],
+  detalleLogs: {
+    keywords: ["detalle", "snapshot", "antes", "después", "cambio", "valor anterior", "valor nuevo"],
     es: [
-      "¿Cómo creo una pregunta frecuente?",
-      "¿Cómo edito una FAQ existente?",
-      "¿Cómo elimino una FAQ?",
-      "¿Cuál es el límite de caracteres para las FAQs?",
+      "¿Cómo veo el detalle de un registro?",
+      "¿Qué son los snapshots en la bitácora?",
+      "¿Qué significa el campo resaltado en amarillo?",
+      "¿Qué información muestra la sección de cambios detectados?",
     ],
     en: [
-      "How do I create a FAQ?",
-      "How do I edit an existing FAQ?",
-      "How do I delete a FAQ?",
-      "What is the character limit for FAQs?",
+      "How do I view a record's detail?",
+      "What are snapshots in the logs?",
+      "What does a field highlighted in yellow mean?",
+      "What information does the detected changes section show?",
     ],
   },
-  asociadosVoluntariosEdicion: {
-    keywords: ["editar asociados", "editar voluntarios", "beneficio", "requisito", "encabezado edición"],
+  accionesLogs: {
+    keywords: ["acción", "creación", "actualización", "eliminación", "asignación", "activación", "contraseña"],
     es: [
-      "¿Cómo edito la sección de Asociados?",
-      "¿Cómo edito la sección de Voluntarios?",
-      "¿Cómo edito un beneficio?",
-      "¿Puedo cambiar el ícono de un beneficio?",
+      "¿Qué tipos de acción registra la bitácora?",
+      "¿Qué significa la acción 'Asignación a ingreso'?",
+      "¿Cómo filtro por tipo de acción?",
+      "¿Qué diferencia hay entre Activación y Creación de usuario?",
     ],
     en: [
-      "How do I edit the Associates section?",
-      "How do I edit the Volunteers section?",
-      "How do I edit a benefit?",
-      "Can I change a benefit's icon?",
+      "What action types does the log record?",
+      "What does the 'Asignación a ingreso' action mean?",
+      "How do I filter by action type?",
+      "What is the difference between user Activation and Creation?",
+    ],
+  },
+  permisosLogs: {
+    keywords: ["rol bitácora", "admin logs", "junta logs", "permiso bitácora", "acceso usuarios log"],
+    es: [
+      "¿Puede el rol JUNTA ver la bitácora de usuarios?",
+      "¿Qué puede hacer el rol ADMIN en la bitácora?",
+      "¿Se pueden eliminar registros de la bitácora?",
+      "¿Por qué no veo la sección de Usuarios en la bitácora?",
+    ],
+    en: [
+      "Can the JUNTA role see the users log?",
+      "What can the ADMIN role do in the logs?",
+      "Can log records be deleted?",
+      "Why don't I see the Users section in the logs?",
     ],
   },
 };
