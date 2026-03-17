@@ -58,6 +58,24 @@ async function downloadBlob(url: string, filename: string) {
   setTimeout(() => URL.revokeObjectURL(href), 1000);
 }
 
+async function openPdfPreview(url: string) {
+  const response = await apiConfig.get(url, { responseType: "blob" });
+
+  const headers = (response as any).headers ?? {};
+  const contentType =
+    (headers["content-type"] as string) || "application/pdf";
+
+  const blob =
+    response.data instanceof Blob
+      ? response.data
+      : new Blob([response.data as any], { type: contentType });
+
+  const href = URL.createObjectURL(blob);
+  window.open(href, "_blank");
+
+  setTimeout(() => URL.revokeObjectURL(href), 60000);
+}
+
 export const pSpendService = {
   downloadSpendCompareExcel,
   downloadPSpendListExcel,
@@ -101,7 +119,7 @@ export const pSpendService = {
   previewSpendComparePDF(filters: SpendFilters) {
     const base = (apiConfig.defaults.baseURL ?? "").replace(/\/$/, "");
     const qs = buildParams({ ...filters, preview: "true" });
-    window.open(`${base}/report-proj/spend/pdf?${qs}`, "_blank");
+    return openPdfPreview(`${base}/report-proj/spend/pdf?${qs}`);
   },
 
   async downloadSpendComparePDF(filters: SpendFilters) {
@@ -115,7 +133,7 @@ export const pSpendService = {
   previewPSpendListPDF(filters: SpendFilters) {
     const base = (apiConfig.defaults.baseURL ?? "").replace(/\/$/, "");
     const qs = buildParams({ ...filters, preview: "true" });
-    window.open(`${base}/report-proj/pspend/pdf?${qs}`, "_blank");
+    return openPdfPreview(`${base}/report-proj/pspend/pdf?${qs}`);
   },
 
   async downloadPSpendListPDF(filters: SpendFilters) {
