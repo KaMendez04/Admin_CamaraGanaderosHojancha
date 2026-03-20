@@ -94,7 +94,10 @@ const { current } = useFiscalYear();
   );
 
   // ===== CREATE Queries =====
-  const typesCreate = useIncomeTypes(typeof departmentId === "number" ? departmentId : undefined);
+  const typesCreate = useIncomeTypes(
+  typeof departmentId === "number" ? departmentId : undefined,
+  current?.id
+);
   const typeOptionsCreate = useMemo(
     () => (typesCreate.data ?? []).map((t: any) => ({ label: t.name, value: t.id })),
     [typesCreate.data]
@@ -102,28 +105,31 @@ const { current } = useFiscalYear();
 
   // ===== EDIT Queries =====
   const typesEdit = useIncomeTypes(
-    mode === "edit" && typeof editTypeDepartmentId === "number"
-      ? editTypeDepartmentId
-      : undefined
-  );
+  mode === "edit" && typeof editTypeDepartmentId === "number"
+    ? editTypeDepartmentId
+    : undefined,
+  current?.id
+);
   const typeOptionsEdit = useMemo(
     () => (typesEdit.data ?? []).map((t: any) => ({ label: t.name, value: t.id })),
     [typesEdit.data]
   );
 
   const typesEditForSub = useIncomeTypes(
-    mode === "edit" && typeof editSubTypeDepartmentId === "number"
-      ? editSubTypeDepartmentId
-      : undefined
-  );
+  mode === "edit" && typeof editSubTypeDepartmentId === "number"
+    ? editSubTypeDepartmentId
+    : undefined,
+  current?.id
+);
   const typeOptionsEditForSub = useMemo(
     () => (typesEditForSub.data ?? []).map((t: any) => ({ label: t.name, value: t.id })),
     [typesEditForSub.data]
   );
 
   const subTypesEdit = useIncomeSubTypes(
-    mode === "edit" && typeof editSubTypeTypeId === "number" ? editSubTypeTypeId : undefined
-  );
+  mode === "edit" && typeof editSubTypeTypeId === "number" ? editSubTypeTypeId : undefined,
+  current?.id
+);
   const subTypeOptionsEdit = useMemo(
     () => (subTypesEdit.data ?? []).map((s: any) => ({ label: s.name, value: s.id })),
     [subTypesEdit.data]
