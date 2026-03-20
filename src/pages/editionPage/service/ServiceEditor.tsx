@@ -361,8 +361,8 @@ export default function ServicesInformativeEditor({
       {selected && (
         // ✅ Quitado overflow-x-hidden aquí también
         <div className="space-y-4">
-          <div className="grid gap-6 lg:grid-cols-[1fr_520px]">
-            <div className="space-y-4 w-full lg:min-w-[420px] lg:max-w-[520px] justify-self-end">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="space-y-4 w-full">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Título</label>
                 <input
