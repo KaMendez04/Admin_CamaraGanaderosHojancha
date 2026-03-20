@@ -21,6 +21,7 @@ import {
 import PIncomeList from "./PIncomeList";
 import { useBodyScrollLock } from "@/hooks/modals/useBodyScrollLock";
 import { CharCounter } from "../../CharCounter";
+import { useFiscalYear } from "@/hooks/Budget/useFiscalYear";
 
 type Props = {
   open: boolean;
@@ -42,7 +43,7 @@ export default function CatalogModal({
 }: Props) {
   const [openAmountModal, setOpenAmountModal] = useState(false);
   const MAX_CATALOG_NAME_LENGTH = 50;
-
+  const { current } = useFiscalYear();
   // ===== EDIT: Departamento =====
   const [editDepartmentId, setEditDepartmentId] = useState<number | "">("");
   const [editDepartmentName, setEditDepartmentName] = useState("");
@@ -78,9 +79,10 @@ export default function CatalogModal({
   );
 
   // ===== CREATE: tipos dependen de departmentId =====
-  const types = usePIncomeTypes(
-    mode === "create" && typeof departmentId === "number" ? departmentId : undefined
-  );
+ const types = usePIncomeTypes(
+  mode === "create" && typeof departmentId === "number" ? departmentId : undefined,
+  current?.id
+);
 
   const typeOptions = useMemo(
     () => (types.data ?? []).map((t: PIncomeType) => ({ label: t.name, value: t.id })),
@@ -89,9 +91,9 @@ export default function CatalogModal({
 
   // ===== EDIT: tipos dependen de editTypeDepartmentId =====
   const editTypes = usePIncomeTypes(
-    mode === "edit" && typeof editTypeDepartmentId === "number" ? editTypeDepartmentId : undefined
-  );
-
+  mode === "edit" && typeof editTypeDepartmentId === "number" ? editTypeDepartmentId : undefined,
+  current?.id
+);
   const editTypeOptions = useMemo(
     () => (editTypes.data ?? []).map((t: PIncomeType) => ({ label: t.name, value: t.id })),
     [editTypes.data]
@@ -99,10 +101,11 @@ export default function CatalogModal({
 
   // ===== EDIT: Tipos para editar Subtipo dependen de editSubTypeDepartmentId =====
   const editSubTypesTypes = usePIncomeTypes(
-    mode === "edit" && typeof editSubTypeDepartmentId === "number"
-      ? editSubTypeDepartmentId
-      : undefined
-  );
+  mode === "edit" && typeof editSubTypeDepartmentId === "number"
+    ? editSubTypeDepartmentId
+    : undefined,
+  current?.id
+);
 
   const editSubTypesTypeOptions = useMemo(
     () => (editSubTypesTypes.data ?? []).map((t: PIncomeType) => ({ label: t.name, value: t.id })),
@@ -111,8 +114,9 @@ export default function CatalogModal({
 
   // ===== EDIT: Subtipos dependen de editSubTypeTypeId =====
   const subTypesEdit = usePIncomeSubTypes(
-    mode === "edit" && typeof editSubTypeTypeId === "number" ? editSubTypeTypeId : undefined
-  );
+  mode === "edit" && typeof editSubTypeTypeId === "number" ? editSubTypeTypeId : undefined,
+  current?.id
+);
 
   const editSubTypeOptions = useMemo(
     () => (subTypesEdit.data ?? []).map((s) => ({ label: s.name, value: s.id })),
@@ -701,7 +705,10 @@ export default function CatalogModal({
             </div>
 
             <div className="min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
-              <PIncomeList subTypeId={typeof editSubTypeId === "number" ? editSubTypeId : undefined} />
+              <PIncomeList
+                subTypeId={typeof editSubTypeId === "number" ? editSubTypeId : undefined}
+                fiscalYearId={current?.id}
+              />
             </div>
 
             <div className="flex items-center justify-end gap-3 border-t p-4 md:p-5">

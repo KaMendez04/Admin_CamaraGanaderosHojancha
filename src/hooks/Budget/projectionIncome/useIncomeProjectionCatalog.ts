@@ -37,27 +37,27 @@ export function useDepartments() {
 }
 
 // IncomeTypes (dependen de departamento)
-export function usePIncomeTypes(departmentId?: number) {
+export function usePIncomeTypes(departmentId?: number, fiscalYearId?: number) {
   const q = useQuery({
-    queryKey: ["pIncomeTypes", departmentId ?? "none"],
+    queryKey: ["pIncomeTypes", departmentId ?? "none", fiscalYearId ?? "no-fy"],
     queryFn: async () => {
       if (!departmentId) return [] as PIncomeType[];
-      const res = await listPIncomeTypes(departmentId);
+      const res = await listPIncomeTypes(departmentId, fiscalYearId);
       return res.data as PIncomeType[];
     },
-    enabled: !!departmentId, // no dispara sin departamento
+    enabled: !!departmentId,
     staleTime: 5 * 60 * 1000,
   });
   return adaptQuery<PIncomeType[]>(q);
 }
 
 // IncomeSubTypes (dependen de type)
-export function usePIncomeSubTypes(pIncomeTypeId?: number) {
+export function usePIncomeSubTypes(pIncomeTypeId?: number, fiscalYearId?: number) {
   const q = useQuery({
-    queryKey: ["pIncomeSubTypes", pIncomeTypeId ?? "none"],
+    queryKey: ["pIncomeSubTypes", pIncomeTypeId ?? "none", fiscalYearId ?? "no-fy"],
     queryFn: async () => {
       if (!pIncomeTypeId) return [] as PIncomeSubType[];
-      const res = await listPIncomeSubTypes(pIncomeTypeId);
+      const res = await listPIncomeSubTypes(pIncomeTypeId, fiscalYearId);
       return res.data as PIncomeSubType[];
     },
     enabled: !!pIncomeTypeId,
@@ -66,10 +66,10 @@ export function usePIncomeSubTypes(pIncomeTypeId?: number) {
   return adaptQuery<PIncomeSubType[]>(q);
 }
 
-export function usePIncomesList(pIncomeSubTypeId?: number) {
+export function usePIncomesList(pIncomeSubTypeId?: number, fiscalYearId?: number) {
   const q = useQuery({
-    queryKey: ["pIncomeList", pIncomeSubTypeId ?? "all"],
-    queryFn: async () => listPIncomes(pIncomeSubTypeId),
+    queryKey: ["pIncomeList", pIncomeSubTypeId ?? "all", fiscalYearId ?? "no-fy"],
+    queryFn: async () => listPIncomes(pIncomeSubTypeId, fiscalYearId),
     staleTime: 30 * 1000,
   });
 
@@ -78,9 +78,8 @@ export function usePIncomesList(pIncomeSubTypeId?: number) {
     loading: q.isPending,
     error: (q.error as any)?.message ?? null,
   };
-
-  
 }
+
 export function useIncomeTypes(departmentId?: number) {
   return useQuery({
     queryKey: ["incomeTypes", departmentId ?? "all"],

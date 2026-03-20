@@ -12,7 +12,6 @@ function formatMoneyCR(v: string | number) {
   return n.toLocaleString("es-CR", { style: "currency", currency: "CRC" });
 }
 
-// Convierte "₡10 000,50" -> 10000.5
 function parseCRCToNumber(input: string) {
   const cleaned = (input ?? "")
     .replace(/[₡\s]/g, "")
@@ -25,12 +24,13 @@ function parseCRCToNumber(input: string) {
 
 type Props = {
   subTypeId?: number;
+  fiscalYearId?: number;
 };
 
 type Row = any;
 
-export default function PIncomeList({ subTypeId }: Props) {
-  const q = usePIncomesList();
+export default function PIncomeList({ subTypeId, fiscalYearId }: Props) {
+  const q = usePIncomesList(subTypeId, fiscalYearId);
   const mUpdate = useUpdatePIncome();
 
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -41,12 +41,8 @@ export default function PIncomeList({ subTypeId }: Props) {
   const MAX_AMOUNT_LENGTH = 20;
 
   const rows = useMemo(() => {
-    const all = (q.data ?? []) as Row[];
-    if (!subTypeId) return all;
-    return all.filter(
-      (row) => Number(row?.pIncomeSubType?.id) === Number(subTypeId)
-    );
-  }, [q.data, subTypeId]);
+    return (q.data ?? []) as Row[];
+  }, [q.data]);
 
   function startEdit(row: Row) {
     const initial = String(row.amount ?? "");
@@ -70,9 +66,7 @@ export default function PIncomeList({ subTypeId }: Props) {
         amount: amountNumber,
       });
       cancelEdit();
-    } catch {
-      // error manejado abajo
-    }
+    } catch {}
   }
 
   const columns = useMemo<ColumnDef<Row, any>[]>(
@@ -98,7 +92,6 @@ export default function PIncomeList({ subTypeId }: Props) {
                 value={draftAmount}
                 maxLength={MAX_AMOUNT_LENGTH}
                 onChange={(e) => {
-                  // solo números, coma y punto
                   const sanitized = e.target.value.replace(/[^0-9.,]/g, "");
                   setDraftAmount(sanitized);
                   draftRef.current = sanitized;
@@ -125,7 +118,6 @@ export default function PIncomeList({ subTypeId }: Props) {
 
           if (isEditing) {
             return (
-              // RESPONSIVE: stack en móvil, fila en desktop
               <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-center">
                 <button
                   className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#6B7A3A] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 sm:w-auto"
@@ -187,7 +179,7 @@ export default function PIncomeList({ subTypeId }: Props) {
 
       {!q.loading && rows.length === 0 && subTypeId && (
         <p className="mt-3 text-xs text-gray-500">
-          No hay proyecciones para este subtipo.
+          No hay proyecciones para este subtipo en el año fiscal seleccionado.
         </p>
       )}
 
