@@ -26,16 +26,23 @@ export async function createDepartment(payload: CreateDepartmentDTO): Promise<De
 }
 
 /** ============= Spend Types (reales) ============= */
-export async function listSpendTypes(departmentId?: number): Promise<ApiList<SpendType>> {
-  const { data } = await apiConfig.get<any[]>("/spend-type");
+export async function listSpendTypes(departmentId?: number, fiscalYearId?: number): Promise<ApiList<SpendType>> {
+  const params: Record<string, number> = {};
 
-  let items: SpendType[] = (data ?? []).map((t) => ({
+  if (departmentId) params.departmentId = departmentId;
+  if (fiscalYearId) params.fiscalYearId = fiscalYearId;
+
+  const { data } = await apiConfig.get<any[]>("/spend-type", {
+    params: Object.keys(params).length ? params : undefined,
+  });
+
+  const items: SpendType[] = (data ?? []).map((t) => ({
     id: t.id,
     name: t.name,
     departmentId: t?.department?.id,
+    amountSpend: t?.amountSpend ?? "0.00",
   }));
 
-  if (departmentId) items = items.filter((t) => t.departmentId === departmentId);
   return { data: items };
 }
 
@@ -49,15 +56,23 @@ export async function createSpendType(payload: CreateSpendTypeDTO): Promise<Spen
 }
 
 /** ============= Spend SubTypes (reales) ============= */
-export async function listSpendSubTypes(spendTypeId: number): Promise<ApiList<SpendSubType>> {
+export async function listSpendSubTypes(
+  spendTypeId: number,
+  fiscalYearId?: number
+): Promise<ApiList<SpendSubType>> {
+  const params: Record<string, number> = { spendTypeId };
+
+  if (fiscalYearId) params.fiscalYearId = fiscalYearId;
+
   const { data } = await apiConfig.get<any[]>("/spend-sub-type", {
-    params: { spendTypeId },
+    params,
   });
 
   const items: SpendSubType[] = (data ?? []).map((s) => ({
     id: s.id,
     name: s.name,
     spendTypeId: s?.spendType?.id ?? spendTypeId,
+    amountSubSpend: s?.amountSubSpend ?? "0.00",
   }));
 
   return { data: items };
@@ -178,8 +193,15 @@ export async function updateSpendSubType(
 }
 
 
-export async function listSpend(): Promise<ApiList<Spend>> {
-  const { data } = await apiConfig.get<any[]>("/spend");
+export async function listSpend(spendSubTypeId?: number, fiscalYearId?: number): Promise<ApiList<Spend>> {
+  const params: Record<string, number> = {};
+
+  if (spendSubTypeId) params.spendSubTypeId = spendSubTypeId;
+  if (fiscalYearId) params.fiscalYearId = fiscalYearId;
+
+  const { data } = await apiConfig.get<any[]>("/spend", {
+    params: Object.keys(params).length ? params : undefined,
+  });
 
   const items: Spend[] = (data ?? []).map((row) => ({
     id: row.id,

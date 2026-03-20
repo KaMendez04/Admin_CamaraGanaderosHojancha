@@ -67,12 +67,13 @@ function normalizeToDateInput(value: any) {
 
 type Props = {
   subTypeId?: number;
+  fiscalYearId?: number;
 };
 
 type Row = any;
 
-export default function SpendList({ subTypeId }: Props) {
-  const q = useSpendsList();
+export default function SpendList({ subTypeId, fiscalYearId }: Props) {
+  const q = useSpendsList(subTypeId, fiscalYearId);
   const mUpdate = useUpdateSpend();
 
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -86,13 +87,8 @@ export default function SpendList({ subTypeId }: Props) {
   const MAX_AMOUNT_LENGTH = 20;
 
   const rows = useMemo(() => {
-    const all = (q.data ?? []) as Row[];
-    if (!subTypeId) return all;
-
-    return all.filter(
-      (row) => Number(row?.spendSubType?.id) === Number(subTypeId)
-    );
-  }, [q.data, subTypeId]);
+    return (q.data ?? []) as Row[];
+  }, [q.data]);
 
   function startEdit(row: Row) {
     const initialAmount = String(row.amount ?? "");
@@ -263,11 +259,15 @@ export default function SpendList({ subTypeId }: Props) {
       <GenericTable<Row> data={rows} columns={columns} isLoading={q.loading} />
 
       {!q.loading && rows.length === 0 && subTypeId && (
-        <p className="mt-3 text-xs text-gray-500">No hay egresos para este subtipo.</p>
+        <p className="mt-3 text-xs text-gray-500">
+          No hay egresos para este subtipo en el año fiscal seleccionado.
+        </p>
       )}
 
       {!q.loading && rows.length === 0 && !subTypeId && (
-        <p className="mt-3 text-xs text-gray-500">No hay egresos aún.</p>
+        <p className="mt-3 text-xs text-gray-500">
+          No hay egresos aún en el año fiscal seleccionado.
+        </p>
       )}
 
       {mUpdate.error && <p className="mt-3 text-xs text-red-600">{mUpdate.error}</p>}

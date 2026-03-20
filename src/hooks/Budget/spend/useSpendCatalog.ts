@@ -38,12 +38,12 @@ export function useDepartments() {
 }
 
 // SpendTypes (dependen de departamento)
-export function useSpendTypes(departmentId?: number) {
+export function useSpendTypes(departmentId?: number, fiscalYearId?: number) {
   const q = useQuery({
-    queryKey: ["spendTypes", departmentId ?? "none"],
+    queryKey: ["spendTypes", departmentId ?? "none", fiscalYearId ?? "no-fy"],
     queryFn: async () => {
       if (!departmentId) return [] as SpendType[];
-      return (await listSpendTypes(departmentId)).data as SpendType[];
+      return (await listSpendTypes(departmentId, fiscalYearId)).data as SpendType[];
     },
     enabled: !!departmentId,
     staleTime: 5 * 60 * 1000,
@@ -52,12 +52,12 @@ export function useSpendTypes(departmentId?: number) {
 }
 
 // SpendSubTypes (dependen de type)
-export function useSpendSubTypes(spendTypeId?: number) {
+export function useSpendSubTypes(spendTypeId?: number, fiscalYearId?: number) {
   const q = useQuery({
-    queryKey: ["spendSubTypes", spendTypeId ?? "none"],
+    queryKey: ["spendSubTypes", spendTypeId ?? "none", fiscalYearId ?? "no-fy"],
     queryFn: async () => {
       if (!spendTypeId) return [] as SpendSubType[];
-      return (await listSpendSubTypes(spendTypeId)).data as SpendSubType[];
+      return (await listSpendSubTypes(spendTypeId, fiscalYearId)).data as SpendSubType[];
     },
     enabled: !!spendTypeId,
     staleTime: 5 * 60 * 1000,
@@ -103,10 +103,10 @@ export function usePSpendSubTypes(args?: { departmentId?: number; typeId?: numbe
 }
 
 
-export function useSpendsList() {
+export function useSpendsList(spendSubTypeId?: number, fiscalYearId?: number) {
   const q = useQuery({
-    queryKey: ["spendList"],
-    queryFn: async () => (await listSpend()).data as Spend[],
+    queryKey: ["spendList", spendSubTypeId ?? "all", fiscalYearId ?? "no-fy"],
+    queryFn: async () => (await listSpend(spendSubTypeId, fiscalYearId)).data as Spend[],
     staleTime: 0,
   });
   return adaptQuery<Spend[]>(q);
