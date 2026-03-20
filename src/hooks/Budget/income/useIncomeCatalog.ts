@@ -55,10 +55,10 @@ export function useIncomeSubTypes(incomeTypeId?: number) {
   return adaptQuery<IncomeSubType[]>(q);
 }
 
-export function useIncomesList(incomeSubTypeId?: number) {
+export function useIncomesList(incomeSubTypeId?: number, fiscalYearId?: number) {
   const q = useQuery({
-    queryKey: ["incomeList", incomeSubTypeId ?? "all"],
-    queryFn: async () => listIncomes(incomeSubTypeId),
+    queryKey: ["incomeList", incomeSubTypeId ?? "all", fiscalYearId ?? "no-fy"],
+    queryFn: async () => listIncomes(incomeSubTypeId, fiscalYearId),
     staleTime: 30 * 1000,
   });
 

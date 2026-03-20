@@ -21,6 +21,8 @@ import { CustomSelect } from "../../CustomSelect";
 import IncomeList from "./IncomeList";
 import { useBodyScrollLock } from "@/hooks/modals/useBodyScrollLock";
 import { CharCounter } from "../../CharCounter";
+import { useFiscalYear } from "@/hooks/Budget/useFiscalYear";
+
 
 type Props = {
   open: boolean;
@@ -40,7 +42,7 @@ export default function CatalogModalIncome({
   inline = false,
 }: Props) {
   const [mounted, setMounted] = useState(false);
-
+const { current } = useFiscalYear();
   const MAX_CATALOG_NAME_LENGTH = 50;
 
   // modal interno "Editar monto"
@@ -639,7 +641,10 @@ export default function CatalogModalIncome({
             </div>
 
             <div className="min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
-              <IncomeList subTypeId={typeof editSubTypeId === "number" ? editSubTypeId : undefined} />
+              <IncomeList
+                subTypeId={typeof editSubTypeId === "number" ? editSubTypeId : undefined}
+                fiscalYearId={current?.id}
+              />
             </div>
 
             <div className="flex items-center justify-end gap-3 border-t p-4 md:p-5">

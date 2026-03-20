@@ -6,7 +6,6 @@ import { useIncomesList } from "../../../hooks/Budget/income/useIncomeCatalog";
 import { GenericTable } from "../../GenericTable";
 import { useUpdateIncome } from "../../../hooks/Budget/income/useIncomeMutation";
 
-// ✅ NUEVO: import del picker
 import { BirthDatePicker } from "@/components/ui/birthDayPicker";
 import { CharCounter } from "../../CharCounter";
 
@@ -69,12 +68,13 @@ function normalizeToDateInput(value: any) {
 
 type Props = {
   subTypeId?: number;
+  fiscalYearId?: number;
 };
 
 type Row = any;
 
-export default function IncomeList({ subTypeId }: Props) {
-  const q = useIncomesList();
+export default function IncomeList({ subTypeId, fiscalYearId }: Props) {
+  const q = useIncomesList(subTypeId, fiscalYearId);
   const mUpdate = useUpdateIncome();
 
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -88,13 +88,8 @@ export default function IncomeList({ subTypeId }: Props) {
   const MAX_AMOUNT_LENGTH = 20;
 
   const rows = useMemo(() => {
-    const all = (q.data ?? []) as Row[];
-    if (!subTypeId) return all;
-
-    return all.filter(
-      (row) => Number(row?.incomeSubType?.id) === Number(subTypeId)
-    );
-  }, [q.data, subTypeId]);
+    return (q.data ?? []) as Row[];
+  }, [q.data]);
 
   function startEdit(row: Row) {
     const initialAmount = String(row.amount ?? "");
@@ -121,7 +116,6 @@ export default function IncomeList({ subTypeId }: Props) {
 
   async function saveEdit(row: Row) {
     const amountNumber = parseCRCToNumber(amountRef.current);
-
     const dateValue = (dateRef.current ?? "").trim();
 
     try {
@@ -131,8 +125,7 @@ export default function IncomeList({ subTypeId }: Props) {
         date: dateValue,
       });
       cancelEdit();
-    } catch {
-    }
+    } catch {}
   }
 
   const columns = useMemo<ColumnDef<Row, any>[]>(
@@ -144,7 +137,6 @@ export default function IncomeList({ subTypeId }: Props) {
           const r = row.original;
           const isEditing = editingId === r.id;
 
-          // dd/mm/aaaa en tabla (sin Date())
           if (!isEditing) return formatDateCR(r?.date);
 
           return (
@@ -275,12 +267,14 @@ export default function IncomeList({ subTypeId }: Props) {
 
       {!q.loading && rows.length === 0 && subTypeId && (
         <p className="mt-3 text-xs text-gray-500">
-          No hay ingresos para este subtipo.
+          No hay ingresos para este subtipo en el año fiscal seleccionado.
         </p>
       )}
 
       {!q.loading && rows.length === 0 && !subTypeId && (
-        <p className="mt-3 text-xs text-gray-500">No hay ingresos aún.</p>
+        <p className="mt-3 text-xs text-gray-500">
+          No hay ingresos aún en el año fiscal seleccionado.
+        </p>
       )}
 
       {mUpdate.error && (

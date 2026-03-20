@@ -140,9 +140,15 @@ export async function updateIncome(
   return data;
 }
 
-export async function listIncomes(incomeSubTypeId?: number) {
+export async function listIncomes(incomeSubTypeId?: number, fiscalYearId?: number) {
+  const params: Record<string, number> = {};
+
+  if (incomeSubTypeId) params.incomeSubTypeId = incomeSubTypeId;
+  if (fiscalYearId) params.fiscalYearId = fiscalYearId;
+
   const { data } = await apiConfig.get<any[]>("/income", {
-    params: incomeSubTypeId ? { incomeSubTypeId } : undefined,
+    params: Object.keys(params).length ? params : undefined,
   });
+
   return data;
 }
