@@ -514,7 +514,7 @@ export default function ServicesInformativeEditor({
                               type="button"
                               onClick={() => setAsCover(idx)}
                               disabled={idx === 0}
-                              className={`w-10 h-10 rounded-xl border flex items-center justify-center text-lg leading-none
+                              className={`w-8 h-8 rounded-lg border flex items-center justify-center text-sm leading-none
                                 ${idx === 0
                                   ? "bg-[#5B732E] text-white border-[#5B732E]"
                                   : "bg-white text-[#5B732E] border-[#5B732E] hover:bg-[#EAEFE0]"
@@ -527,7 +527,7 @@ export default function ServicesInformativeEditor({
                             <button
                               type="button"
                               onClick={() => removeAt(idx)}
-                              className="w-10 h-10 rounded-xl border border-[#B85C4C] text-[#B85C4C] bg-white hover:bg-[#E6C3B4] flex items-center justify-center text-lg leading-none"
+                              className="w-8 h-8 rounded-lg border border-[#B85C4C] text-[#B85C4C] bg-white hover:bg-[#E6C3B4] flex items-center justify-center text-sm leading-non"
                               title="Quitar"
                               aria-label="Quitar"
                             >
