@@ -597,7 +597,8 @@ export default function CatalogModal({
               <button
                 type="button"
                 onClick={() => setOpenAmountModal(true)}
-                className="inline-flex w-full items-center justify-center rounded-xl border border-[#6B7A3A]/30 bg-white px-4 py-2.5 text-sm font-semibold text-[#33361D] shadow-sm hover:bg-gray-50 md:w-auto"
+                disabled={typeof editSubTypeId !== "number"}
+                className="inline-flex w-full items-center justify-center rounded-xl border border-[#6B7A3A]/30 bg-white px-4 py-2.5 text-sm font-semibold text-[#33361D] shadow-sm hover:bg-gray-50 disabled:opacity-50 md:w-auto"
               >
                 Editar monto
               </button>

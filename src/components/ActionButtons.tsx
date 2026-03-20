@@ -102,6 +102,23 @@ type ActionButtonsProps = {
   rejectText?: string;
   previousText?: string;
   nextText?: string;
+
+onCreateAlt?: () => void;
+onCancelAlt?: () => void;
+
+showCreateAlt?: boolean;
+showCancelAlt?: boolean;
+
+requireConfirmCreateAlt?: boolean;
+requireConfirmCancelAlt?: boolean;
+
+createAltText?: string;
+cancelAltText?: string;
+
+createAltConfirmTitle?: string;
+createAltConfirmText?: string;
+cancelAltConfirmTitle?: string;
+cancelAltConfirmText?: string;
 };
 
 export function ActionButtons({
@@ -177,8 +194,39 @@ export function ActionButtons({
   rejectText = "Rechazar",
   previousText = "Anterior",
   nextText = "Siguiente",
+
+    onCreateAlt,
+  onCancelAlt,
+
+  showCreateAlt = false,
+  showCancelAlt = false,
+
+  requireConfirmCreateAlt = false,
+  requireConfirmCancelAlt = false,
+
+  createAltText = "Crear",
+  cancelAltText = "Cancelar",
+
+  createAltConfirmTitle = "¿Crear?",
+  createAltConfirmText = "¿Desea continuar?",
+  cancelAltConfirmTitle = "¿Cancelar?",
+  cancelAltConfirmText = "¿Desea continuar?",
 }: ActionButtonsProps) {
   
+
+  const swalBase = {
+  background: "#FAF9F5",
+  scrollbarPadding: false,
+  heightAuto: false,
+  focusConfirm: false,
+  focusCancel: true,
+  returnFocus: false,
+  customClass: {
+    popup: "rounded-2xl",
+    confirmButton: "rounded-xl px-6 py-3 font-semibold",
+    cancelButton: "rounded-xl px-6 py-3 font-semibold",
+  },
+};
   // Handler para aprobar con confirmación
   const handleApprove = async () => {
     if (requireConfirmApprove) {
@@ -359,6 +407,52 @@ export function ActionButtons({
       onSave?.();
     }
   };
+const handleCreateAlt = async () => {
+  if (requireConfirmCreateAlt) {
+    const result = await Swal.fire({
+      ...swalBase,
+        title: createAltConfirmTitle,
+        text: createAltConfirmText,
+        icon: "question",
+        iconColor: "#C19A3D",
+        showCancelButton: true,
+        confirmButtonColor: "#5B732E",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sí, crear",
+        cancelButtonText: "Cancelar",
+        reverseButtons: false,
+    });
+
+    if (result.isConfirmed) {
+      onCreateAlt?.();
+    }
+  } else {
+    onCreateAlt?.();
+  }
+};
+
+const handleCancelAlt = async () => {
+  if (requireConfirmCancelAlt) {
+    const result = await Swal.fire({
+      ...swalBase,
+      title: cancelAltConfirmTitle,
+      text: cancelAltConfirmText,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#5B732E",
+      confirmButtonText: "Sí, cerrar",
+      cancelButtonText: "No, continuar",
+      reverseButtons: false,
+    });
+
+    if (result.isConfirmed) {
+      onCancelAlt?.();
+    }
+  } else {
+    onCancelAlt?.();
+  }
+};
 
   return (
     <div className="flex gap-2 justify-center items-center">
@@ -471,6 +565,36 @@ export function ActionButtons({
         >
           <Plus className="w-5 h-5" />
           {showText && <span>{createText}</span>}
+        </button>
+      )}
+
+      {/* Botón Cancelar alternativo */}
+      {showCancelAlt && onCancelAlt && (
+        <button
+          type="button"
+          onClick={handleCancelAlt}
+          disabled={isSaving}
+          className="inline-flex w-full items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white border-2 border-[#C19A3D] text-[#C19A3D] text-sm font-semibold hover:bg-[#FEF6E0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed sm:w-auto"
+          title={cancelAltText}
+          aria-label={cancelAltText}
+        >
+          <XCircle className="w-4 h-4" />
+          {showText && <span>{cancelAltText}</span>}
+        </button>
+      )}
+
+      {/* Botón Crear alternativo */}
+      {showCreateAlt && onCreateAlt && !isReadOnly && (
+        <button
+          type="button"
+          onClick={handleCreateAlt}
+          disabled={isSaving || disabled}
+          className="inline-flex w-full items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#5B732E] text-white text-sm font-semibold hover:bg-[#556B2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm sm:w-auto"
+          title={createAltText}
+          aria-label={createAltText}
+        >
+          <Plus className="w-4 h-4" />
+          {showText && <span>{createAltText}</span>}
         </button>
       )}
 

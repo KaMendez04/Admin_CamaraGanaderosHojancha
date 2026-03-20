@@ -8,6 +8,13 @@ import type {
 } from "../../models/Budget/PSpendType";
 import apiConfig from "../../apiConfig/apiConfig";
 
+const CURRENT_FY_KEY = "cg_currentFYId";
+
+const getFiscalYearId = () =>
+  typeof window === "undefined"
+    ? undefined
+    : Number(localStorage.getItem(CURRENT_FY_KEY) || 0) || undefined;
+
 /** ============= Departamentos ============= */
 export async function listDepartments(): Promise<ApiList<Department>> {
   const { data } = await apiConfig.get<Department[]>("/department");
@@ -112,12 +119,10 @@ export async function updatePSpendSubType(
 /** ============= Crear Proyección de Egreso ============= */
 export async function createPSpend(payload: CreatePSpendDTO): Promise<PSpend> {
   const body = {
-    // 👇 nombre que espera el backend
-    subTypeId: payload.pSpendSubTypeId,
-    // 👇 envía número (evita toFixed que lo convierte a string)
-    amount: Number(payload.amount),
-  };
-
+  subTypeId: payload.pSpendSubTypeId,
+  amount: Number(payload.amount),
+  fiscalYearId: getFiscalYearId(),
+};
   const { data } = await apiConfig.post<any>("/p-spend", body);
 
   return {

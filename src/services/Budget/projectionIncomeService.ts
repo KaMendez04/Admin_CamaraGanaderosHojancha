@@ -1,6 +1,13 @@
 import type { ApiList, CreateDepartmentDTO, CreatePIncomeDTO, CreatePIncomeSubTypeDTO, CreatePIncomeTypeDTO, Department, PIncome, PIncomeSubType, PIncomeType } from "../../models/Budget/incomeProjectionType";
 import apiConfig from "../../apiConfig/apiConfig";
 
+const CURRENT_FY_KEY = "cg_currentFYId";
+
+const getFiscalYearId = () =>
+  typeof window === "undefined"
+    ? undefined
+    : Number(localStorage.getItem(CURRENT_FY_KEY) || 0) || undefined;
+
 
 export async function listDepartments(): Promise<Department[]> {
   const { data } = await apiConfig.get<Department[]>("/department");
@@ -73,10 +80,10 @@ export async function updateDepartment(id: number, payload: { name: string }): P
 
 export async function createPIncome(payload: CreatePIncomeDTO): Promise<PIncome> {
   const body = {
-    pIncomeSubTypeId: payload.pIncomeSubTypeId,
- 
-    amount: Number(payload.amount).toFixed(2)
-  };
+  pIncomeSubTypeId: payload.pIncomeSubTypeId,
+  amount: Number(payload.amount).toFixed(2),
+  fiscalYearId: getFiscalYearId(),
+};
 
   const { data } = await apiConfig.post<any>("/p-income", body);
 

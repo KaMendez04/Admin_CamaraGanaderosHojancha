@@ -14,6 +14,13 @@ import type {
 
 import apiConfig from "../../apiConfig/apiConfig";
 
+const CURRENT_FY_KEY = "cg_currentFYId";
+
+const getFiscalYearId = () =>
+  typeof window === "undefined"
+    ? undefined
+    : Number(localStorage.getItem(CURRENT_FY_KEY) || 0) || undefined;
+
 /** ============= Departamentos ============= */
 export async function listDepartments(): Promise<ApiList<Department>> {
   const { data } = await apiConfig.get<Department[]>("/department");
@@ -75,10 +82,11 @@ export async function createSpendSubType(payload: CreateSpendSubTypeDTO): Promis
 /** ============= Movimientos reales (Egresos) ============= */
 export async function createSpend(payload: CreateSpendDTO): Promise<Spend> {
   const body = {
-    spendSubTypeId: payload.spendSubTypeId,
-    amount: Number(payload.amount).toFixed(2),
-    date: payload.date,
-  };
+  spendSubTypeId: payload.spendSubTypeId,
+  amount: Number(payload.amount).toFixed(2),
+  date: payload.date,
+  fiscalYearId: getFiscalYearId(),
+};
 
   const { data } = await apiConfig.post<any>("/spend", body);
 
