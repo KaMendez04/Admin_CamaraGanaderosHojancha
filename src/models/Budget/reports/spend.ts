@@ -19,4 +19,5 @@ export type SpendTableRow = {
     departmentId?: number;
     spendTypeId?: number;
     spendSubTypeId?: number;
+    fiscalYearId?: number;
   };

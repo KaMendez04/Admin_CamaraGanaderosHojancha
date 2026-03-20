@@ -3,6 +3,7 @@ import api from "../../../apiConfig/apiConfig";
 export type IncomeResolvedFilters = {
   start?: string;
   end?: string;
+  fiscalYearId?: number;
   departmentId?: number;
   incomeTypeId?: number;
   incomeSubTypeId?: number;

@@ -1,4 +1,3 @@
-// src/services/Budget/initialService.ts
 import {
   mapIncomeRows,
   mapSpendRows,
@@ -9,14 +8,13 @@ import {
 } from "../../models/Budget/initialType";
 import apiConfig from "../../apiConfig/apiConfig";
 
-const HOME_SUMMARY_URL = "/home/summary";  // Cards
-const HOME_INCOMES_URL = "/home/incomes";  // Tabla ingresos
-const HOME_SPENDS_URL  = "/home/spends";   // Tabla egresos
+const HOME_SUMMARY_URL = "/home/summary";
+const HOME_INCOMES_URL = "/home/incomes";
+const HOME_SPENDS_URL  = "/home/spends";
 
 type Range = { startDate?: string; endDate?: string };
 type GroupBy = "department" | "type" | "subtype";
 
-// helper para armar querystring limpio
 const qs = (obj: Record<string, any>) =>
   Object.entries(obj)
     .filter(([, v]) => v !== undefined && v !== null && v !== "")
@@ -24,27 +22,48 @@ const qs = (obj: Record<string, any>) =>
     .join("&");
 
 export async function fetchIncomeByDepartment(
-  params: { groupBy?: GroupBy } & Range = {}
+  params: { groupBy?: GroupBy; fiscalYearId?: number } & Range = {}
 ): Promise<Row[]> {
-  const query = qs({ groupBy: params.groupBy ?? "department", ...params });
+  const query = qs({
+    groupBy: params.groupBy ?? "department",
+    startDate: params.startDate,
+    endDate: params.endDate,
+    fiscalYearId: params.fiscalYearId,
+  });
+
   const { data } = await apiConfig.get<ApiIncomeByDept[]>(
     `${HOME_INCOMES_URL}${query ? `?${query}` : ""}`
   );
+
   return mapIncomeRows(data);
 }
 
 export async function fetchSpendByDepartment(
-  params: { groupBy?: GroupBy } & Range = {}
+  params: { groupBy?: GroupBy; fiscalYearId?: number } & Range = {}
 ): Promise<Row[]> {
-  const query = qs({ groupBy: params.groupBy ?? "department", ...params });
+  const query = qs({
+    groupBy: params.groupBy ?? "department",
+    startDate: params.startDate,
+    endDate: params.endDate,
+    fiscalYearId: params.fiscalYearId,
+  });
+
   const { data } = await apiConfig.get<ApiSpendByDept[]>(
     `${HOME_SPENDS_URL}${query ? `?${query}` : ""}`
   );
+
   return mapSpendRows(data);
 }
 
-export async function fetchCardStats(params: Range = {}): Promise<CardStats> {
-  const query = qs(params);
+export async function fetchCardStats(
+  params: Range & { fiscalYearId?: number } = {}
+): Promise<CardStats> {
+  const query = qs({
+    startDate: params.startDate,
+    endDate: params.endDate,
+    fiscalYearId: params.fiscalYearId,
+  });
+
   const { data } = await apiConfig.get<{
     incomes: number;
     spends: number;
@@ -54,7 +73,6 @@ export async function fetchCardStats(params: Range = {}): Promise<CardStats> {
     projectedBalance: number;
   }>(`${HOME_SUMMARY_URL}${query ? `?${query}` : ""}`);
 
-  // ✅ Calcular el balance correcto: Ingresos Reales - Egresos Totales
   const saldoRestante = data.incomes - data.spends;
 
   return {
@@ -63,6 +81,7 @@ export async function fetchCardStats(params: Range = {}): Promise<CardStats> {
     saldoRestante: saldoRestante,
   };
 }
+
 export const initialService = {
   fetchIncomeByDepartment,
   fetchSpendByDepartment,
