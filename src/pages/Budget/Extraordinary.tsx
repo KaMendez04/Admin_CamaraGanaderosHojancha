@@ -10,19 +10,48 @@ import { CreateExtraordinarySchema } from "../../schemas/extraordinarySchema"
 import AssignExtraordinaryCard from "../../components/Budget/Extraordinary/assingnExtraordinary"
 import {
   useCreateExtraordinaryMutation,
-  useExtraordinaryListQuery,
+  useExtraordinaryList,
 } from "../../hooks/Budget/extraordinary/useExtraordinary"
 import ExtraordinayList from "../../components/Budget/Extraordinary/extraordinayList"
 import { ActionButtons } from "../../components/ActionButtons"
 import { parseCR, useMoneyInput } from "@/hooks/Budget/useMoneyInput"
-import { showSuccessAlert } from "@/utils/alerts"
+import { showErrorAlertRegister, showSuccessAlert } from "@/utils/alerts"
+import { useFiscalYear } from "@/hooks/Budget/useFiscalYear"
 
 export default function BudgetExtraordinary() {
   const [openForm, setOpenForm] = useState(true)
 
-  const { data: list = [], isLoading: loading } = useExtraordinaryListQuery()
+  const { current } = useFiscalYear()
+  const { data: list = [], loading, reload } = useExtraordinaryList(current?.id)
+
   const createMutation = useCreateExtraordinaryMutation()
   const money = useMoneyInput("")
+
+  const getFiscalRange = () => {
+    const start =
+      String(
+        current?.start_date ??
+        ""
+      ).slice(0, 10)
+
+    const end =
+      String(
+        current?.end_date ??
+        ""
+      ).slice(0, 10)
+
+    return { start, end }
+  }
+
+  const isDateInCurrentFiscalYear = (date?: string) => {
+    if (!date || !current) return true
+
+    const { start, end } = getFiscalRange()
+
+    if (!start || !end) return true
+
+    return date >= start && date <= end
+  }
 
   const form = useForm({
     defaultValues: { name: "", amount: "", date: "" },
@@ -33,30 +62,43 @@ export default function BudgetExtraordinary() {
       if (!parsed.success) return
 
       const { name, date } = parsed.data
-
       const amountNumber = parseCR(parsed.data.amount)
 
-      try {
-            await createMutation.mutateAsync({
-              name: name.trim(),
-              amount: String(amountNumber),
-              date: date || undefined,
-            })
+      if (date && !isDateInCurrentFiscalYear(date)) {
+        await showErrorAlertRegister(
+          "La fecha debe pertenecer al año fiscal actual."
+        )
+        return
+      }
 
-            form.reset()
-            money.setValue("")
-            await showSuccessAlert("El movimiento extraordinario se registró correctamente.")
-          } catch (error) {
-            console.error("Error creating extraordinary:", error)
-          }
+      try {
+        await createMutation.mutateAsync({
+          name: name.trim(),
+          amount: String(amountNumber),
+          date: date || undefined,
+        })
+
+        form.reset()
+        money.setValue("")
+        onReload()
+        await showSuccessAlert("El movimiento extraordinario se registró correctamente.")
+      } catch (error) {
+        console.error("Error creating extraordinary:", error)
+      }
     },
   })
+
+  const onReload = () => {
+    reload?.()
+  }
 
   const Form = form
   const loadingAll = loading || createMutation.isPending
 
   const errorText = "text-xs text-[#9c1414] mt-1"
   const label = "mb-1 block text-xs font-semibold text-gray-700"
+
+  const fiscalRange = getFiscalRange()
 
   return (
     <div className="min-h-screen bg-[#f3f8ef] font-sans">
@@ -88,7 +130,6 @@ export default function BudgetExtraordinary() {
                 Registra un nuevo movimiento extraordinario. Si no especificas fecha, se usa la actual.
               </p>
 
-              {/* Nombre */}
               <Form.Field
                 name="name"
                 validators={{
@@ -126,14 +167,17 @@ export default function BudgetExtraordinary() {
               </Form.Field>
 
               <div className="grid gap-4 md:grid-cols-2 mt-4">
-                {/* Fecha */}
                 <Form.Field
                   name="date"
                   validators={{
-                    onChange: ({ value }) =>
-                      !value || /^\d{4}-\d{2}-\d{2}$/.test(value)
-                        ? undefined
-                        : "Fecha inválida",
+                    onChange: ({ value }) => {
+                      if (!value) return undefined
+                      if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return "Fecha inválida"
+                      if (!isDateInCurrentFiscalYear(value)) {
+                        return "La fecha debe pertenecer al año fiscal actual"
+                      }
+                      return undefined
+                    },
                   }}
                 >
                   {(field) => (
@@ -152,8 +196,12 @@ export default function BudgetExtraordinary() {
                         }
                         className="w-full"
                       />
+
                       <p className="mt-1 text-xs text-gray-500">
                         Si no la eliges, se usa la fecha actual.
+                        {fiscalRange.start && fiscalRange.end && (
+                          <> Debe estar entre {fiscalRange.start} y {fiscalRange.end}.</>
+                        )}
                       </p>
                     </div>
                   )}
@@ -211,7 +259,7 @@ export default function BudgetExtraordinary() {
                       showCancel
                       cancelText="Cancelar"
                       requireConfirmCancel={false}
-                      onSave={() => { }}
+                      onSave={() => {}}
                       showSave
                       showText
                       saveButtonType="submit"
@@ -230,7 +278,11 @@ export default function BudgetExtraordinary() {
           )}
         </div>
 
-        <ExtraordinayList loading={loading} list={list} />
+        <ExtraordinayList
+          loading={loading}
+          list={list}
+          onSaved={onReload}
+        />
 
         <AssignExtraordinaryCard className="mt-6" />
       </div>

@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input"
 import { ActionButtons } from "../../ActionButtons"
 import { BirthDatePicker } from "@/components/ui/birthDayPicker"
 import { parseCR, useMoneyInput } from "@/hooks/Budget/useMoneyInput"
+import { useFiscalYear } from "@/hooks/Budget/useFiscalYear"
 
 type Props = {
   className?: string
@@ -24,13 +25,15 @@ export default function AssignExtraordinaryCard({
   onAssigned,
   defaultOpen = true,
 }: Props) {
+  const { current } = useFiscalYear()
   const [open, setOpen] = React.useState<boolean>(defaultOpen)
   const [saldoInsuficiente, setSaldoInsuficiente] = React.useState(false)
   const money = useMoneyInput("")
-  const { data: extras, loading: loadingExtras } = useExtraordinaryList()
+  const { data: extras, loading: loadingExtras } = useExtraordinaryList(current?.id)
   const { data: departments, loading: loadingDepts } = useDepartmentsE()
   const { submit: assign, loading: assigning } = useAssignExtraordinary()
 
+  
   const form = useForm({
     defaultValues: {
       extraordinaryId: 0,
@@ -331,6 +334,7 @@ export default function AssignExtraordinaryCard({
                 <ActionButtons
                   onCancel={() => {
                     Form.reset()
+                    money.setValue("")
                     setSaldoInsuficiente(false)
                   }}
                   showCancel
