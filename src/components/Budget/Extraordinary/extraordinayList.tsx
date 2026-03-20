@@ -75,7 +75,7 @@ export default function ExtraordinayList({ list, loading, onSaved }: Extraordina
     ]
   }, [columnHelper])
 
-  const { page, setPage, totalPages, pagedItems, pageItems } = usePagination(list ?? [], 10, [list])
+  const { page, setPage, totalPages, pagedItems, pageItems } = usePagination(list ?? [], 5, [list])
 
   return (
     <div>
