@@ -1,14 +1,6 @@
 import type { ApiList, CreateDepartmentDTO, CreatePIncomeDTO, CreatePIncomeSubTypeDTO, CreatePIncomeTypeDTO, Department, PIncome, PIncomeSubType, PIncomeType } from "../../models/Budget/incomeProjectionType";
 import apiConfig from "../../apiConfig/apiConfig";
 
-const CURRENT_FY_KEY = "cg_currentFYId";
-
-const getFiscalYearId = () =>
-  typeof window === "undefined"
-    ? undefined
-    : Number(localStorage.getItem(CURRENT_FY_KEY) || 0) || undefined;
-
-
 export async function listDepartments(): Promise<Department[]> {
   const { data } = await apiConfig.get<Department[]>("/department");
   return data; // ← devuelve el array, no { data }
@@ -103,13 +95,12 @@ export async function updateDepartment(id: number, payload: { name: string }): P
   return data;
 }
 
-
 export async function createPIncome(payload: CreatePIncomeDTO): Promise<PIncome> {
   const body = {
-  pIncomeSubTypeId: payload.pIncomeSubTypeId,
-  amount: Number(payload.amount).toFixed(2),
-  fiscalYearId: getFiscalYearId(),
-};
+    pIncomeSubTypeId: payload.pIncomeSubTypeId,
+    amount: Number(payload.amount).toFixed(2),
+    fiscalYearId: payload.fiscalYearId,
+  };
 
   const { data } = await apiConfig.post<any>("/p-income", body);
 
@@ -151,12 +142,12 @@ export async function updatePIncomeSubType(
   };
 }
 
-
 export async function updatePIncome(
   id: number,
   payload: {
     amount?: number;
     pIncomeSubTypeId?: number;
+    fiscalYearId: number;
   }
 ) {
   const body: any = {};
@@ -164,15 +155,16 @@ export async function updatePIncome(
   if (payload.amount !== undefined) {
     body.amount = Number(payload.amount).toFixed(2);
   }
+
   if (payload.pIncomeSubTypeId !== undefined) {
     body.pIncomeSubTypeId = payload.pIncomeSubTypeId;
   }
 
-  const { data } = await apiConfig.patch<any>(`/p-income/${id}`, body);
+  body.fiscalYearId = payload.fiscalYearId;
 
+  const { data } = await apiConfig.patch<any>(`/p-income/${id}`, body);
   return data;
 }
-
 
 export async function listIncomeTypes(departmentId?: number): Promise<ApiList<{id:number;name:string;departmentId?:number}>> {
   const { data } = await apiConfig.get<any[]>("/income-type");

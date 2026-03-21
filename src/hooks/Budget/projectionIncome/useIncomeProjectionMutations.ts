@@ -65,10 +65,23 @@ export function useCreateIncomeSubType() {
 
 // Registrar movimiento de ingreso real (/p-income)
 export function useCreatePIncomeEntry() {
-  // Por ahora no invalidamos nada adicional porque tu UI no lista aquí movimientos.
+  const qc = useQueryClient();
+
   const m = useMutation({
     mutationFn: (payload: CreatePIncomeDTO) => createPIncome(payload),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ["pIncomeList"] });
+      qc.invalidateQueries({ queryKey: ["pIncomeSubTypes"] });
+      qc.invalidateQueries({ queryKey: ["pIncomeTypes"] });
+
+      if (vars.fiscalYearId) {
+        qc.invalidateQueries({
+          queryKey: ["pIncomeList", "all", vars.fiscalYearId],
+        });
+      }
+    },
   });
+
   return wrapMutation<CreatePIncomeDTO, PIncome>(m);
 }
 
@@ -124,8 +137,6 @@ export function useUpdateIncomeSubType() {
   return wrapMutation<{ id: number; name?: string; pIncomeTypeId?: number }, PIncomeSubType>(m);
 }
 
-
-
 export function useUpdatePIncome() {
   const qc = useQueryClient();
 
@@ -134,28 +145,42 @@ export function useUpdatePIncome() {
       id,
       amount,
       pIncomeSubTypeId,
+      fiscalYearId,
     }: {
       id: number;
       amount?: number;
       pIncomeSubTypeId?: number;
+      fiscalYearId: number;
     }) =>
       updatePIncome(id, {
         amount,
         pIncomeSubTypeId,
+        fiscalYearId,
       }),
 
-    onSuccess: (_data) => {
-      // cuando editemos, luego invalidaremos la lista
+    onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ["pIncomeList"] });
+      qc.invalidateQueries({ queryKey: ["pIncomeSubTypes"] });
+      qc.invalidateQueries({ queryKey: ["pIncomeTypes"] });
+
+      if (vars.fiscalYearId) {
+        qc.invalidateQueries({
+          queryKey: ["pIncomeList", "all", vars.fiscalYearId],
+        });
+      }
     },
   });
 
   return wrapMutation<
-    { id: number; amount?: number; pIncomeSubTypeId?: number },
+    {
+      id: number;
+      amount?: number;
+      pIncomeSubTypeId?: number;
+      fiscalYearId: number;
+    },
     any
   >(m);
 }
-
 
 export function useEnsureIncomeTypeFromProjection() {
   const m = useMutation({

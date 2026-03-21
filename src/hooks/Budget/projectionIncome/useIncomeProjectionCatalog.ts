@@ -31,7 +31,7 @@ export function useDepartments() {
       const res = await listDepartments();
       return res.data as Department[];
     },
-    staleTime: 5 * 60 * 1000, // cachea un rato
+    staleTime: 5 * 60 * 1000,
   });
   return adaptQuery<Department[]>(q);
 }

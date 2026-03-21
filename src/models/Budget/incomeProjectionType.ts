@@ -76,4 +76,5 @@ export interface PIncome {
 export type CreatePIncomeDTO = {
   pIncomeSubTypeId: number;
   amount: number;
+  fiscalYearId: number;
 };

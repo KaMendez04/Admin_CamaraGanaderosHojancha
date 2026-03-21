@@ -6,6 +6,7 @@ import { usePIncomesList } from "../../../hooks/Budget/projectionIncome/useIncom
 import { GenericTable } from "../../GenericTable";
 import { useUpdatePIncome } from "../../../hooks/Budget/projectionIncome/useIncomeProjectionMutations";
 import { CharCounter } from "../../CharCounter";
+import { useFiscalYear } from "@/hooks/Budget/useFiscalYear";
 
 function formatMoneyCR(v: string | number) {
   const n = Number(v ?? 0);
@@ -30,7 +31,10 @@ type Props = {
 type Row = any;
 
 export default function PIncomeList({ subTypeId, fiscalYearId }: Props) {
-  const q = usePIncomesList(subTypeId, fiscalYearId);
+  const { current } = useFiscalYear();
+  const selectedFiscalYearId = fiscalYearId ?? current?.id;
+
+  const q = usePIncomesList(subTypeId, selectedFiscalYearId);
   const mUpdate = useUpdatePIncome();
 
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -58,12 +62,15 @@ export default function PIncomeList({ subTypeId, fiscalYearId }: Props) {
   }
 
   async function saveEdit(row: Row) {
+    if (!selectedFiscalYearId) return;
+
     const amountNumber = parseCRCToNumber(draftRef.current);
 
     try {
       await mUpdate.mutate({
         id: row.id,
         amount: amountNumber,
+        fiscalYearId: selectedFiscalYearId,
       });
       cancelEdit();
     } catch {}
@@ -122,7 +129,7 @@ export default function PIncomeList({ subTypeId, fiscalYearId }: Props) {
                 <button
                   className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#6B7A3A] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 sm:w-auto"
                   onClick={() => saveEdit(r)}
-                  disabled={mUpdate.loading}
+                  disabled={mUpdate.loading || !selectedFiscalYearId}
                   title="Guardar"
                 >
                   <Save className="h-4 w-4" />
@@ -144,17 +151,7 @@ export default function PIncomeList({ subTypeId, fiscalYearId }: Props) {
 
           return (
             <button
-              className="
-                inline-flex items-center justify-center
-                rounded-lg
-                border border-[#6B7A3A]
-                bg-[#F8F9F3]
-                p-2
-                text-[#6B7A3A]
-                shadow-sm
-                transition-colors
-                hover:bg-[#EAEFE0]
-              "
+              className="inline-flex items-center justify-center rounded-lg border border-[#6B7A3A] bg-[#F8F9F3] p-2 text-[#6B7A3A] shadow-sm transition-colors hover:bg-[#EAEFE0]"
               onClick={() => startEdit(r)}
               title="Editar"
             >
@@ -164,18 +161,14 @@ export default function PIncomeList({ subTypeId, fiscalYearId }: Props) {
         },
       },
     ],
-    [editingId, draftAmount, mUpdate.loading]
+    [editingId, draftAmount, mUpdate.loading, selectedFiscalYearId]
   );
 
   if (q.error) return <p className="text-sm text-red-600">{q.error}</p>;
 
   return (
     <div className="rounded-2xl border border-gray-100 bg-white p-4">
-      <GenericTable<Row>
-        data={rows}
-        columns={columns}
-        isLoading={q.loading}
-      />
+      <GenericTable<Row> data={rows} columns={columns} isLoading={q.loading} />
 
       {!q.loading && rows.length === 0 && subTypeId && (
         <p className="mt-3 text-xs text-gray-500">
