@@ -1,11 +1,10 @@
 import * as React from "react"
-import { Outlet, Link, useRouterState } from "@tanstack/react-router"
+import { Outlet, Link, useLocation } from "@tanstack/react-router"
 import { motion } from "framer-motion"
 import { Menu, X } from "lucide-react"
 
 export default function Reports() {
-  const { location } = useRouterState()
-  const pathname = location.pathname
+  const { pathname } = useLocation()
 
   const isActive = (path: string) => pathname.startsWith(path)
 
@@ -95,7 +94,7 @@ export default function Reports() {
                     <motion.div
                       layoutId="underline"
                       className="absolute left-1/2 -translate-x-1/2 -bottom-1 h-[3px] w-16 rounded-full bg-[#708C3E]"
-                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 28, mass: 0.6 }}
                     />
                   )}
                 </Link>

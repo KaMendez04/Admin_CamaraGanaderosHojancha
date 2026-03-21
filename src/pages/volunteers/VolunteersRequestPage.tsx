@@ -78,7 +78,7 @@ export default function VolunteersRequestPage() {
         </div>
 
         <button
-          onClick={() => downloadPDF.mutate()}
+          onClick={() => downloadPDF.mutate(status)}
           disabled={downloadPDF.isPending}
           className="mt-6 md:mt-0 mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm"
         >

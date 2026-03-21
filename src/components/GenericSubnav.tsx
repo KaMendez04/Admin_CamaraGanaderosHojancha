@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Link, useRouterState } from "@tanstack/react-router"
+import { Link, useLocation } from "@tanstack/react-router"
 import { motion } from "framer-motion"
 import { Menu, X } from "lucide-react"
 
@@ -19,8 +19,7 @@ type GenericSubnavProps = {
 }
 
 export function GenericSubnav({ items, layoutId }: GenericSubnavProps) {
-  const { location } = useRouterState()
-  const pathname = location.pathname
+  const { pathname } = useLocation()
 
   const role = (getCurrentUser()?.role?.name ?? "").toUpperCase() as RoleCode
 
@@ -94,21 +93,21 @@ export function GenericSubnav({ items, layoutId }: GenericSubnavProps) {
               const active = isActive(item.to, item.exact)
               return (
                 <li key={item.to} className="relative">
+                  {active && (
+                    <motion.div
+                      layoutId={layoutId}
+                      className="absolute inset-0 rounded-md bg-gradient-to-r from-[#6F8C1F] to-[#475C1D] shadow-md"
+                      transition={{ type: "spring", stiffness: 300, damping: 28, mass: 0.6 }}
+                    />
+                  )}
                   <Link
                     to={item.to}
-                    className={`relative inline-flex items-center justify-center px-6 py-2 text-sm font-medium rounded-md transition-all duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-[#EAEFE0] ${
+                    className={`relative inline-flex items-center justify-center px-6 py-2 text-sm font-medium rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#EAEFE0] ${
                       active
                         ? "text-white"
                         : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                     }`}
                   >
-                    {active && (
-                      <motion.div
-                        layoutId={layoutId}
-                        className="absolute inset-0 rounded-md bg-gradient-to-r from-[#6F8C1F] to-[#475C1D] shadow-md"
-                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                      />
-                    )}
                     <span className="relative z-10">{item.label}</span>
                   </Link>
                 </li>

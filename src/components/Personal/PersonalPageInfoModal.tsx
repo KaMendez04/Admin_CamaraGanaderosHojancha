@@ -39,8 +39,7 @@ export function PersonalPageInfoModal({ item, onClose }: PersonalPageInfoModalPr
       return
     }
 
-    const filename = `personal_${id}.pdf`
-    await download(id, filename)
+    await download(id, item.name, item.lastname1)
   }
 
   return (

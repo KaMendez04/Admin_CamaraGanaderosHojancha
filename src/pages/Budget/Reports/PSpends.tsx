@@ -3,9 +3,9 @@ import { useQuery } from "@tanstack/react-query"
 import { pSpendService } from "../../../services/Budget/reportsPSpend/pSpendReportService"
 import { CustomSelect } from "../../../components/CustomSelect"
 
-// ✅ solo llamamos lo que ya tenés
 import { usePagination, PaginationBar } from "../../../components/ui/pagination"
 import { BirthDatePicker } from "@/components/ui/birthDayPicker"
+import { useFiscalYear } from "@/hooks/Budget/useFiscalYear"
 
 type AnyObj = Record<string, unknown>
 function ensureArray<T = any>(x: unknown): T[] {
@@ -15,52 +15,57 @@ function ensureArray<T = any>(x: unknown): T[] {
     if (Array.isArray((o as any).data)) return (o as any).data as T[]
     if (Array.isArray((o as any).items)) return (o as any).items as T[]
     const vals = Object.values(o)
-    if (vals.length && vals.every((v) => v && typeof v === "object"))
-      return vals as T[]
+    if (vals.length && vals.every((v) => v && typeof v === "object")) return vals as T[]
   }
   return []
 }
 
-// Formateo CRC
 const crc = (n: number) =>
-  new Intl.NumberFormat("es-CR", { style: "currency", currency: "CRC" }).format(
-    Number.isFinite(n) ? n : 0
-  )
+  new Intl.NumberFormat("es-CR", {
+    style: "currency",
+    currency: "CRC",
+    minimumFractionDigits: 2,
+  }).format(Number.isFinite(n) ? n : 0)
 
-// ======= Componente =======
 export default function PSpendProjectionsPage() {
-  // ------- filtros (simples en local como en tu ejemplo) -------
-  const [submitted, setSubmitted] = useState<any>({})
+  const { current: fiscalYear } = useFiscalYear()
+
+  // null = no ejecutar query todavía (esperar al año fiscal)
+  const [submitted, setSubmitted] = useState<any>(null)
   const [start, setStart] = useState<string | undefined>()
   const [end, setEnd] = useState<string | undefined>()
   const [departmentId, setDepartmentId] = useState<number | undefined>()
   const [spendTypeId, setSpendTypeId] = useState<number | undefined>()
   const [spendSubTypeId, setSpendSubTypeId] = useState<number | undefined>()
 
-  const filters = { start, end, departmentId, spendTypeId, spendSubTypeId }
-
-  // Auto-aplicar filtros (sin botones)
+  // Solo dispara cuando fiscalYear ya llegó
   useEffect(() => {
+    if (!fiscalYear) return
     setSubmitted({
-      start: start || undefined,
-      end: end || undefined,
+      start: start || fiscalYear.start_date || undefined,
+      end: end || fiscalYear.end_date || undefined,
       departmentId: departmentId || undefined,
       spendTypeId: spendTypeId || undefined,
       spendSubTypeId: spendSubTypeId || undefined,
     })
-  }, [start, end, departmentId, spendTypeId, spendSubTypeId])
+  }, [start, end, departmentId, spendTypeId, spendSubTypeId, fiscalYear?.id])
 
-  // ------- catálogos -------
-  // departamentos (siempre)
+  const resolvedFilters = {
+    start: start || fiscalYear?.start_date || undefined,
+    end: end || fiscalYear?.end_date || undefined,
+    departmentId,
+    spendTypeId,
+    spendSubTypeId,
+  }
+
   const { data: departmentsData = [], isFetching: depsLoading } = useQuery({
     queryKey: ["pSpendDepartments"],
-    queryFn: pSpendService.listDepartments, // <- usa el service de pSpend
+    queryFn: pSpendService.listDepartments,
     refetchOnMount: "always",
     staleTime: 0,
   })
   const departments = ensureArray<any>(departmentsData)
 
-  // tipos por departamento (habilitado solo si hay depto)
   const { data: typesData = [], isFetching: typesLoading } = useQuery({
     queryKey: ["pSpendTypes", departmentId ?? null],
     queryFn: () => pSpendService.listSpendTypes(departmentId),
@@ -73,7 +78,6 @@ export default function PSpendProjectionsPage() {
     name: t.name ?? t.spendTypeName,
   }))
 
-  //  subtipos por tipo (habilitado solo si hay tipo)
   const { data: subTypesData = [], isFetching: subTypesLoading } = useQuery({
     queryKey: ["pSpendSubTypes", spendTypeId ?? null],
     queryFn: () => pSpendService.listSpendSubTypes(spendTypeId),
@@ -98,21 +102,15 @@ export default function PSpendProjectionsPage() {
   const { data: reportData, isFetching: reportLoading } = useQuery({
     queryKey: ["pSpendCompareReport", submitted],
     queryFn: () => pSpendService.getSpendReport(submitted),
+    enabled: submitted !== null,
   })
   const rows = ensureArray<any>(reportData?.rows)
   const totals = reportData?.totals ?? { real: 0, projected: 0, difference: 0 }
 
-  // ------- UI: placeholder dd/mm/aaaa en inputs date -------
-  const [] = useState(!start)
-  const [] = useState(!end)
+  const handlePreviewPDF = () => pSpendService.previewSpendComparePDF(resolvedFilters)
+  const handleDownloadPDF = () => pSpendService.downloadSpendComparePDF(resolvedFilters)
+  const handleExcelComparativo = () => pSpendService.downloadSpendCompareExcel(resolvedFilters)
 
-  // ------- acciones -------
-  const handlePreviewPDF = () => pSpendService.previewSpendComparePDF(filters)
-  const handleDownloadPDF = () => pSpendService.downloadSpendComparePDF(filters)
-  const handleExcelComparativo = () =>
-    pSpendService.downloadSpendCompareExcel(filters)
-
-  //  options para CustomSelect
   const departmentOptions = [
     { value: "", label: depsLoading ? "Cargando..." : "Todos" },
     ...departments.map((d: any) => ({
@@ -124,11 +122,7 @@ export default function PSpendProjectionsPage() {
   const typeOptions = [
     {
       value: "",
-      label: !departmentId
-        ? "Seleccione un departamento"
-        : typesLoading
-          ? "Cargando..."
-          : "Todos",
+      label: !departmentId ? "Seleccione un departamento" : typesLoading ? "Cargando..." : "Todos",
     },
     ...spendTypes.map((t) => ({ value: t.id, label: t.name })),
   ]
@@ -136,16 +130,11 @@ export default function PSpendProjectionsPage() {
   const subTypeOptions = [
     {
       value: "",
-      label: !spendTypeId
-        ? "Seleccione un tipo"
-        : subTypesLoading
-          ? "Cargando..."
-          : "Todos",
+      label: !spendTypeId ? "Seleccione un tipo" : subTypesLoading ? "Cargando..." : "Todos",
     },
     ...spendSubTypes.map((st) => ({ value: st.id, label: st.name })),
   ]
 
-  // ✅ Paginación (mínimo código aquí)
   const { page, setPage, totalPages, pagedItems, pageItems } = usePagination(
     rows,
     10,
@@ -155,48 +144,27 @@ export default function PSpendProjectionsPage() {
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-6xl p-4 md:p-8">
-        <div className="rounded-3xl bg-white p-6 md:p-10">
-          {/* Tarjetas superiores */}
+        <div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
             <div className="rounded-2xl bg-[#F8F9F3] p-6 ring-1 ring-[#EAEFE0]">
-              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">
-                Total egresos (Proyectado)
-              </div>
-              <div className="mt-2 font-bold text-[#5B732E] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">
-                {crc(totals.projected)}
-              </div>
+              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">Total egresos (Proyectado)</div>
+              <div className="mt-2 font-bold text-[#5B732E] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">{crc(totals.projected)}</div>
             </div>
-
             <div className="rounded-2xl bg-[#EAEFE0] p-6 ring-1 ring-[#EAEFE0]">
-              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">
-                Total real
-              </div>
-              <div className="mt-2 font-bold text-[#5B732E] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">
-                {crc(totals.real)}
-              </div>
+              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">Total real</div>
+              <div className="mt-2 font-bold text-[#5B732E] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">{crc(totals.real)}</div>
             </div>
-
             <div className="rounded-2xl bg-[#FEF6E0] p-6 ring-1 ring-[#F3E8C8]">
-              <div className="text-xs font-bold text-[#C6A14B] tracking-wider uppercase">
-                Diferencia (Proy - Real)
-              </div>
-              <div className="mt-2 font-bold text-[#C19A3D] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">
-                {crc(totals.difference)}
-              </div>
+              <div className="text-xs font-bold text-[#C6A14B] tracking-wider uppercase">Diferencia (Proy - Real)</div>
+              <div className="mt-2 font-bold text-[#C19A3D] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">{crc(totals.difference)}</div>
             </div>
           </div>
 
-          {/* Filtros */}
           <div className="rounded-3xl bg-[#FBFDF7] ring-1 ring-[#E8EEDB] p-5 md:p-6 mb-6">
             <div className="text-sm font-bold text-[#33361D] mb-3">Filtros</div>
-
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-              {/* Departamento */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-[#33361D] mb-1.5">
-                  Departamento
-                </label>
-
+                <label className="block text-sm font-semibold text-[#33361D] mb-1.5">Departamento</label>
                 <CustomSelect
                   value={departmentId ?? ""}
                   onChange={(v) => {
@@ -211,13 +179,8 @@ export default function PSpendProjectionsPage() {
                   zIndex={50}
                 />
               </div>
-
-              {/* Tipo */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-[#33361D] mb-1.5">
-                  Tipo
-                </label>
-
+                <label className="block text-sm font-semibold text-[#33361D] mb-1.5">Tipo</label>
                 <CustomSelect
                   value={spendTypeId ?? ""}
                   onChange={(v) => {
@@ -231,88 +194,52 @@ export default function PSpendProjectionsPage() {
                   zIndex={40}
                 />
               </div>
-
-              {/* Subtipo */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-[#33361D] mb-1.5">
-                  Subtipo
-                </label>
-
+                <label className="block text-sm font-semibold text-[#33361D] mb-1.5">Subtipo</label>
                 <CustomSelect
                   value={spendSubTypeId ?? ""}
-                  onChange={(v) =>
-                    setSpendSubTypeId(v === "" ? undefined : Number(v))
-                  }
+                  onChange={(v) => setSpendSubTypeId(v === "" ? undefined : Number(v))}
                   options={subTypeOptions}
                   placeholder={!spendTypeId ? "Seleccione un tipo" : "Todos"}
                   disabled={!spendTypeId}
                   zIndex={30}
                 />
               </div>
-
-               {/* Fecha inicio */}
-               <div>
-                 <label className="block text-sm font-semibold text-[#33361D] mb-1.5">
-                   Fecha de inicio
-                 </label>
- 
-                 <BirthDatePicker
-                   value={start}
-                   onChange={(date) => setStart(date || undefined)}
-                   placeholder="Seleccione fecha inicio"
-                   helperText=""
-                   triggerClassName="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition hover:bg-white"
-                 />
-               </div>
- 
-               {/* Fecha fin */}
-               <div>
-                 <label className="block text-sm font-semibold text-[#33361D] mb-1.5">
-                   Fecha de fin
-                 </label>
- 
-                 <BirthDatePicker
-                   value={end}
-                   onChange={(date) => setEnd(date || undefined)}
-                   minDate={start}
-                   placeholder="Seleccione fecha fin"
-                   helperText={start ? "La fecha final no puede ser anterior a la fecha de inicio." : ""}
-                   triggerClassName="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition hover:bg-white"
-                 />
-               </div>
-            </div>
-          </div>
-
-          {/* Acciones */}
-          <div className="rounded-3xl bg-[#FBFDF7] ring-1 ring-[#E8EEDB] p-5 md:p-6 mb-6">
-            <div className="mt-2 flex flex-col md:flex-row md:items-center gap-3">
-              <div className="md:ml-auto flex flex-wrap gap-3">
-                <button
-                  onClick={handlePreviewPDF}
-                  className="flex-1 min-w-[140px] md:flex-none px-5 py-3 rounded-xl border-2 border-[#C19A3D] text-[#C19A3D] font-semibold hover:bg-[#FEF6E0] transition disabled:opacity-60"
-                >
-                  Ver PDF
-                </button>
-                <button
-                  onClick={handleDownloadPDF}
-                  className="flex-1 min-w-[160px] md:flex-none px-5 py-3 rounded-xl bg-[#C19A3D] text-white font-semibold hover:bg-[#C6A14B] transition disabled:opacity-50 shadow-sm"
-                >
-                  Descargar PDF
-                </button>
-
-                <button
-                  onClick={handleExcelComparativo}
-                  className="flex-1 min-w-[170px] md:flex-none px-5 py-3 rounded-xl border-2 border-[#2d6a4f] text-white bg-[#376a2d] font-semibold hover:bg-[#3c5c35] transition disabled:opacity-60"
-                >
-                  Descargar Excel
-                </button>
+              <div>
+                <label className="block text-sm font-semibold text-[#33361D] mb-1.5">Fecha de inicio</label>
+                <BirthDatePicker
+                  value={start}
+                  onChange={(date) => setStart(date || undefined)}
+                  placeholder="Seleccione fecha inicio"
+                  helperText=""
+                  triggerClassName="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition hover:bg-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-[#33361D] mb-1.5">Fecha de fin</label>
+                <BirthDatePicker
+                  value={end}
+                  onChange={(date) => setEnd(date || undefined)}
+                  minDate={start}
+                  placeholder="Seleccione fecha fin"
+                  helperText={start ? "La fecha final no puede ser anterior a la fecha de inicio." : ""}
+                  triggerClassName="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition hover:bg-white"
+                />
               </div>
             </div>
           </div>
 
-          {/* Tabla */}
+          <div className="rounded-3xl bg-[#FBFDF7] ring-1 ring-[#E8EEDB] p-5 md:p-6 mb-6">
+            <div className="mt-2 flex flex-col md:flex-row md:items-center gap-3">
+              <div className="md:ml-auto flex flex-wrap gap-3">
+                <button onClick={handlePreviewPDF} className="flex-1 min-w-[140px] md:flex-none px-5 py-3 rounded-xl border-2 border-[#C19A3D] text-[#C19A3D] font-semibold hover:bg-[#FEF6E0] transition disabled:opacity-60">Ver PDF</button>
+                <button onClick={handleDownloadPDF} className="flex-1 min-w-[160px] md:flex-none px-5 py-3 rounded-xl bg-[#C19A3D] text-white font-semibold hover:bg-[#C6A14B] transition disabled:opacity-50 shadow-sm">Descargar PDF</button>
+                <button onClick={handleExcelComparativo} className="flex-1 min-w-[170px] md:flex-none px-5 py-3 rounded-xl border-2 border-[#2d6a4f] text-white bg-[#376a2d] font-semibold hover:bg-[#3c5c35] transition disabled:opacity-60">Descargar Excel</button>
+              </div>
+            </div>
+          </div>
+
           <div className="rounded-2xl bg-[#F8F9F3] overflow-hidden shadow-sm">
-            {/* ===== Header (solo desktop) ===== */}
             <div className="hidden md:block bg-[#EAEFE0] px-4 py-3">
               <div className="grid grid-cols-[1fr_1fr_1fr_1fr] gap-4 text-sm font-bold text-[#33361D]">
                 <div>Subtipo</div>
@@ -321,87 +248,37 @@ export default function PSpendProjectionsPage() {
                 <div className="text-right">Diferencia</div>
               </div>
             </div>
-
-            {/* ===== Body ===== */}
             <div className="bg-white">
               {pagedItems.map((r: any, i: number) => (
-                <div
-                  key={i}
-                  className="
-                    border-b border-[#EAEFE0]
-                    px-4 py-3
-                    text-sm text-[#33361D]
-                    hover:bg-[#F8F9F3]
-                    transition
-                    grid
-                    grid-cols-1
-                    gap-2
-                    md:grid-cols-[1fr_1fr_1fr_1fr]
-                    md:gap-4
-                  "
-                >
-                  {/* Subtipo */}
+                <div key={i} className="border-b border-[#EAEFE0] px-4 py-3 text-sm text-[#33361D] hover:bg-[#F8F9F3] transition grid grid-cols-1 gap-2 md:grid-cols-[1fr_1fr_1fr_1fr] md:gap-4">
                   <div>
-                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
-                      Subtipo
-                    </span>
+                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">Subtipo</span>
                     <span className="font-medium">{r.name}</span>
                   </div>
-
-                  {/* Real */}
                   <div className="md:text-right">
-                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
-                      Real
-                    </span>
-                    <span className="tabular-nums whitespace-nowrap text-[#5B732E]">
-                      {crc(r.real)}
-                    </span>
+                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">Real</span>
+                    <span className="tabular-nums whitespace-nowrap text-[#5B732E]">{crc(r.real)}</span>
                   </div>
-
-                  {/* Proyectado */}
                   <div className="md:text-right">
-                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
-                      Proyectado
-                    </span>
-                    <span className="tabular-nums whitespace-nowrap font-medium text-[#5B732E]">
-                      {crc(r.projected)}
-                    </span>
+                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">Proyectado</span>
+                    <span className="tabular-nums whitespace-nowrap font-medium text-[#5B732E]">{crc(r.projected)}</span>
                   </div>
-
-                  {/* Diferencia */}
                   <div className="md:text-right">
-                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
-                      Diferencia
-                    </span>
-                    <span className="tabular-nums whitespace-nowrap font-bold text-[#C19A3D]">
-                      {crc(r.difference)}
-                    </span>
+                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">Diferencia</span>
+                    <span className="tabular-nums whitespace-nowrap font-bold text-[#C19A3D]">{crc(r.difference)}</span>
                   </div>
                 </div>
               ))}
-
               {rows.length === 0 && !reportLoading && (
-                <div className="py-10 text-center text-gray-400 font-medium">
-                  Sin resultados
-                </div>
+                <div className="py-10 text-center text-gray-400 font-medium">Sin resultados</div>
               )}
-
               {reportLoading && (
-                <div className="py-10 text-center text-gray-400 font-medium">
-                  Cargando...
-                </div>
+                <div className="py-10 text-center text-gray-400 font-medium">Cargando...</div>
               )}
             </div>
-
-            {/* ✅ Paginación */}
             {!reportLoading && rows.length > 0 && totalPages > 1 && (
               <div className="bg-white px-4 py-4 border-t border-[#EAEFE0]">
-                <PaginationBar
-                  page={page}
-                  totalPages={totalPages}
-                  pageItems={pageItems}
-                  onPageChange={setPage}
-                />
+                <PaginationBar page={page} totalPages={totalPages} pageItems={pageItems} onPageChange={setPage} />
               </div>
             )}
           </div>
