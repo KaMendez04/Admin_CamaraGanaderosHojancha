@@ -4,9 +4,16 @@ import type { Department } from "../../../models/Budget/IncomeType";
 import apiConfig from "../../../apiConfig/apiConfig";
 import { ExtraordinaryListSchema, ExtraordinarySchema } from "@/schemas/extraordinarySchema";
 
-export async function listExtraordinary(): Promise<Extraordinary[]> {
-  const res = await apiConfig.get("/extraordinary")
-  return ExtraordinaryListSchema.parse(res.data)
+export async function listExtraordinary(fiscalYearId?: number): Promise<Extraordinary[]> {
+  const params: Record<string, number> = {};
+
+  if (fiscalYearId) params.fiscalYearId = fiscalYearId;
+
+  const res = await apiConfig.get("/extraordinary", {
+    params: Object.keys(params).length ? params : undefined,
+  });
+
+  return ExtraordinaryListSchema.parse(res.data);
 }
 
 export async function getExtraordinary(id: number): Promise<Extraordinary> {
@@ -15,7 +22,7 @@ export async function getExtraordinary(id: number): Promise<Extraordinary> {
 }
 
 export async function createExtraordinary(
-  body: Pick<Extraordinary, "name" | "amount" | "date">
+  body: Pick<Extraordinary, "name" | "amount" | "date"> & { fiscalYearId: number }
 ): Promise<Extraordinary> {
   const { data } = await apiConfig.post<Extraordinary>("/extraordinary", body);
   return data;
@@ -23,7 +30,9 @@ export async function createExtraordinary(
 
 export async function updateExtraordinary(
   id: number,
-  patch: Partial<Pick<{ name: string; amount: string; date?: string | null }, "name" | "amount" | "date">>
+  patch: Partial<Pick<{ name: string; amount: string; date?: string | null }, "name" | "amount" | "date">> & {
+    fiscalYearId: number;
+  }
 ) {
   const response = await apiConfig.patch(`/extraordinary/${id}`, patch);
   return response.data;

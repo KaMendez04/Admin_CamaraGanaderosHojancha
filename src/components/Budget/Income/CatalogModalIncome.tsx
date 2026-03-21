@@ -21,6 +21,8 @@ import { CustomSelect } from "../../CustomSelect";
 import IncomeList from "./IncomeList";
 import { useBodyScrollLock } from "@/hooks/modals/useBodyScrollLock";
 import { CharCounter } from "../../CharCounter";
+import { useFiscalYear } from "@/hooks/Budget/useFiscalYear";
+
 
 type Props = {
   open: boolean;
@@ -40,7 +42,7 @@ export default function CatalogModalIncome({
   inline = false,
 }: Props) {
   const [mounted, setMounted] = useState(false);
-
+const { current } = useFiscalYear();
   const MAX_CATALOG_NAME_LENGTH = 50;
 
   // modal interno "Editar monto"
@@ -92,7 +94,10 @@ export default function CatalogModalIncome({
   );
 
   // ===== CREATE Queries =====
-  const typesCreate = useIncomeTypes(typeof departmentId === "number" ? departmentId : undefined);
+  const typesCreate = useIncomeTypes(
+  typeof departmentId === "number" ? departmentId : undefined,
+  current?.id
+);
   const typeOptionsCreate = useMemo(
     () => (typesCreate.data ?? []).map((t: any) => ({ label: t.name, value: t.id })),
     [typesCreate.data]
@@ -100,28 +105,31 @@ export default function CatalogModalIncome({
 
   // ===== EDIT Queries =====
   const typesEdit = useIncomeTypes(
-    mode === "edit" && typeof editTypeDepartmentId === "number"
-      ? editTypeDepartmentId
-      : undefined
-  );
+  mode === "edit" && typeof editTypeDepartmentId === "number"
+    ? editTypeDepartmentId
+    : undefined,
+  current?.id
+);
   const typeOptionsEdit = useMemo(
     () => (typesEdit.data ?? []).map((t: any) => ({ label: t.name, value: t.id })),
     [typesEdit.data]
   );
 
   const typesEditForSub = useIncomeTypes(
-    mode === "edit" && typeof editSubTypeDepartmentId === "number"
-      ? editSubTypeDepartmentId
-      : undefined
-  );
+  mode === "edit" && typeof editSubTypeDepartmentId === "number"
+    ? editSubTypeDepartmentId
+    : undefined,
+  current?.id
+);
   const typeOptionsEditForSub = useMemo(
     () => (typesEditForSub.data ?? []).map((t: any) => ({ label: t.name, value: t.id })),
     [typesEditForSub.data]
   );
 
   const subTypesEdit = useIncomeSubTypes(
-    mode === "edit" && typeof editSubTypeTypeId === "number" ? editSubTypeTypeId : undefined
-  );
+  mode === "edit" && typeof editSubTypeTypeId === "number" ? editSubTypeTypeId : undefined,
+  current?.id
+);
   const subTypeOptionsEdit = useMemo(
     () => (subTypesEdit.data ?? []).map((s: any) => ({ label: s.name, value: s.id })),
     [subTypesEdit.data]
@@ -639,7 +647,10 @@ export default function CatalogModalIncome({
             </div>
 
             <div className="min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
-              <IncomeList subTypeId={typeof editSubTypeId === "number" ? editSubTypeId : undefined} />
+              <IncomeList
+                subTypeId={typeof editSubTypeId === "number" ? editSubTypeId : undefined}
+                fiscalYearId={current?.id}
+              />
             </div>
 
             <div className="flex items-center justify-end gap-3 border-t p-4 md:p-5">

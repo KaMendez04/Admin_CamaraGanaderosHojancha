@@ -6,16 +6,15 @@ import { useIncomesList } from "../../../hooks/Budget/income/useIncomeCatalog";
 import { GenericTable } from "../../GenericTable";
 import { useUpdateIncome } from "../../../hooks/Budget/income/useIncomeMutation";
 
-// ✅ NUEVO: import del picker
 import { BirthDatePicker } from "@/components/ui/birthDayPicker";
 import { CharCounter } from "../../CharCounter";
+import { useFiscalYear } from "@/hooks/Budget/useFiscalYear";
 
 function formatMoneyCR(v: string | number) {
   const n = Number(v ?? 0);
   return n.toLocaleString("es-CR", { style: "currency", currency: "CRC" });
 }
 
-// Convierte "₡10 000,50" -> 10000.5
 function parseCRCToNumber(input: string) {
   const cleaned = (input ?? "")
     .replace(/[₡\s]/g, "")
@@ -33,10 +32,8 @@ function formatDateCR(value: any) {
 
   const pure = s.includes("T") ? s.slice(0, 10) : s;
 
-  // ya viene dd/mm/yyyy
   if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(pure)) return pure;
 
-  // YYYY-MM-DD -> dd/mm/yyyy
   if (/^\d{4}-\d{2}-\d{2}$/.test(pure)) {
     const [y, m, d] = pure.split("-");
     return `${d}/${m}/${y}`;
@@ -49,13 +46,9 @@ function normalizeToDateInput(value: any) {
   const v = String(value ?? "").trim();
   if (!v) return "";
 
-  // YYYY-MM-DD
   if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
-
-  // ISO
   if (/^\d{4}-\d{2}-\d{2}T/.test(v)) return v.slice(0, 10);
 
-  // dd/mm/yyyy -> yyyy-mm-dd
   const m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (m) {
     const dd = String(m[1]).padStart(2, "0");
@@ -69,16 +62,19 @@ function normalizeToDateInput(value: any) {
 
 type Props = {
   subTypeId?: number;
+  fiscalYearId?: number;
 };
 
 type Row = any;
 
-export default function IncomeList({ subTypeId }: Props) {
-  const q = useIncomesList();
+export default function IncomeList({ subTypeId, fiscalYearId }: Props) {
+  const { current } = useFiscalYear();
+  const selectedFiscalYearId = fiscalYearId ?? current?.id;
+
+  const q = useIncomesList(subTypeId, selectedFiscalYearId);
   const mUpdate = useUpdateIncome();
 
   const [editingId, setEditingId] = useState<number | null>(null);
-
   const [draftAmount, setDraftAmount] = useState<string>("");
   const [draftDate, setDraftDate] = useState<string>("");
 
@@ -88,13 +84,8 @@ export default function IncomeList({ subTypeId }: Props) {
   const MAX_AMOUNT_LENGTH = 20;
 
   const rows = useMemo(() => {
-    const all = (q.data ?? []) as Row[];
-    if (!subTypeId) return all;
-
-    return all.filter(
-      (row) => Number(row?.incomeSubType?.id) === Number(subTypeId)
-    );
-  }, [q.data, subTypeId]);
+    return (q.data ?? []) as Row[];
+  }, [q.data]);
 
   function startEdit(row: Row) {
     const initialAmount = String(row.amount ?? "");
@@ -111,17 +102,16 @@ export default function IncomeList({ subTypeId }: Props) {
 
   function cancelEdit() {
     setEditingId(null);
-
     setDraftAmount("");
     amountRef.current = "";
-
     setDraftDate("");
     dateRef.current = "";
   }
 
   async function saveEdit(row: Row) {
-    const amountNumber = parseCRCToNumber(amountRef.current);
+    if (!selectedFiscalYearId) return;
 
+    const amountNumber = parseCRCToNumber(amountRef.current);
     const dateValue = (dateRef.current ?? "").trim();
 
     try {
@@ -129,10 +119,10 @@ export default function IncomeList({ subTypeId }: Props) {
         id: row.id,
         amount: amountNumber,
         date: dateValue,
+        fiscalYearId: selectedFiscalYearId,
       });
       cancelEdit();
-    } catch {
-    }
+    } catch {}
   }
 
   const columns = useMemo<ColumnDef<Row, any>[]>(
@@ -144,7 +134,6 @@ export default function IncomeList({ subTypeId }: Props) {
           const r = row.original;
           const isEditing = editingId === r.id;
 
-          // dd/mm/aaaa en tabla (sin Date())
           if (!isEditing) return formatDateCR(r?.date);
 
           return (
@@ -222,7 +211,7 @@ export default function IncomeList({ subTypeId }: Props) {
                 <button
                   className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#6B7A3A] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 sm:w-auto"
                   onClick={() => saveEdit(r)}
-                  disabled={mUpdate.loading}
+                  disabled={mUpdate.loading || !selectedFiscalYearId}
                   title="Guardar"
                 >
                   <Save className="h-4 w-4" />
@@ -244,17 +233,7 @@ export default function IncomeList({ subTypeId }: Props) {
 
           return (
             <button
-              className="
-                inline-flex items-center justify-center
-                rounded-lg
-                border border-[#6B7A3A]
-                bg-[#F8F9F3]
-                p-2
-                text-[#6B7A3A]
-                shadow-sm
-                transition-colors
-                hover:bg-[#EAEFE0]
-              "
+              className="inline-flex items-center justify-center rounded-lg border border-[#6B7A3A] bg-[#F8F9F3] p-2 text-[#6B7A3A] shadow-sm transition-colors hover:bg-[#EAEFE0]"
               onClick={() => startEdit(r)}
               title="Editar"
             >
@@ -264,7 +243,7 @@ export default function IncomeList({ subTypeId }: Props) {
         },
       },
     ],
-    [editingId, draftAmount, draftDate, mUpdate.loading]
+    [editingId, draftAmount, draftDate, mUpdate.loading, selectedFiscalYearId]
   );
 
   if (q.error) return <p className="text-sm text-red-600">{q.error}</p>;
@@ -275,12 +254,14 @@ export default function IncomeList({ subTypeId }: Props) {
 
       {!q.loading && rows.length === 0 && subTypeId && (
         <p className="mt-3 text-xs text-gray-500">
-          No hay ingresos para este subtipo.
+          No hay ingresos para este subtipo en el año fiscal seleccionado.
         </p>
       )}
 
       {!q.loading && rows.length === 0 && !subTypeId && (
-        <p className="mt-3 text-xs text-gray-500">No hay ingresos aún.</p>
+        <p className="mt-3 text-xs text-gray-500">
+          No hay ingresos aún en el año fiscal seleccionado.
+        </p>
       )}
 
       {mUpdate.error && (

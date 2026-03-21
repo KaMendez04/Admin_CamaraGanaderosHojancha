@@ -7,6 +7,7 @@ import type { SpendSummary, SpendTableRow } from "../../../models/Budget/reports
 export type SpendReportNameFilters = {
   start?: string;
   end?: string;
+  fiscalYearId?: number;
   departmentName?: string;
   spendTypeName?: string;
   spendSubTypeName?: string;
@@ -87,6 +88,7 @@ export function useSpendReport(filters: SpendReportNameFilters | null) {
       const { rows, totals } = await fetchSpendFull({
         start: filters?.start || undefined,
         end: filters?.end || undefined,
+        fiscalYearId: filters?.fiscalYearId,
         departmentId,
         spendTypeId,
         spendSubTypeId,

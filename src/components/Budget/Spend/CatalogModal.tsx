@@ -21,6 +21,7 @@ import {
 import SpendList from "./SpendList";
 import { useBodyScrollLock } from "@/hooks/modals/useBodyScrollLock";
 import { CharCounter } from "../../CharCounter";
+import { useFiscalYear } from "@/hooks/Budget/useFiscalYear";
 
 type Props = {
   open: boolean;
@@ -41,7 +42,7 @@ export default function CatalogModalSpend({
 }: Props) {
   const [mounted, setMounted] = useState(false);
   const MAX_CATALOG_NAME_LENGTH = 50;
-
+  const { current } = useFiscalYear();
   // modal interno "Editar monto"
   const [openAmountModal, setOpenAmountModal] = useState(false);
 
@@ -95,8 +96,9 @@ export default function CatalogModalSpend({
 
   // ===== CREATE: tipos dependen de departmentId =====
   const types = useSpendTypes(
-    mode === "create" && typeof departmentId === "number" ? departmentId : undefined
-  );
+  mode === "create" && typeof departmentId === "number" ? departmentId : undefined,
+  current?.id
+);
   const typeOptions = useMemo(
     () => (types.data ?? []).map((t: any) => ({ label: t.name, value: t.id })),
     [types.data]
@@ -104,8 +106,9 @@ export default function CatalogModalSpend({
 
   // ===== EDIT: tipos dependen de editTypeDepartmentId =====
   const editTypes = useSpendTypes(
-    mode === "edit" && typeof editTypeDepartmentId === "number" ? editTypeDepartmentId : undefined
-  );
+  mode === "edit" && typeof editTypeDepartmentId === "number" ? editTypeDepartmentId : undefined,
+  current?.id
+);
   const editTypeOptions = useMemo(
     () => (editTypes.data ?? []).map((t: any) => ({ label: t.name, value: t.id })),
     [editTypes.data]
@@ -113,10 +116,11 @@ export default function CatalogModalSpend({
 
   // ===== EDIT: Tipos para editar Subtipo dependen de editSubTypeDepartmentId =====
   const editSubTypesTypes = useSpendTypes(
-    mode === "edit" && typeof editSubTypeDepartmentId === "number"
-      ? editSubTypeDepartmentId
-      : undefined
-  );
+  mode === "edit" && typeof editSubTypeDepartmentId === "number"
+    ? editSubTypeDepartmentId
+    : undefined,
+  current?.id
+);
   const editSubTypesTypeOptions = useMemo(
     () => (editSubTypesTypes.data ?? []).map((t: any) => ({ label: t.name, value: t.id })),
     [editSubTypesTypes.data]
@@ -124,8 +128,9 @@ export default function CatalogModalSpend({
 
   // ===== EDIT: Subtipos dependen de editSubTypeTypeId =====
   const subTypesEdit = useSpendSubTypes(
-    mode === "edit" && typeof editSubTypeTypeId === "number" ? editSubTypeTypeId : undefined
-  );
+  mode === "edit" && typeof editSubTypeTypeId === "number" ? editSubTypeTypeId : undefined,
+  current?.id
+);
   const editSubTypeOptions = useMemo(
     () => (subTypesEdit.data ?? []).map((s: any) => ({ label: s.name, value: s.id })),
     [subTypesEdit.data]
@@ -635,7 +640,10 @@ export default function CatalogModalSpend({
             </div>
 
             <div className="min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
-              <SpendList subTypeId={typeof editSubTypeId === "number" ? editSubTypeId : undefined} />
+              <SpendList
+                subTypeId={typeof editSubTypeId === "number" ? editSubTypeId : undefined}
+                fiscalYearId={current?.id}
+              />
             </div>
 
             <div className="flex items-center justify-end gap-3 border-t p-4 md:p-5">

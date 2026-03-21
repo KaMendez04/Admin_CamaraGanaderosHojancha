@@ -5,8 +5,6 @@ import { CustomSelect } from "../../CustomSelect";
 import { useDepartments, useIncomeSubTypes, useIncomeTypes } from "../../../hooks/Budget/income/useIncomeCatalog";
 import { useCreateIncomeEntry } from "../../../hooks/Budget/income/useIncomeMutation";
 import type { CreateIncomeDTO } from "../../../models/Budget/IncomeType";
-
-// 👇 traer proyección para mezclar
 import { usePIncomeTypes, usePIncomeSubTypes } from "../../../hooks/Budget/projectionIncome/useIncomeProjectionCatalog";
 import {
   useEnsureIncomeSubTypeFromProjection,
@@ -15,6 +13,7 @@ import {
 import { BirthDatePicker } from "@/components/ui/birthDayPicker";
 import { ActionButtons } from "../../ActionButtons";
 import { showSuccessAlert } from "@/utils/alerts";
+import { useFiscalYear } from "@/hooks/Budget/useFiscalYear";
 
 
 type Props = {
@@ -34,6 +33,7 @@ function parseOriginId(v: string | number | ""): { origin: "r" | "p"; id: number
 }
 
 export default function IncomeForm({ onSuccess, disabled }: Props) {
+  const { current } = useFiscalYear();
   const [departmentId, setDepartmentId] = useState<number | "">("");
   const [typeKey, setTypeKey] = useState<OriginId | "">("");
   const [subTypeKey, setSubTypeKey] = useState<OriginId | "">("");
@@ -52,22 +52,24 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // ===== Queries =====
   const dept = useDepartments();
-
-  // reales
   const realTypes = useIncomeTypes(typeof departmentId === "number" ? departmentId : undefined);
+  const projTypes = usePIncomeTypes(
+    typeof departmentId === "number" ? departmentId : undefined,
+    current?.id
+  );
 
-  // proyección (mismo dept)
-  const projTypes = usePIncomeTypes(typeof departmentId === "number" ? departmentId : undefined);
-
-  // subtypes dependen del type seleccionado (origen)
   const typeParsed = parseOriginId(typeKey);
 
-  const realSubTypes = useIncomeSubTypes(typeParsed?.origin === "r" ? typeParsed.id : undefined);
-  const projSubTypes = usePIncomeSubTypes(typeParsed?.origin === "p" ? typeParsed.id : undefined);
+  const realSubTypes = useIncomeSubTypes(
+    typeParsed?.origin === "r" ? typeParsed.id : undefined,
+    current?.id
+  );
+  const projSubTypes = usePIncomeSubTypes(
+    typeParsed?.origin === "p" ? typeParsed.id : undefined,
+    current?.id
+  );
 
-  // ===== Options =====
   const departmentOptions = useMemo(
     () => (dept.data ?? []).map((d) => ({ label: d.name, value: d.id })),
     [dept.data]
@@ -101,7 +103,6 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
     }));
   }, [typeParsed, realSubTypes.data, projSubTypes.data]);
 
-  // ===== Cascada =====
   useEffect(() => {
     setTypeKey("");
     setSubTypeKey("");
@@ -111,9 +112,7 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
     setSubTypeKey("");
   }, [typeKey]);
 
-  // ===== Mutations =====
   const createIncome = useCreateIncomeEntry();
-
   const ensureTypeFromProj = useEnsureIncomeTypeFromProjection();
   const ensureSubFromProj = useEnsureIncomeSubTypeFromProjection();
 
@@ -128,6 +127,17 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
       (ensureSubFromProj as any).isLoading ??
       (ensureSubFromProj as any).loading
   );
+
+  function isDateInSelectedFiscalYear(value?: string) {
+    if (!value || !current) return true;
+
+    const start = String(current.start_date ?? "").slice(0, 10);
+    const end = String(current.end_date ?? "").slice(0, 10);
+
+    if (!start || !end) return true;
+
+    return value >= start && value <= end;
+  }
 
   function resetForm() {
     setErrors({});
@@ -149,11 +159,30 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
   async function onSubmit() {
     setErrors({});
 
+    if (!current?.id) {
+      return setErrors((e) => ({ ...e, api: "Selecciona un año fiscal" }));
+    }
+
+    if (!current.is_active) {
+      return setErrors((e) => ({ ...e, api: "El año fiscal seleccionado no está activo" }));
+    }
+
+    if (current.state !== "OPEN") {
+      return setErrors((e) => ({ ...e, api: "El año fiscal seleccionado está cerrado" }));
+    }
+
     if (!departmentId) return setErrors((e) => ({ ...e, departmentId: "Selecciona un departamento" }));
     if (!typeKey) return setErrors((e) => ({ ...e, typeId: "Selecciona un tipo" }));
     if (!subTypeKey) return setErrors((e) => ({ ...e, subTypeId: "Selecciona un sub-tipo" }));
     if (!amountStr || amount <= 0) return setErrors((e) => ({ ...e, amount: "Monto requerido" }));
     if (!date) return setErrors((e) => ({ ...e, date: "Fecha requerida" }));
+
+    if (!isDateInSelectedFiscalYear(date)) {
+      return setErrors((e) => ({
+        ...e,
+        date: "La fecha debe pertenecer al año fiscal seleccionado",
+      }));
+    }
 
     try {
       const tParsed = parseOriginId(typeKey);
@@ -179,6 +208,7 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
         incomeSubTypeId: realIncomeSubTypeId,
         amount,
         date,
+        fiscalYearId: current.id,
       };
 
       const res = await createIncome.mutate(payload);
@@ -187,13 +217,13 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
       await showSuccessAlert("El ingreso se registró correctamente.");
       onSuccess?.(res.id);
     } catch (err: any) {
-      setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo registrar el ingreso" }));
+      const msg = err?.response?.data?.message || err?.message || "No se pudo registrar el ingreso";
+      setErrors((e) => ({ ...e, api: msg }));
     }
   }
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
-      {/* Departamento */}
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-[#33361D]">Departamento</label>
         <CustomSelect
@@ -206,7 +236,6 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
         {errors.departmentId && <p className="text-xs text-red-600">{errors.departmentId}</p>}
       </div>
 
-      {/* Tipo */}
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-[#33361D]">Tipo</label>
         <CustomSelect
@@ -219,7 +248,6 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
         {errors.typeId && <p className="text-xs text-red-600">{errors.typeId}</p>}
       </div>
 
-      {/* Subtipo */}
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-[#33361D]">Subtipo</label>
         <CustomSelect
@@ -232,13 +260,28 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
         {errors.subTypeId && <p className="text-xs text-red-600">{errors.subTypeId}</p>}
       </div>
 
-      {/* Fecha */}
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-[#33361D]">Fecha</label>
 
         <BirthDatePicker
           value={date}
-          onChange={(iso) => setDate(iso)}
+          onChange={(iso) => {
+            setDate(iso);
+
+            if (!iso) {
+              setErrors((e) => ({ ...e, date: "" }));
+              return;
+            }
+
+            if (!isDateInSelectedFiscalYear(iso)) {
+              setErrors((e) => ({
+                ...e,
+                date: "La fecha debe pertenecer al año fiscal seleccionado",
+              }));
+            } else {
+              setErrors((e) => ({ ...e, date: "" }));
+            }
+          }}
           disabled={disabled}
           placeholder="Seleccione una fecha"
           error={errors.date}
@@ -246,11 +289,8 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
           triggerClassName="rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
           className="w-full"
         />
-
-        {errors.date && <p className="text-xs text-red-600">{errors.date}</p>}
       </div>
 
-      {/* Monto */}
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-[#33361D]">Monto</label>
         <input
@@ -273,7 +313,19 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
             showText
             saveText="Registrar Ingreso"
             cancelText="Cancelar"
-            disabled={disabled || !departmentId || !typeKey || !subTypeKey || !amountStr || amount <= 0 || !date}
+            disabled={
+              disabled ||
+              !current?.id ||
+              !current.is_active ||
+              current.state !== "OPEN" ||
+              !departmentId ||
+              !typeKey ||
+              !subTypeKey ||
+              !amountStr ||
+              amount <= 0 ||
+              !date ||
+              !isDateInSelectedFiscalYear(date)
+            }
             isSaving={isSubmitting}
             requireConfirmCancel={false}
             requireConfirmSave={false}

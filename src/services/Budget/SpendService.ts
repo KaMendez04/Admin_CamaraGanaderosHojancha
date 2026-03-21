@@ -33,16 +33,23 @@ export async function createDepartment(payload: CreateDepartmentDTO): Promise<De
 }
 
 /** ============= Spend Types (reales) ============= */
-export async function listSpendTypes(departmentId?: number): Promise<ApiList<SpendType>> {
-  const { data } = await apiConfig.get<any[]>("/spend-type");
+export async function listSpendTypes(departmentId?: number, fiscalYearId?: number): Promise<ApiList<SpendType>> {
+  const params: Record<string, number> = {};
 
-  let items: SpendType[] = (data ?? []).map((t) => ({
+  if (departmentId) params.departmentId = departmentId;
+  if (fiscalYearId) params.fiscalYearId = fiscalYearId;
+
+  const { data } = await apiConfig.get<any[]>("/spend-type", {
+    params: Object.keys(params).length ? params : undefined,
+  });
+
+  const items: SpendType[] = (data ?? []).map((t) => ({
     id: t.id,
     name: t.name,
     departmentId: t?.department?.id,
+    amountSpend: t?.amountSpend ?? "0.00",
   }));
 
-  if (departmentId) items = items.filter((t) => t.departmentId === departmentId);
   return { data: items };
 }
 
@@ -56,15 +63,23 @@ export async function createSpendType(payload: CreateSpendTypeDTO): Promise<Spen
 }
 
 /** ============= Spend SubTypes (reales) ============= */
-export async function listSpendSubTypes(spendTypeId: number): Promise<ApiList<SpendSubType>> {
+export async function listSpendSubTypes(
+  spendTypeId: number,
+  fiscalYearId?: number
+): Promise<ApiList<SpendSubType>> {
+  const params: Record<string, number> = { spendTypeId };
+
+  if (fiscalYearId) params.fiscalYearId = fiscalYearId;
+
   const { data } = await apiConfig.get<any[]>("/spend-sub-type", {
-    params: { spendTypeId },
+    params,
   });
 
   const items: SpendSubType[] = (data ?? []).map((s) => ({
     id: s.id,
     name: s.name,
     spendTypeId: s?.spendType?.id ?? spendTypeId,
+    amountSubSpend: s?.amountSubSpend ?? "0.00",
   }));
 
   return { data: items };
@@ -82,11 +97,11 @@ export async function createSpendSubType(payload: CreateSpendSubTypeDTO): Promis
 /** ============= Movimientos reales (Egresos) ============= */
 export async function createSpend(payload: CreateSpendDTO): Promise<Spend> {
   const body = {
-  spendSubTypeId: payload.spendSubTypeId,
-  amount: Number(payload.amount).toFixed(2),
-  date: payload.date,
-  fiscalYearId: getFiscalYearId(),
-};
+    spendSubTypeId: payload.spendSubTypeId,
+    amount: Number(payload.amount).toFixed(2),
+    date: payload.date,
+    fiscalYearId: payload.fiscalYearId,
+  };
 
   const { data } = await apiConfig.post<any>("/spend", body);
 
@@ -186,8 +201,15 @@ export async function updateSpendSubType(
 }
 
 
-export async function listSpend(): Promise<ApiList<Spend>> {
-  const { data } = await apiConfig.get<any[]>("/spend");
+export async function listSpend(spendSubTypeId?: number, fiscalYearId?: number): Promise<ApiList<Spend>> {
+  const params: Record<string, number> = {};
+
+  if (spendSubTypeId) params.spendSubTypeId = spendSubTypeId;
+  if (fiscalYearId) params.fiscalYearId = fiscalYearId;
+
+  const { data } = await apiConfig.get<any[]>("/spend", {
+    params: Object.keys(params).length ? params : undefined,
+  });
 
   const items: Spend[] = (data ?? []).map((row) => ({
     id: row.id,
@@ -203,15 +225,17 @@ export async function listSpend(): Promise<ApiList<Spend>> {
   return { data: items };
 }
 
-// ✅ Update egreso (editar monto / subtipo / fecha si quisieras)
 export async function updateSpend(
   id: number,
-  payload: { spendSubTypeId?: number; amount?: number; date?: string }
+  payload: { spendSubTypeId?: number; amount?: number; date?: string; fiscalYearId: number }
 ): Promise<Spend> {
   const body: any = {};
+
   if (payload.spendSubTypeId !== undefined) body.spendSubTypeId = payload.spendSubTypeId;
   if (payload.amount !== undefined) body.amount = Number(payload.amount).toFixed(2);
   if (payload.date !== undefined) body.date = payload.date;
+
+  body.fiscalYearId = payload.fiscalYearId;
 
   const { data } = await apiConfig.patch<any>(`/spend/${id}`, body);
 

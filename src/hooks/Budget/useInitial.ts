@@ -32,9 +32,9 @@ export function useInitial(range?: { startDate?: string; endDate?: string }) {
         setError(null);
 
         const [cardsData, incomeData, spendData] = await Promise.all([
-          fetchCardStats(range),
-          fetchIncomeByDepartment({ ...range, groupBy: "department" }),
-          fetchSpendByDepartment({ ...range, groupBy: "department" }),
+          fetchCardStats({ ...range, fiscalYearId: fyId }),
+          fetchIncomeByDepartment({ ...range, groupBy: "department", fiscalYearId: fyId }),
+          fetchSpendByDepartment({ ...range, groupBy: "department", fiscalYearId: fyId }),
         ]);
 
         if (cancelled) return;

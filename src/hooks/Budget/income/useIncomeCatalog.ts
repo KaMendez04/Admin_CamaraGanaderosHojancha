@@ -26,12 +26,12 @@ export function useDepartments() {
 }
 
 // IncomeTypes (dependen de departamento)
-export function useIncomeTypes(departmentId?: number) {
+export function useIncomeTypes(departmentId?: number, fiscalYearId?: number) {
   const q = useQuery({
-    queryKey: ["incomeTypes", departmentId ?? "none"],
+    queryKey: ["incomeTypes", departmentId ?? "none", fiscalYearId ?? "no-fy"],
     queryFn: async () => {
       if (!departmentId) return [] as IncomeType[];
-      const res = await listIncomeTypes(departmentId);
+      const res = await listIncomeTypes(departmentId, fiscalYearId);
       return res.data as IncomeType[];
     },
     enabled: !!departmentId,
@@ -41,12 +41,12 @@ export function useIncomeTypes(departmentId?: number) {
 }
 
 // IncomeSubTypes (dependen de type)
-export function useIncomeSubTypes(incomeTypeId?: number) {
+export function useIncomeSubTypes(incomeTypeId?: number, fiscalYearId?: number) {
   const q = useQuery({
-    queryKey: ["incomeSubTypes", incomeTypeId ?? "none"],
+    queryKey: ["incomeSubTypes", incomeTypeId ?? "none", fiscalYearId ?? "no-fy"],
     queryFn: async () => {
       if (!incomeTypeId) return [] as IncomeSubType[];
-      const res = await listIncomeSubTypes(incomeTypeId);
+      const res = await listIncomeSubTypes(incomeTypeId, fiscalYearId);
       return res.data as IncomeSubType[];
     },
     enabled: !!incomeTypeId,
@@ -55,10 +55,10 @@ export function useIncomeSubTypes(incomeTypeId?: number) {
   return adaptQuery<IncomeSubType[]>(q);
 }
 
-export function useIncomesList(incomeSubTypeId?: number) {
+export function useIncomesList(incomeSubTypeId?: number, fiscalYearId?: number) {
   const q = useQuery({
-    queryKey: ["incomeList", incomeSubTypeId ?? "all"],
-    queryFn: async () => listIncomes(incomeSubTypeId),
+    queryKey: ["incomeList", incomeSubTypeId ?? "all", fiscalYearId ?? "no-fy"],
+    queryFn: async () => listIncomes(incomeSubTypeId, fiscalYearId),
     staleTime: 30 * 1000,
   });
 

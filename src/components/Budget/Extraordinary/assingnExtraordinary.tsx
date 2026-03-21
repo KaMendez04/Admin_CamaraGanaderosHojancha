@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input"
 import { ActionButtons } from "../../ActionButtons"
 import { BirthDatePicker } from "@/components/ui/birthDayPicker"
 import { parseCR, useMoneyInput } from "@/hooks/Budget/useMoneyInput"
+import { useFiscalYear } from "@/hooks/Budget/useFiscalYear"
 
 type Props = {
   className?: string
@@ -24,13 +25,15 @@ export default function AssignExtraordinaryCard({
   onAssigned,
   defaultOpen = true,
 }: Props) {
+  const { current } = useFiscalYear()
   const [open, setOpen] = React.useState<boolean>(defaultOpen)
   const [saldoInsuficiente, setSaldoInsuficiente] = React.useState(false)
   const money = useMoneyInput("")
-  const { data: extras, loading: loadingExtras } = useExtraordinaryList()
+  const { data: extras, loading: loadingExtras } = useExtraordinaryList(current?.id)
   const { data: departments, loading: loadingDepts } = useDepartmentsE()
   const { submit: assign, loading: assigning } = useAssignExtraordinary()
 
+  
   const form = useForm({
     defaultValues: {
       extraordinaryId: 0,
@@ -39,26 +42,30 @@ export default function AssignExtraordinaryCard({
       subTypeName: "",
       date: "", // ✅ opcional
     },
+    
     onSubmit: async ({ value }) => {
-      const parsed = AssignExtraordinarySchema.safeParse(value)
-      if (!parsed.success) return
+      const parsed = AssignExtraordinarySchema.safeParse(value);
+      if (!parsed.success) return;
 
-      // recalcular saldo dentro del submit
-      const amountNumber = parseCR(parsed.data.amount)
-      const selectedExtra = extras.find((e) => e.id === parsed.data.extraordinaryId)
+      if (!current?.id) return;
+      if (!current.is_active) return;
+      if (current.state !== "OPEN") return;
+
+      const amountNumber = parseCR(parsed.data.amount);
+      const selectedExtra = extras.find((e) => e.id === parsed.data.extraordinaryId);
       const remainingNow = selectedExtra
         ? Math.max(0, Number(selectedExtra.amount) - Number(selectedExtra.used))
-        : 0
+        : 0;
 
       if (
         parsed.data.extraordinaryId > 0 &&
         Number.isFinite(amountNumber) &&
         amountNumber > remainingNow
       ) {
-        setSaldoInsuficiente(true)
-        return
+        setSaldoInsuficiente(true);
+        return;
       }
-      setSaldoInsuficiente(false)
+      setSaldoInsuficiente(false);
 
       try {
         const payload = await assign({
@@ -67,12 +74,13 @@ export default function AssignExtraordinaryCard({
           departmentId: parsed.data.departmentId,
           subTypeName: parsed.data.subTypeName.trim(),
           date: parsed.data.date || undefined,
-        })
+          fiscalYearId: current.id,
+        });
 
-        form.reset() // ✅
-        onAssigned?.(payload)
+        form.reset();
+        onAssigned?.(payload);
       } catch (error) {
-        console.error("Error assigning extraordinary:", error)
+        console.error("Error assigning extraordinary:", error);
       }
     },
   })
@@ -331,6 +339,7 @@ export default function AssignExtraordinaryCard({
                 <ActionButtons
                   onCancel={() => {
                     Form.reset()
+                    money.setValue("")
                     setSaldoInsuficiente(false)
                   }}
                   showCancel

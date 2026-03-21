@@ -23,19 +23,25 @@ export async function listDepartments(): Promise<ApiList<Department>> {
 
 /** ============= P-Types (proyección) ============= */
 export async function listPSpendTypes(
-  departmentId?: number
+  departmentId?: number,
+  fiscalYearId?: number
 ): Promise<ApiList<PSpendType>> {
+  const params: Record<string, number> = {};
+
+  if (departmentId) params.departmentId = departmentId;
+  if (fiscalYearId) params.fiscalYearId = fiscalYearId;
+
   const { data } = await apiConfig.get<any[]>("/p-spend-type", {
-    params: departmentId ? { departmentId } : undefined,
+    params: Object.keys(params).length ? params : undefined,
   });
 
-  let items: PSpendType[] = (data ?? []).map((t) => ({
+  const items: PSpendType[] = (data ?? []).map((t) => ({
     id: t.id,
     name: t.name,
     departmentId: t?.department?.id ?? t?.departmentId ?? departmentId,
+    amountPSpend: t?.amountPSpend ?? "0.00",
   }));
 
-  if (departmentId) items = items.filter((t) => t.departmentId === departmentId);
   return { data: items };
 }
 
@@ -65,21 +71,23 @@ export async function updatePSpendType(
 
 /** ============= P-SubTypes (proyección) ============= */
 export async function listPSpendSubTypes(
-  pSpendTypeId: number
+  pSpendTypeId: number,
+  fiscalYearId?: number
 ): Promise<ApiList<PSpendSubType>> {
-  // El back espera `typeId`
+  const params: Record<string, number> = { typeId: pSpendTypeId };
+  if (fiscalYearId) params.fiscalYearId = fiscalYearId;
+
   const { data } = await apiConfig.get<any[]>("/p-spend-sub-type", {
-    params: { typeId: pSpendTypeId },
+    params,
   });
 
   const items: PSpendSubType[] = (data ?? []).map((s) => ({
     id: s.id,
     name: s.name,
-    // la relación llega como `type`
     pSpendTypeId: s?.type?.id ?? pSpendTypeId,
+    amountPSpend: s?.amountPSpend ?? "0.00",
   }));
 
-  // Defensa extra por si el back devolviera más de un tipo
   const filtered = items.filter((s) => s.pSpendTypeId === pSpendTypeId);
 
   return { data: filtered };
@@ -138,9 +146,14 @@ export async function createPSpend(payload: CreatePSpendDTO): Promise<PSpend> {
 }
 
 
-export async function listPSpends(subTypeId?: number) {
+export async function listPSpends(subTypeId?: number, fiscalYearId?: number) {
+  const params: Record<string, number> = {};
+
+  if (subTypeId) params.subTypeId = subTypeId;
+  if (fiscalYearId) params.fiscalYearId = fiscalYearId;
+
   const { data } = await apiConfig.get<any[]>("/p-spend", {
-    params: subTypeId ? { subTypeId } : undefined,
+    params: Object.keys(params).length ? params : undefined,
   });
   return data;
 }

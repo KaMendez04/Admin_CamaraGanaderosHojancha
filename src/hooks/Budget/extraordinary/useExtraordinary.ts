@@ -21,7 +21,8 @@ import { showConfirmAlert, showErrorAlertRegister, showSuccessAlert } from '@/ut
 export const extraordinaryKeys = {
   all: ['extraordinaries'] as const,
   lists: () => [...extraordinaryKeys.all, 'list'] as const,
-  list: (filters?: any) => [...extraordinaryKeys.lists(), filters] as const,
+  list: (filters?: { fiscalYearId?: number }) =>
+  [...extraordinaryKeys.lists(), filters ?? {}] as const,
   departments: ['departments'] as const,
   remaining: (id: number) => [...extraordinaryKeys.all, 'remaining', id] as const,
   detail: (id: number) => [...extraordinaryKeys.all, "detail", id] as const,
@@ -29,10 +30,12 @@ export const extraordinaryKeys = {
 
 // ===== QUERIES (para leer datos) =====
 
-export function useExtraordinaryListQuery() {
+export function useExtraordinaryListQuery(fiscalYearId?: number) {
   return useQuery({
-    queryKey: extraordinaryKeys.list(),
-    queryFn: listExtraordinary,
+    queryKey: extraordinaryKeys.list(
+      fiscalYearId ? { fiscalYearId } : undefined
+    ),
+    queryFn: () => listExtraordinary(fiscalYearId),
     staleTime: 2 * 60 * 1000, // 2 minutos
   });
 }
@@ -69,11 +72,11 @@ export function useCreateExtraordinaryMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: Pick<Extraordinary, "name" | "amount" | "date">) =>
+    mutationFn: (data: Pick<Extraordinary, "name" | "amount" | "date"> & { fiscalYearId: number }) =>
       createExtraordinary(data),
     onSuccess: () => {
       // Invalidar la lista para que se recargue automáticamente
-      queryClient.invalidateQueries({ queryKey: extraordinaryKeys.list() });
+      queryClient.invalidateQueries({ queryKey: extraordinaryKeys.lists() });
     },
   });
 }
@@ -84,7 +87,7 @@ export function useDeleteExtraordinaryMutation() {
   return useMutation({
     mutationFn: (id: number) => deleteExtraordinary(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: extraordinaryKeys.list() });
+      queryClient.invalidateQueries({ queryKey: extraordinaryKeys.lists() });
     },
   });
 }
@@ -96,7 +99,7 @@ export function useAllocateExtraordinaryMutation() {
     mutationFn: ({ id, amount }: { id: number; amount: number }) =>
       allocateExtraordinary(id, amount),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: extraordinaryKeys.list() });
+      queryClient.invalidateQueries({ queryKey: extraordinaryKeys.lists() });
       // También invalidar todos los remaining queries
       queryClient.invalidateQueries({ queryKey: extraordinaryKeys.all });
     },
@@ -122,7 +125,7 @@ export function useAssignExtraordinaryMutation() {
     },
 
     onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: extraordinaryKeys.list() });
+      queryClient.invalidateQueries({ queryKey: extraordinaryKeys.lists() });
       queryClient.invalidateQueries({ queryKey: extraordinaryKeys.departments });
       queryClient.invalidateQueries({ queryKey: extraordinaryKeys.all });
 
@@ -146,7 +149,7 @@ export function useUpdateExtraordinaryMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, patch }: { id: number; patch: Partial<Pick<Extraordinary, "name" | "amount" | "date">> }) => {
+    mutationFn: async ({ id, patch }: { id: number; patch: Partial<Pick<Extraordinary, "name" | "amount" | "date">> & { fiscalYearId: number } }) => {
       return updateExtraordinary(id, patch);
     },
 
@@ -162,7 +165,7 @@ export function useUpdateExtraordinaryMutation() {
     },
 
     onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: extraordinaryKeys.list() });
+      queryClient.invalidateQueries({ queryKey: extraordinaryKeys.lists() });
       queryClient.invalidateQueries({ queryKey: extraordinaryKeys.all });
 
       await showSuccessAlert("Los cambios del movimiento extraordinario fueron guardados.");
@@ -184,8 +187,8 @@ export function useUpdateExtraordinaryMutation() {
 // ===== HOOKS DE CONVENIENCIA (mantienen la misma API que tus hooks actuales) =====
 
 // Para mantener compatibilidad con tu código existente
-export function useExtraordinaryList() {
-  const query = useExtraordinaryListQuery();
+export function useExtraordinaryList(fiscalYearId?: number) {
+  const query = useExtraordinaryListQuery(fiscalYearId);
 
   return {
     data: query.data ?? [],

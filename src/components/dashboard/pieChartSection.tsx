@@ -1,107 +1,112 @@
-import { PieChart, Pie, Cell, Tooltip as PieTooltip, ResponsiveContainer as PieResponsiveContainer } from "recharts"
-import type { PieChartSectionProps } from "../../models/PrincipalType"
+import type { PieItem } from "@/types/pieType"
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip as PieTooltip,
+  ResponsiveContainer,
+} from "recharts"
 
-const COLORS = ["#6B8E3D", "#8BA84E", "#A5C46D", "#C19A3D", "#D4B55A", "#E8C77D"]
+interface PieChartSectionProps {
+  data: PieItem[]
+  isLoading: boolean
+  formatCurrency: (value: number) => string
+  total?: number
+}
 
-export function PieChartSection({ data, isLoading, formatCurrency }: PieChartSectionProps) {
-  const totalPie = data.reduce((sum, item) => sum + item.value, 0)
-
+export function PieChartSection({
+  data,
+  isLoading,
+  formatCurrency,
+  total = 0,
+}: PieChartSectionProps) {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#E5E8DC] hover:shadow-md transition-all duration-300">
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-[#3D4A1F] mb-1 tracking-tight">
+    <section className="rounded-3xl border border-[#E7EBD8] bg-white p-4 shadow-sm sm:p-5">
+      <div className="mb-3">
+        <h2 className="text-base font-bold text-[#243018] sm:text-lg">
           Distribución de Ingresos
         </h2>
-        <p className="text-sm text-[#6B7A4A] font-medium">Por departamento</p>
+        <p className="text-xs sm:text-sm text-[#6C775A]">
+          Participación por departamento
+        </p>
       </div>
 
       {isLoading ? (
-        <div className="h-64 flex items-center justify-center">
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-10 h-10 border-3 border-[#6B8E3D] border-t-transparent rounded-full animate-spin" />
-            <span className="text-[#6B7A4A] font-medium text-sm">Cargando datos...</span>
-          </div>
+        <div className="flex h-[300px] items-center justify-center">
+          <div className="h-10 w-10 rounded-full border-[3px] border-[#2D5F4F] border-t-transparent animate-spin" />
         </div>
       ) : (
-        <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-8">
-          {/* Gráfico de pie */}
-          <div className="w-full lg:flex-1 flex justify-center">
-            <div className="w-full max-w-[280px] lg:max-w-none">
-              <PieResponsiveContainer width="100%" height={240}>
-                <PieChart>
-                  <defs>
-                    {COLORS.map((color, idx) => (
-                      <linearGradient key={idx} id={`gradient-${idx}`} x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stopColor={color} stopOpacity={0.95} />
-                        <stop offset="100%" stopColor={color} stopOpacity={0.75} />
-                      </linearGradient>
-                    ))}
-                  </defs>
-                  <Pie
-                    data={data}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={95}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {data.map((_entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={`url(#gradient-${index % COLORS.length})`}
-                        stroke="#fff"
-                        strokeWidth={3}
-                      />
-                    ))}
-                  </Pie>
-                  <PieTooltip
-                    formatter={(value: number) => formatCurrency(value)}
-                    contentStyle={{
-                      backgroundColor: "#FFFFFF",
-                      border: "1px solid #E5E8DC",
-                      borderRadius: "12px",
-                      padding: "12px 16px",
-                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
-                    }}
-                  />
-                </PieChart>
-              </PieResponsiveContainer>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[200px_1fr] lg:items-center">
+          <div className="relative mx-auto h-[220px] w-[220px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={data as unknown as Record<string, unknown>[]}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={55}
+                  outerRadius={84}
+                  paddingAngle={2}
+                  stroke="#fff"
+                  strokeWidth={3}
+                >
+                  {data.map((item) => (
+                    <Cell key={item.name} fill={item.color} />
+                  ))}
+                </Pie>
+                <PieTooltip
+                  formatter={(value) => formatCurrency(Number(value))}
+                  contentStyle={{
+                    backgroundColor: "#fff",
+                    border: "1px solid #E7EBD8",
+                    borderRadius: "12px",
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <div className="text-center">
+                <p className="text-[11px] uppercase tracking-wide text-[#7A8567]">Total</p>
+                <p className="text-sm font-bold text-[#243018]">{formatCurrency(total)}</p>
+              </div>
             </div>
           </div>
 
-          {/* Leyenda con detalles */}
-          <div className="w-full lg:flex-1 space-y-2">
-            {data.map((item, index) => {
-              const percentage = totalPie > 0 ? ((item.value / totalPie) * 100).toFixed(1) : "0"
-              return (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 rounded-xl hover:bg-[#F8F9F3] transition-colors"
-                >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div 
-                      className="w-3 h-3 rounded-full shadow-sm flex-shrink-0" 
-                      style={{ backgroundColor: item.color }} 
-                    />
-                    <span className="text-sm font-semibold text-[#3D4A1F] truncate">
-                      {item.name}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 ml-2">
-                    <span className="text-sm font-bold text-[#6B8E3D]">
+          <div className="space-y-2">
+            {data
+              .slice()
+              .sort((a, b) => b.value - a.value)
+              .map((item) => {
+                const percentage =
+                  total > 0 ? ((item.value / total) * 100).toFixed(1) : "0.0"
+
+                return (
+                  <div
+                    key={item.name}
+                    className="flex items-center justify-between gap-3 rounded-xl bg-[#FAFBF7] px-3 py-2"
+                  >
+                    <div className="flex min-w-0 items-center gap-2">
+                      <span
+                        className="h-3 w-3 flex-shrink-0 rounded-full"
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span className="truncate text-sm font-medium text-[#2A351D]">
+                        {item.name}
+                      </span>
+                    </div>
+
+                    <span className="text-xs font-bold text-[#5A7018]">
                       {percentage}%
                     </span>
-                    <span className="text-xs text-[#6B7A4A] font-medium hidden sm:inline">
-                      {formatCurrency(item.value)}
-                    </span>
                   </div>
-                </div>
-              )
-            })}
+                )
+              })}
           </div>
         </div>
       )}
-    </div>
+    </section>
   )
 }

@@ -16,6 +16,7 @@ import {
 export type IncomeReportNameFilters = {
   start?: string;
   end?: string;
+  fiscalYear?: number;
   departmentName?: string;
   incomeTypeName?: string;
   incomeSubTypeName?: string;
@@ -66,6 +67,7 @@ export function useIncomeReport(filters: IncomeReportNameFilters | null) {
       const { rows, totals } = await fetchIncomeFull({
         start: filters?.start || undefined,
         end: filters?.end || undefined,
+        fiscalYearId: filters?.fiscalYear,
         departmentId,
         incomeTypeId,
         incomeSubTypeId,

@@ -32,7 +32,7 @@ export const useFiscalYear = () => {
 const STORAGE_KEY = "cg_currentFYId";
 
 export const FiscalYearProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { token } = useAuth(); 
+  const { token } = useAuth();
   const [list, setList] = useState<FiscalYear[]>([]);
   const [current, setCurrent] = useState<FiscalYear | null>(null);
   const [loading, setLoading] = useState(false);
@@ -40,7 +40,7 @@ export const FiscalYearProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const resolveCurrent = (items: FiscalYear[]) => {
     const stored = Number(localStorage.getItem(STORAGE_KEY) || 0) || undefined;
     const fromStorage = stored ? items.find((x) => x.id === stored) : undefined;
-    const active = items.find((x) => x.is_active) ?? items.find((x) => x.state === "OPEN");
+    const active = items.find((x) => x.is_active);
     return fromStorage ?? active ?? items[0] ?? null;
   };
 

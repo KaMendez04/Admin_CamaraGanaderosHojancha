@@ -12,7 +12,6 @@ function formatMoneyCR(v: string | number) {
   return n.toLocaleString("es-CR", { style: "currency", currency: "CRC" })
 }
 
-// Convierte "₡10 000,50" -> 10000.5
 function parseCRCToNumber(input: string) {
   const cleaned = (input ?? "")
     .replace(/[₡\s]/g, "")
@@ -25,12 +24,13 @@ function parseCRCToNumber(input: string) {
 
 type Props = {
   subTypeId?: number
+  fiscalYearId?: number
 }
 
 type Row = any
 
-export default function PSpendList({ subTypeId }: Props) {
-  const q = usePSpendsList()
+export default function PSpendList({ subTypeId, fiscalYearId }: Props) {
+  const q = usePSpendsList(subTypeId, fiscalYearId)
   const mUpdate = useUpdatePSpend()
 
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -40,12 +40,8 @@ export default function PSpendList({ subTypeId }: Props) {
   const MAX_AMOUNT_LENGTH = 20
 
   const rows = useMemo(() => {
-    const all = (q.data ?? []) as Row[]
-    if (!subTypeId) return all
-
-    // Tu data viene como: row.subType.id
-    return all.filter((row) => Number(row?.subType?.id) === Number(subTypeId))
-  }, [q.data, subTypeId])
+    return (q.data ?? []) as Row[]
+  }, [q.data])
 
   function startEdit(row: Row) {
     const initial = String(row.amount ?? "")
@@ -69,9 +65,7 @@ export default function PSpendList({ subTypeId }: Props) {
         amount: amountNumber,
       })
       cancelEdit()
-    } catch {
-      // error se muestra abajo
-    }
+    } catch {}
   }
 
   const columns = useMemo<ColumnDef<Row, any>[]>(
@@ -184,7 +178,7 @@ export default function PSpendList({ subTypeId }: Props) {
 
       {!q.loading && rows.length === 0 && subTypeId && (
         <p className="mt-3 text-xs text-gray-500">
-          No hay proyecciones para este subtipo.
+          No hay proyecciones para este subtipo en el año fiscal seleccionado.
         </p>
       )}
 

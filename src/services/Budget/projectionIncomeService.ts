@@ -20,15 +20,26 @@ export async function createDepartment(payload: CreateDepartmentDTO): Promise<De
 }
 
 
-export async function listPIncomeTypes(departmentId?: number): Promise<ApiList<PIncomeType>> {
-  const { data } = await apiConfig.get<any[]>("/p-income-type");
-  // Map a nuestro modelo plano
-  let items: PIncomeType[] = (data ?? []).map((t) => ({
+export async function listPIncomeTypes(
+  departmentId?: number,
+  fiscalYearId?: number
+): Promise<ApiList<PIncomeType>> {
+  const params: Record<string, number> = {};
+
+  if (departmentId) params.departmentId = departmentId;
+  if (fiscalYearId) params.fiscalYearId = fiscalYearId;
+
+  const { data } = await apiConfig.get<any[]>("/p-income-type", {
+    params: Object.keys(params).length ? params : undefined,
+  });
+
+  const items: PIncomeType[] = (data ?? []).map((t) => ({
     id: t.id,
     name: t.name,
     departmentId: t?.department?.id,
+    amountPIncome: t?.amountPIncome ?? "0.00",
   }));
-  if (departmentId) items = items.filter((t) => t.departmentId === departmentId);
+
   return { data: items };
 }
 
@@ -42,21 +53,36 @@ export async function createPIncomeType(payload: CreatePIncomeTypeDTO): Promise<
 }
 
 
-export async function listPIncomeSubTypes(pIncomeTypeId: number): Promise<ApiList<PIncomeSubType>> {
+export async function listPIncomeSubTypes(
+  pIncomeTypeId: number,
+  fiscalYearId?: number
+): Promise<ApiList<PIncomeSubType>> {
+  const params: Record<string, number> = { pIncomeTypeId };
+
+  if (fiscalYearId) params.fiscalYearId = fiscalYearId;
+
   const { data } = await apiConfig.get<any[]>("/p-income-sub-type", {
-    params: { pIncomeTypeId },
+    params,
   });
+
   const items: PIncomeSubType[] = (data ?? []).map((s) => ({
     id: s.id,
     name: s.name,
     pIncomeTypeId: s?.pIncomeType?.id ?? pIncomeTypeId,
+    amountSubPIncome: s?.amountSubPIncome ?? "0.00",
   }));
+
   return { data: items };
 }
 
-export async function listPIncomes(pIncomeSubTypeId?: number) {
+export async function listPIncomes(pIncomeSubTypeId?: number, fiscalYearId?: number) {
+  const params: Record<string, number> = {};
+
+  if (pIncomeSubTypeId) params.pIncomeSubTypeId = pIncomeSubTypeId;
+  if (fiscalYearId) params.fiscalYearId = fiscalYearId;
+
   const { data } = await apiConfig.get<any[]>("/p-income", {
-    params: pIncomeSubTypeId ? { pIncomeSubTypeId } : undefined,
+    params: Object.keys(params).length ? params : undefined,
   });
 
   return data;

@@ -38,15 +38,17 @@ export async function updateDepartment(
   return data;
 }
 
-export async function listIncomeTypes(departmentId?: number): Promise<ApiList<IncomeType>> {
-  const { data } = await apiConfig.get<any[]>("/income-type");
-  let items: IncomeType[] = (data ?? []).map((t) => ({
-    id: t.id,
-    name: t.name,
-    departmentId: t?.department?.id,
-  }));
-  if (departmentId) items = items.filter((t) => t.departmentId === departmentId);
-  return { data: items };
+export async function listIncomeTypes(departmentId?: number, fiscalYearId?: number) {
+  const params: Record<string, number> = {};
+
+  if (departmentId) params.departmentId = departmentId;
+  if (fiscalYearId) params.fiscalYearId = fiscalYearId;
+
+  const res = await apiConfig.get("/income-type", {
+    params: Object.keys(params).length ? params : undefined,
+  });
+
+  return res;
 }
 
 export async function createIncomeType(payload: CreateIncomeTypeDTO): Promise<IncomeType> {
@@ -71,16 +73,17 @@ export async function updateIncomeType(
   };
 }
 
-export async function listIncomeSubTypes(incomeTypeId: number): Promise<ApiList<IncomeSubType>> {
-  const { data } = await apiConfig.get<any[]>("/income-sub-type", {
-    params: { incomeTypeId },
+export async function listIncomeSubTypes(incomeTypeId?: number, fiscalYearId?: number) {
+  const params: Record<string, number> = {};
+
+  if (incomeTypeId) params.incomeTypeId = incomeTypeId;
+  if (fiscalYearId) params.fiscalYearId = fiscalYearId;
+
+  const res = await apiConfig.get("/income-sub-type", {
+    params: Object.keys(params).length ? params : undefined,
   });
-  const items: IncomeSubType[] = (data ?? []).map((s) => ({
-    id: s.id,
-    name: s.name,
-    incomeTypeId: s?.incomeType?.id ?? incomeTypeId,
-  }));
-  return { data: items };
+
+  return res;
 }
 
 export async function createIncomeSubType(payload: CreateIncomeSubTypeDTO): Promise<IncomeSubType> {
@@ -110,7 +113,7 @@ export async function createIncome(payload: CreateIncomeDTO): Promise<Income> {
     incomeSubTypeId: payload.incomeSubTypeId,
     amount: Number(payload.amount).toFixed(2),
     date: payload.date,
-    fiscalYearId: getFiscalYearId(),
+    fiscalYearId: payload.fiscalYearId,
   };
 
   const { data } = await apiConfig.post<any>("/income", body);
@@ -127,10 +130,9 @@ export async function createIncome(payload: CreateIncomeDTO): Promise<Income> {
   };
 }
 
-
 export async function updateIncome(
   id: number,
-  payload: { amount?: number; incomeSubTypeId?: number; date?: string }
+  payload: { amount?: number; incomeSubTypeId?: number; date?: string; fiscalYearId: number }
 ) {
   const body: any = {};
 
@@ -144,13 +146,20 @@ export async function updateIncome(
     body.date = payload.date;
   }
 
+  body.fiscalYearId = payload.fiscalYearId;
+
   const { data } = await apiConfig.patch<any>(`/income/${id}`, body);
   return data;
 }
+export async function listIncomes(incomeSubTypeId?: number, fiscalYearId?: number) {
+  const params: Record<string, number> = {};
 
-export async function listIncomes(incomeSubTypeId?: number) {
+  if (incomeSubTypeId) params.incomeSubTypeId = incomeSubTypeId;
+  if (fiscalYearId) params.fiscalYearId = fiscalYearId;
+
   const { data } = await apiConfig.get<any[]>("/income", {
-    params: incomeSubTypeId ? { incomeSubTypeId } : undefined,
+    params: Object.keys(params).length ? params : undefined,
   });
+
   return data;
 }
