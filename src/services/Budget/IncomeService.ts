@@ -12,13 +12,6 @@ import type {
 } from "../../models/Budget/IncomeType";
 import apiConfig from "../../apiConfig/apiConfig";
 
-const CURRENT_FY_KEY = "cg_currentFYId";
-
-const getFiscalYearId = () =>
-  typeof window === "undefined"
-    ? undefined
-    : Number(localStorage.getItem(CURRENT_FY_KEY) || 0) || undefined;
-
 export async function listDepartments(): Promise<ApiList<Department>> {
   const { data } = await apiConfig.get<Department[]>("/department");
   return { data };
