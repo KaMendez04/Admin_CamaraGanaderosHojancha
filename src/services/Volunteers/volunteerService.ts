@@ -129,8 +129,9 @@ export const voluntariosPdfService = {
 };
 
 export const solicitudesVoluntariadoPdfService = {
-  async getSolicitudesPdf(): Promise<Blob> {
+  async getSolicitudesPdf(estado?: string): Promise<Blob> {
     const res = await apiConfig.get("/solicitud-voluntariado/pdf-solicitudes", {
+      params: estado ? { estado } : undefined,
       responseType: "blob",
       headers: { Accept: "application/pdf" },
     });
@@ -138,13 +139,16 @@ export const solicitudesVoluntariadoPdfService = {
     return res.data as Blob;
   },
 
-  async downloadSolicitudesPdf(filename = "solicitudes-de-voluntarios.pdf") {
-    const blob = await this.getSolicitudesPdf();
+  async downloadSolicitudesPdf(
+    estado?: string,
+    filename = "solicitudes-de-voluntarios.pdf"
+  ) {
+    const blob = await this.getSolicitudesPdf(estado);
     downloadBlob(blob, filename);
   },
 
-  async openSolicitudesPdf() {
-    const blob = await this.getSolicitudesPdf();
+  async openSolicitudesPdf(estado?: string) {
+    const blob = await this.getSolicitudesPdf(estado);
     const url = window.URL.createObjectURL(blob);
     window.open(url, "_blank", "noopener,noreferrer");
     setTimeout(() => window.URL.revokeObjectURL(url), 60_000);

@@ -17,86 +17,69 @@ export async function listAssociates(
     limit: params.limit,
   };
 
-  if (params.estado !== undefined) queryParams.estado = params.estado;
+  // ✅ El backend usa booleanos (true=ACTIVO, false=INACTIVO)
+  // Pero Axios puede omitir `false` — lo forzamos a string "true"/"false"
+  if (params.estado !== undefined) queryParams.estado = String(params.estado);
+
   if (params.search) queryParams.search = params.search;
-  if (params.sort) queryParams.sort = params.sort;
+  if (params.sort)   queryParams.sort   = params.sort;
 
   const response = await apiConfig.get("/associates", { params: queryParams });
   return AssociateListResponseSchema.parse(response.data);
 }
 
-// ✅ NUEVO: Detalle BÁSICO (sin cargar TODA la info de fincas - para lazy loading)
+// ✅ Detalle BÁSICO
 export async function getAssociateBasic(id: number): Promise<Associate> {
   const response = await apiConfig.get(`/associates/${id}/basic`);
-
-  console.log("📦 Basic associate response:", response.data);
-
   const parsed = AssociateSchema.safeParse(response.data);
-
   if (!parsed.success) {
     console.error("❌ Schema validation failed:", parsed.error.format());
     throw new Error("Error al validar la respuesta del servidor");
   }
-
   return parsed.data;
 }
 
 // ✅ Detalle completo
 export async function getAssociate(id: number): Promise<Associate> {
   const response = await apiConfig.get(`/associates/${id}`);
-
-  console.log("📦 Response from /associates/:id:", response.data);
-
   const parsed = AssociateSchema.safeParse(response.data);
-
   if (!parsed.success) {
     console.error("❌ Schema validation failed:", parsed.error);
     throw new Error("Error al validar la respuesta del servidor");
   }
-
   return parsed.data;
 }
 
-// ✅ Buscar por cédula
 export async function getAssociateByCedula(cedula: string): Promise<Associate> {
   const response = await apiConfig.get(`/associates/cedula/${cedula}`);
   return AssociateSchema.parse(response.data);
 }
 
-// ✅ Actualizar asociado
-export async function updateAssociate(
-  id: number,
-  patch: UpdateAssociateValues
-): Promise<Associate> {
+export async function updateAssociate(id: number, patch: UpdateAssociateValues): Promise<Associate> {
   const response = await apiConfig.patch(`/associates/${id}`, patch);
   return AssociateSchema.parse(response.data);
 }
 
-// ✅ Activar asociado
 export async function activateAssociate(id: number): Promise<Associate> {
   const response = await apiConfig.patch(`/associates/${id}/activate`);
   return AssociateSchema.parse(response.data);
 }
 
-// ✅ Desactivar asociado
 export async function deactivateAssociate(id: number): Promise<Associate> {
   const response = await apiConfig.patch(`/associates/${id}/deactivate`);
   return AssociateSchema.parse(response.data);
 }
 
-// ✅ Toggle estado
 export async function toggleAssociateStatus(id: number): Promise<Associate> {
   const response = await apiConfig.patch(`/associates/${id}/toggle`);
   return AssociateSchema.parse(response.data);
 }
 
-// ✅ Estadísticas
 export async function getAssociatesStats() {
   const response = await apiConfig.get("/associates/stats");
   return response.data;
 }
 
-// ✅ Descargar PDF
 export async function downloadAssociatesPDF(params: {
   estado?: string;
   search?: string;
@@ -105,10 +88,7 @@ export async function downloadAssociatesPDF(params: {
   const response = await apiConfig.get("/associates/pdf-list", {
     params,
     responseType: "blob",
-    headers: {
-      Accept: "application/pdf",
-    },
+    headers: { Accept: "application/pdf" },
   });
-
   return response.data as Blob;
 }

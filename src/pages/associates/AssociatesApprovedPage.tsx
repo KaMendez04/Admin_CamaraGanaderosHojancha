@@ -11,6 +11,7 @@ import { KPICard } from "../../components/KPICard";
 import { useDownloadAssociatesPDF } from "../../hooks/associates/useDownloadAssociatesPDF";
 import { Download } from "lucide-react";
 import { getPageItems, PaginationBar } from "@/components/ui/pagination";
+
 type EstadoFilter = "ACTIVO" | "INACTIVO" | undefined;
 
 export default function AssociatesApprovedPage() {
@@ -23,9 +24,11 @@ export default function AssociatesApprovedPage() {
   const role = getCurrentUser()?.role?.name?.toUpperCase();
   const isReadOnly = role === "JUNTA";
 
-  // Convertir filtro a boolean o undefined para el hook
+  // ✅ CORREGIDO: ya no convertimos a booleano — el servicio ahora recibe
+  // directamente "ACTIVO" | "INACTIVO" | undefined y los mapea internamente.
+  // Antes: true/false → el backend lo ignoraba o lo interpretaba mal.
   const estadoParam =
-    estadoFilter === "ACTIVO" ? true :
+    estadoFilter === "ACTIVO"   ? true  :
     estadoFilter === "INACTIVO" ? false :
     undefined;
 
@@ -91,30 +94,30 @@ export default function AssociatesApprovedPage() {
           </div>
         </div>
 
-<button
-  onClick={() =>
-    downloadPDF.mutate({
-      estado: status,
-      search,
-      sort: "createdAt:desc",
-    })
-  }
-  disabled={downloadPDF.isPending}
-  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm mb-6 mt-6 lg:mt-0"
->
-  {downloadPDF.isPending ? (
-    <>
-      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-      Generando PDF...
-    </>
-  ) : (
-    <>
-      <Download className="w-4 h-4" />
-      Descargar PDF
-    </>
-  )}
-</button>
- 
+        <button
+          onClick={() =>
+            downloadPDF.mutate({
+              estado: estadoFilter, // ✅ CORREGIDO: era `status` (window.status), ahora usa el estado correcto
+              search,
+              sort: "createdAt:desc",
+            })
+          }
+          disabled={downloadPDF.isPending}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm mb-6 mt-6 lg:mt-0"
+        >
+          {downloadPDF.isPending ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Generando PDF...
+            </>
+          ) : (
+            <>
+              <Download className="w-4 h-4" />
+              Descargar PDF
+            </>
+          )}
+        </button>
+
         {/* Tabla */}
         <AssociatesTable
           data={tableData}
@@ -124,10 +127,10 @@ export default function AssociatesApprovedPage() {
           onEdit={(id) => setEditId(id)}
         />
 
-        {/* Paginación con ActionButtons */}
+        {/* Paginación */}
         {!isLoading && (
           <div className="flex justify-between items-center mt-6">
-           <PaginationBar
+            <PaginationBar
               page={page}
               totalPages={data?.pages ?? 1}
               pageItems={getPageItems(page, data?.pages ?? 1)}

@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { downloadSolicitudesPDF } from "../../services/Associates/adminSolicitudesService";
+import { getCostaRicaFileStamp } from "@/utils/dateForPdf";
 
 function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
@@ -14,13 +15,6 @@ function downloadBlob(blob: Blob, filename: string) {
   setTimeout(() => URL.revokeObjectURL(url), 30_000);
 }
 
-function getDateStr() {
-  const d = new Date();
-  const dd = String(d.getDate()).padStart(2, "0");
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const yyyy = d.getFullYear();
-  return `${dd}-${mm}-${yyyy}`;
-}
 
 export function useDownloadSolicitudesPDF() {
   return useMutation({
@@ -33,7 +27,7 @@ export function useDownloadSolicitudesPDF() {
     },
     onSuccess: (blob, vars) => {
       const estado = vars.estado ?? "TODOS";
-      downloadBlob(blob, `solicitudes_${estado}_${getDateStr()}.pdf`);
+      downloadBlob(blob, `solicitudes_${estado}_${getCostaRicaFileStamp()}.pdf`);
     },
   });
 }
