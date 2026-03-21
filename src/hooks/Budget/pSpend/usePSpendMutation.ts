@@ -19,7 +19,6 @@ import {
 import {
   createDepartment,
   updateDepartment,
-  // updateDepartment, // ✅ TODO: agregar cuando exista en el service correcto
 } from "../../../services/Budget/SpendService";
 
 function wrapMutation<TPayload, TResult>(
@@ -41,20 +40,6 @@ export function useCreateDepartment() {
   return wrapMutation<{ name: string }, Department>(m);
 }
 
-/**
- * ✅ TODO: habilitar cuando tengas updateDepartment en el service correcto.
- *
-export function useUpdateDepartment() {
-  const qc = useQueryClient();
-  const m = useMutation({
-    mutationFn: ({ id, name }: { id: number; name: string }) =>
-      updateDepartment(id, { name }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["departments"] }),
-  });
-  return wrapMutation<{ id: number; name: string }, Department>(m);
-}
- */
-
 export function useCreatePSpendType() {
   const qc = useQueryClient();
   const m = useMutation({
@@ -63,6 +48,18 @@ export function useCreatePSpendType() {
       qc.invalidateQueries({ queryKey: ["pSpendTypes", p.departmentId ?? "none"] }),
   });
   return wrapMutation<{ name: string; departmentId: number }, PSpendType>(m);
+}
+
+export function useUpdateDepartment() {
+  const qc = useQueryClient();
+  const m = useMutation({
+    mutationFn: ({ id, name }: { id: number; name: string }) =>
+      updateDepartment(id, { name }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["departments"] });
+    },
+  });
+  return wrapMutation<{ id: number; name: string }, Department>(m);
 }
 
 export function useUpdatePSpendType() {
@@ -102,30 +99,57 @@ export function useUpdatePSpendSubType() {
 }
 
 export function useCreatePSpendEntry() {
-  const m = useMutation({ mutationFn: (p: CreatePSpendDTO) => createPSpend(p) });
+  const qc = useQueryClient();
+
+  const m = useMutation({
+    mutationFn: (p: CreatePSpendDTO) => createPSpend(p),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ["pSpendList"] });
+      qc.invalidateQueries({ queryKey: ["pSpendSubTypes"] });
+      qc.invalidateQueries({ queryKey: ["pSpendTypes"] });
+
+      if (vars.fiscalYearId) {
+        qc.invalidateQueries({
+          queryKey: ["pSpendList", "all", vars.fiscalYearId],
+        });
+      }
+    },
+  });
+
   return wrapMutation<CreatePSpendDTO, PSpend>(m);
 }
 
-export function useUpdateDepartment() {
-  const qc = useQueryClient();
-  const m = useMutation({
-    mutationFn: ({ id, name }: { id: number; name: string }) => updateDepartment(id, { name }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["departments"] }),
-  });
-  return wrapMutation<{ id: number; name: string }, Department>(m);
-}
-
 export function useUpdatePSpend() {
-  const qc = useQueryClient()
+  const qc = useQueryClient();
 
   const m = useMutation({
-    mutationFn: (p: { id: number; amount?: number; subTypeId?: number; date?: string }) =>
-      updatePSpend(p.id, { amount: p.amount, subTypeId: p.subTypeId, date: p.date }),
+    mutationFn: (p: {
+      id: number;
+      amount?: number;
+      subTypeId?: number;
+      fiscalYearId: number;
+    }) =>
+      updatePSpend(p.id, {
+        amount: p.amount,
+        subTypeId: p.subTypeId,
+        fiscalYearId: p.fiscalYearId,
+      }),
 
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["pSpendList"] })
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ["pSpendList"] });
+      qc.invalidateQueries({ queryKey: ["pSpendSubTypes"] });
+      qc.invalidateQueries({ queryKey: ["pSpendTypes"] });
+
+      if (vars.fiscalYearId) {
+        qc.invalidateQueries({
+          queryKey: ["pSpendList", "all", vars.fiscalYearId],
+        });
+      }
     },
-  })
+  });
 
-  return wrapMutation<{ id: number; amount?: number; subTypeId?: number; date?: string }, any>(m)
+  return wrapMutation<
+    { id: number; amount?: number; subTypeId?: number; fiscalYearId: number },
+    any
+  >(m);
 }
