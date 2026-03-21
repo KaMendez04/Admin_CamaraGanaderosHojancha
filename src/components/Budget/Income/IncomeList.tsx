@@ -8,13 +8,13 @@ import { useUpdateIncome } from "../../../hooks/Budget/income/useIncomeMutation"
 
 import { BirthDatePicker } from "@/components/ui/birthDayPicker";
 import { CharCounter } from "../../CharCounter";
+import { useFiscalYear } from "@/hooks/Budget/useFiscalYear";
 
 function formatMoneyCR(v: string | number) {
   const n = Number(v ?? 0);
   return n.toLocaleString("es-CR", { style: "currency", currency: "CRC" });
 }
 
-// Convierte "₡10 000,50" -> 10000.5
 function parseCRCToNumber(input: string) {
   const cleaned = (input ?? "")
     .replace(/[₡\s]/g, "")
@@ -32,10 +32,8 @@ function formatDateCR(value: any) {
 
   const pure = s.includes("T") ? s.slice(0, 10) : s;
 
-  // ya viene dd/mm/yyyy
   if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(pure)) return pure;
 
-  // YYYY-MM-DD -> dd/mm/yyyy
   if (/^\d{4}-\d{2}-\d{2}$/.test(pure)) {
     const [y, m, d] = pure.split("-");
     return `${d}/${m}/${y}`;
@@ -48,13 +46,9 @@ function normalizeToDateInput(value: any) {
   const v = String(value ?? "").trim();
   if (!v) return "";
 
-  // YYYY-MM-DD
   if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
-
-  // ISO
   if (/^\d{4}-\d{2}-\d{2}T/.test(v)) return v.slice(0, 10);
 
-  // dd/mm/yyyy -> yyyy-mm-dd
   const m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (m) {
     const dd = String(m[1]).padStart(2, "0");
@@ -74,11 +68,13 @@ type Props = {
 type Row = any;
 
 export default function IncomeList({ subTypeId, fiscalYearId }: Props) {
-  const q = useIncomesList(subTypeId, fiscalYearId);
+  const { current } = useFiscalYear();
+  const selectedFiscalYearId = fiscalYearId ?? current?.id;
+
+  const q = useIncomesList(subTypeId, selectedFiscalYearId);
   const mUpdate = useUpdateIncome();
 
   const [editingId, setEditingId] = useState<number | null>(null);
-
   const [draftAmount, setDraftAmount] = useState<string>("");
   const [draftDate, setDraftDate] = useState<string>("");
 
@@ -106,15 +102,15 @@ export default function IncomeList({ subTypeId, fiscalYearId }: Props) {
 
   function cancelEdit() {
     setEditingId(null);
-
     setDraftAmount("");
     amountRef.current = "";
-
     setDraftDate("");
     dateRef.current = "";
   }
 
   async function saveEdit(row: Row) {
+    if (!selectedFiscalYearId) return;
+
     const amountNumber = parseCRCToNumber(amountRef.current);
     const dateValue = (dateRef.current ?? "").trim();
 
@@ -123,6 +119,7 @@ export default function IncomeList({ subTypeId, fiscalYearId }: Props) {
         id: row.id,
         amount: amountNumber,
         date: dateValue,
+        fiscalYearId: selectedFiscalYearId,
       });
       cancelEdit();
     } catch {}
@@ -214,7 +211,7 @@ export default function IncomeList({ subTypeId, fiscalYearId }: Props) {
                 <button
                   className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#6B7A3A] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 sm:w-auto"
                   onClick={() => saveEdit(r)}
-                  disabled={mUpdate.loading}
+                  disabled={mUpdate.loading || !selectedFiscalYearId}
                   title="Guardar"
                 >
                   <Save className="h-4 w-4" />
@@ -236,17 +233,7 @@ export default function IncomeList({ subTypeId, fiscalYearId }: Props) {
 
           return (
             <button
-              className="
-                inline-flex items-center justify-center
-                rounded-lg
-                border border-[#6B7A3A]
-                bg-[#F8F9F3]
-                p-2
-                text-[#6B7A3A]
-                shadow-sm
-                transition-colors
-                hover:bg-[#EAEFE0]
-              "
+              className="inline-flex items-center justify-center rounded-lg border border-[#6B7A3A] bg-[#F8F9F3] p-2 text-[#6B7A3A] shadow-sm transition-colors hover:bg-[#EAEFE0]"
               onClick={() => startEdit(r)}
               title="Editar"
             >
@@ -256,7 +243,7 @@ export default function IncomeList({ subTypeId, fiscalYearId }: Props) {
         },
       },
     ],
-    [editingId, draftAmount, draftDate, mUpdate.loading]
+    [editingId, draftAmount, draftDate, mUpdate.loading, selectedFiscalYearId]
   );
 
   if (q.error) return <p className="text-sm text-red-600">{q.error}</p>;

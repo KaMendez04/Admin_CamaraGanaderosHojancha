@@ -93,6 +93,7 @@ export async function createSpend(payload: CreateSpendDTO): Promise<Spend> {
     spendSubTypeId: payload.spendSubTypeId,
     amount: Number(payload.amount).toFixed(2),
     date: payload.date,
+    fiscalYearId: payload.fiscalYearId,
   };
 
   const { data } = await apiConfig.post<any>("/spend", body);
@@ -217,15 +218,17 @@ export async function listSpend(spendSubTypeId?: number, fiscalYearId?: number):
   return { data: items };
 }
 
-// ✅ Update egreso (editar monto / subtipo / fecha si quisieras)
 export async function updateSpend(
   id: number,
-  payload: { spendSubTypeId?: number; amount?: number; date?: string }
+  payload: { spendSubTypeId?: number; amount?: number; date?: string; fiscalYearId: number }
 ): Promise<Spend> {
   const body: any = {};
+
   if (payload.spendSubTypeId !== undefined) body.spendSubTypeId = payload.spendSubTypeId;
   if (payload.amount !== undefined) body.amount = Number(payload.amount).toFixed(2);
   if (payload.date !== undefined) body.date = payload.date;
+
+  body.fiscalYearId = payload.fiscalYearId;
 
   const { data } = await apiConfig.patch<any>(`/spend/${id}`, body);
 

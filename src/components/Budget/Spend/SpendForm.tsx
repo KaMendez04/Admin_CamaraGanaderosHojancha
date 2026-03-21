@@ -19,7 +19,7 @@ import type { CreateSpendDTO } from "../../../models/Budget/SpendType";
 import { BirthDatePicker } from "@/components/ui/birthDayPicker";
 import { ActionButtons } from "../../ActionButtons";
 import { showSuccessAlert } from "@/utils/alerts";
-
+import { useFiscalYear } from "@/hooks/Budget/useFiscalYear";
 
 type Props = {
   onSuccess?: (createdId: number) => void;
@@ -39,6 +39,15 @@ function parseOriginId(v: string | number | ""): { origin: "r" | "p"; id: number
 }
 
 export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) {
+  const { current, list } = useFiscalYear();
+
+  const selectedFiscalYear =
+    fiscalYearId != null
+      ? list.find((fy) => fy.id === fiscalYearId) ?? null
+      : current;
+
+  const selectedFiscalYearId = selectedFiscalYear?.id;
+
   const [departmentId, setDepartmentId] = useState<number | "">("");
   const [typeKey, setTypeKey] = useState<OriginId | "">("");
   const [subTypeKey, setSubTypeKey] = useState<OriginId | "">("");
@@ -57,13 +66,12 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // ===== Queries =====
   const dept = useDepartments();
 
   const realTypes = useSpendTypes(typeof departmentId === "number" ? departmentId : undefined);
   const projTypes = usePSpendTypes(
     typeof departmentId === "number" ? departmentId : undefined,
-    fiscalYearId
+    selectedFiscalYearId
   );
 
   const typeParsed = parseOriginId(typeKey);
@@ -75,12 +83,11 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
       ? {
           departmentId: typeof departmentId === "number" ? departmentId : undefined,
           typeId: typeParsed.id,
-          fiscalYearId,
+          fiscalYearId: selectedFiscalYearId,
         }
       : undefined
   );
 
-  // ===== Options =====
   const departmentOptions = useMemo(
     () => (dept.data ?? []).map((d) => ({ label: d.name, value: d.id })),
     [dept.data]
@@ -114,7 +121,6 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
     }));
   }, [typeParsed, realSubTypes.data, projSubTypes.data]);
 
-  // ===== Cascada =====
   useEffect(() => {
     setTypeKey("");
     setSubTypeKey("");
@@ -124,7 +130,6 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
     setSubTypeKey("");
   }, [typeKey]);
 
-  // ===== Mutations =====
   const createSpend = useCreateSpendEntry();
   const ensureSubFromProj = useEnsureSpendSubTypeFromProjection();
 
@@ -136,6 +141,17 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
       (ensureSubFromProj as any).isLoading ??
       (ensureSubFromProj as any).loading
   );
+
+  function isDateInSelectedFiscalYear(value?: string) {
+    if (!value || !selectedFiscalYear) return true;
+
+    const start = String(selectedFiscalYear.start_date ?? "").slice(0, 10);
+    const end = String(selectedFiscalYear.end_date ?? "").slice(0, 10);
+
+    if (!start || !end) return true;
+
+    return value >= start && value <= end;
+  }
 
   function resetForm() {
     setErrors({});
@@ -157,11 +173,30 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
   async function onSubmit() {
     setErrors({});
 
+    if (!selectedFiscalYearId) {
+      return setErrors((e) => ({ ...e, api: "Selecciona un año fiscal" }));
+    }
+
+    if (!selectedFiscalYear?.is_active) {
+      return setErrors((e) => ({ ...e, api: "El año fiscal seleccionado no está activo" }));
+    }
+
+    if (selectedFiscalYear.state !== "OPEN") {
+      return setErrors((e) => ({ ...e, api: "El año fiscal seleccionado está cerrado" }));
+    }
+
     if (!departmentId) return setErrors((e) => ({ ...e, departmentId: "Selecciona un departamento" }));
     if (!typeKey) return setErrors((e) => ({ ...e, typeId: "Selecciona un tipo" }));
     if (!subTypeKey) return setErrors((e) => ({ ...e, subTypeId: "Selecciona un sub-tipo" }));
     if (!amountStr || amount <= 0) return setErrors((e) => ({ ...e, amount: "Monto requerido" }));
     if (!date) return setErrors((e) => ({ ...e, date: "Fecha requerida" }));
+
+    if (!isDateInSelectedFiscalYear(date)) {
+      return setErrors((e) => ({
+        ...e,
+        date: "La fecha debe pertenecer al año fiscal seleccionado",
+      }));
+    }
 
     try {
       const tParsed = parseOriginId(typeKey);
@@ -183,6 +218,7 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
         spendSubTypeId: realSpendSubTypeId,
         amount,
         date,
+        fiscalYearId: selectedFiscalYearId,
       };
 
       const res = await createSpend.mutate(payload);
@@ -191,13 +227,17 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
       await showSuccessAlert("El egreso se registró correctamente.");
       onSuccess?.(res.id);
     } catch (err: any) {
-      setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo registrar el egreso" }));
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "No se pudo registrar el egreso";
+
+      setErrors((e) => ({ ...e, api: msg }));
     }
   }
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
-      {/* Departamento */}
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-[#33361D]">Departamento</label>
         <CustomSelect
@@ -210,7 +250,6 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
         {errors.departmentId && <p className="text-xs text-red-600">{errors.departmentId}</p>}
       </div>
 
-      {/* Tipo */}
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-[#33361D]">Tipo</label>
         <CustomSelect
@@ -223,7 +262,6 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
         {errors.typeId && <p className="text-xs text-red-600">{errors.typeId}</p>}
       </div>
 
-      {/* Subtipo */}
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-[#33361D]">Subtipo</label>
         <CustomSelect
@@ -236,26 +274,37 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
         {errors.subTypeId && <p className="text-xs text-red-600">{errors.subTypeId}</p>}
       </div>
 
-      {/* Fecha */}
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-[#33361D]">Fecha</label>
 
         <BirthDatePicker
           value={date}
-          onChange={(iso) => setDate(iso)}
+          onChange={(iso) => {
+            setDate(iso);
+
+            if (!iso) {
+              setErrors((e) => ({ ...e, date: "" }));
+              return;
+            }
+
+            if (!isDateInSelectedFiscalYear(iso)) {
+              setErrors((e) => ({
+                ...e,
+                date: "La fecha debe pertenecer al año fiscal seleccionado",
+              }));
+            } else {
+              setErrors((e) => ({ ...e, date: "", api: "" }));
+            }
+          }}
           disabled={disabled}
           placeholder="Seleccione una fecha"
           error={errors.date}
-          minDate={new Date().toISOString().slice(0, 10)}
           helperText=""
           triggerClassName="rounded-xl border border-gray-200 px-3 py-2 outline-none focus:ring-2 focus:ring-[#708C3E]"
           className="w-full"
         />
-
-        {errors.date && <p className="text-xs text-red-600">{errors.date}</p>}
       </div>
 
-      {/* Monto */}
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-[#33361D]">Monto</label>
         <input
@@ -278,7 +327,19 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
             showText
             saveText="Registrar egreso"
             cancelText="Cancelar"
-            disabled={disabled || !departmentId || !typeKey || !subTypeKey || !amountStr || amount <= 0 || !date}
+            disabled={
+              disabled ||
+              !selectedFiscalYearId ||
+              !selectedFiscalYear?.is_active ||
+              selectedFiscalYear?.state !== "OPEN" ||
+              !departmentId ||
+              !typeKey ||
+              !subTypeKey ||
+              !amountStr ||
+              amount <= 0 ||
+              !date ||
+              !isDateInSelectedFiscalYear(date)
+            }
             isSaving={isSubmitting}
             requireConfirmCancel={false}
             requireConfirmSave={false}

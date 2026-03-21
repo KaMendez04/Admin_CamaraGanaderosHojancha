@@ -70,6 +70,7 @@ export type CreateIncomeDTO = {
   incomeSubTypeId: number;
   amount: number; // lo serializamos en el service si hace falta
   date: string;   // 'YYYY-MM-DD'
+  fiscalYearId: number;
 };
 
 export type Option = { label: string; value: number | string };

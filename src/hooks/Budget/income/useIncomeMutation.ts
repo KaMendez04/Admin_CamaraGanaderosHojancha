@@ -131,13 +131,15 @@ export function useUpdateIncome() {
       amount,
       incomeSubTypeId,
       date,
+      fiscalYearId,
     }: {
       id: number;
       amount?: number;
       incomeSubTypeId?: number;
       date?: string;
+      fiscalYearId: number;
     }) =>
-      updateIncome(id, { amount, incomeSubTypeId, date }),
+      updateIncome(id, { amount, incomeSubTypeId, date, fiscalYearId }),
 
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["incomeList"] });
@@ -146,7 +148,7 @@ export function useUpdateIncome() {
   });
 
   return wrapMutation<
-    { id: number; amount?: number; incomeSubTypeId?: number; date?: string },
+    { id: number; amount?: number; incomeSubTypeId?: number; date?: string; fiscalYearId: number },
     any
   >(m);
 }

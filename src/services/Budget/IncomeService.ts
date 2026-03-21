@@ -106,6 +106,7 @@ export async function createIncome(payload: CreateIncomeDTO): Promise<Income> {
     incomeSubTypeId: payload.incomeSubTypeId,
     amount: Number(payload.amount).toFixed(2),
     date: payload.date,
+    fiscalYearId: payload.fiscalYearId,
   };
 
   const { data } = await apiConfig.post<any>("/income", body);
@@ -122,10 +123,9 @@ export async function createIncome(payload: CreateIncomeDTO): Promise<Income> {
   };
 }
 
-
 export async function updateIncome(
   id: number,
-  payload: { amount?: number; incomeSubTypeId?: number; date?: string }
+  payload: { amount?: number; incomeSubTypeId?: number; date?: string; fiscalYearId: number }
 ) {
   const body: any = {};
 
@@ -139,10 +139,11 @@ export async function updateIncome(
     body.date = payload.date;
   }
 
+  body.fiscalYearId = payload.fiscalYearId;
+
   const { data } = await apiConfig.patch<any>(`/income/${id}`, body);
   return data;
 }
-
 export async function listIncomes(incomeSubTypeId?: number, fiscalYearId?: number) {
   const params: Record<string, number> = {};
 
