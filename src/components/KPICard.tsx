@@ -1,22 +1,23 @@
 interface KPICardProps {
   label: string;
   value: string | number;
-  tone?: "base" | "alt" | "gold";
+  tone?: "base" | "gold";
 }
 
 export function KPICard({ label, value, tone = "base" }: KPICardProps) {
   const toneMap = {
-    base: "bg-[#F8F9F3] text-[#5B732E]",
-    alt: "bg-[#EAEFE0] text-[#5B732E]",
-    gold: "bg-[#FEF6E0] text-[#C19A3D]",
+    base: "bg-[#EAEFE0] border border-[#d7dfc7] text-slate-900",
+    gold: "bg-[#fdf5e4] border border-[#F1E3B7] text-[#8A6A19]",
   } as const;
 
   return (
-    <div className={`rounded-2xl ${toneMap[tone]} p-3.5 shadow-sm`}>
-      <div className="text-xs font-bold tracking-wider uppercase opacity-80">
+    <div className={`min-w-[150px] rounded-2xl px-4 py-3 ${toneMap[tone]}`}>
+      <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
         {label}
       </div>
-      <div className="mt-1.5 text-2xl font-bold">{value}</div>
+      <div className="mt-1 text-[22px] font-semibold leading-none">
+        {value}
+      </div>
     </div>
   );
 }

@@ -40,16 +40,13 @@ import Reports from "../pages/Budget/Reports/index";
 import IncomeReportPage from "../pages/Budget/Reports/IncomeReportPage";
 import SpendReportPage from "../pages/Budget/Reports/SpendReportPage";
 
-// ✅ nombres reales
 import PSpendProjectionsPage from "../pages/Budget/Reports/PSpends";
 import PIncomeProjectionsPage from "../pages/Budget/Reports/PIncome";
 import ExtraReportPage from "../pages/Budget/Reports/extraReportPage";
 
-import AssociatesSubnav from "../pages/associates/AssociatesSubnav";
 import AdminRequestsPage from "../pages/associates/AdminRequestPage";
 import AssociatesApprovedPage from "../pages/associates/AssociatesApprovedPage";
 
-import VolunteersSubnav from "../pages/volunteers/VolunteersSubnav";
 import VolunteersRequestPage from "../pages/volunteers/VolunteersRequestPage";
 import VolunteersApprovedPage from "../pages/volunteers/VolunteersApprovedPage";
 
@@ -316,8 +313,10 @@ const budgetLayoutRoute = new Route({
   path: "/budget",
   component: () => (
     <>
+    <div className="flex justify-center pt-4 bg-[#f3f8ef]">
       <BudgetSubnav />
-      <Outlet />
+    </div>
+    <Outlet />
     </>
   ),
 });
@@ -457,7 +456,6 @@ const associatesLayoutRoute = new Route({
   },
   component: () => (
     <>
-      <AssociatesSubnav />
       <Outlet />
     </>
   ),
@@ -496,7 +494,6 @@ const volunteersLayoutRoute = new Route({
   },
   component: () => (
     <>
-      <VolunteersSubnav />
       <Outlet />
     </>
   ),

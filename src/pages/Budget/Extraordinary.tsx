@@ -117,8 +117,8 @@ export default function BudgetExtraordinary() {
   const fiscalRange = getFiscalRange()
 
   return (
-    <div className="min-h-screen bg-[#f3f8ef] font-sans">
-      <div className="mx-auto max-w-5xl p-4 md:p-8">
+    <div className="min-h-screen bg-[#f3f8ef]">
+      <div className="mx-auto max-w-6xl p-4 md:p-8">
         <div className="relative rounded-2xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)] ring-1 ring-gray-100 p-5 md:p-6">
           <div className="flex items-start justify-between">
             <h1 className="text-2xl font-semibold text-gray-900">

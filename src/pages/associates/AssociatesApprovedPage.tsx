@@ -6,11 +6,12 @@ import { useAdminAssociatesList } from "../../hooks/associates/useAdminAssociate
 import { useAssociateDetail } from "../../hooks/associates/useAdminAssociateDetail";
 import { getCurrentUser } from "../../auth/auth";
 import { AssociatesTable, type AssociateRow } from "../../components/associates/associatesTable";
-import { StatusFilters } from "../../components/StatusFilters";
 import { KPICard } from "../../components/KPICard";
 import { useDownloadAssociatesPDF } from "../../hooks/associates/useDownloadAssociatesPDF";
-import { Download } from "lucide-react";
 import { getPageItems, PaginationBar } from "@/components/ui/pagination";
+import AssociatesSubnav from "./AssociatesSubnav";
+import { StatusFilters } from "@/components/StatusFilters";
+
 type EstadoFilter = "ACTIVO" | "INACTIVO" | undefined;
 
 export default function AssociatesApprovedPage() {
@@ -23,7 +24,6 @@ export default function AssociatesApprovedPage() {
   const role = getCurrentUser()?.role?.name?.toUpperCase();
   const isReadOnly = role === "JUNTA";
 
-  // Convertir filtro a boolean o undefined para el hook
   const estadoParam =
     estadoFilter === "ACTIVO" ? true :
     estadoFilter === "INACTIVO" ? false :
@@ -46,7 +46,6 @@ export default function AssociatesApprovedPage() {
 
   const update = useUpdateAssociate();
 
-  // Transformar datos para la tabla
   const tableData: AssociateRow[] =
     data?.items.map((asociado) => ({
       idAsociado: asociado.idAsociado,
@@ -60,84 +59,72 @@ export default function AssociatesApprovedPage() {
     })) ?? [];
 
   return (
-    <div className="min-h-screen">
-      <div className="mx-auto max-w-7xl p-4 md:p-8">
-        {/* Filtros y KPIs lado a lado */}
-        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 mb-1">
-          {/* Filtros */}
-          <StatusFilters
-            status={estadoFilter}
-            onStatusChange={(newStatus) => {
-              setEstadoFilter(newStatus as EstadoFilter);
-              setPage(1);
-            }}
-            search={search}
-            onSearchChange={(newSearch) => {
-              setSearch(newSearch);
-              setPage(1);
-            }}
-            statusOptions={["ACTIVO", "INACTIVO"]}
-            showAllOption={true}
-          />
+    <div className="min-h-screen bg-[#FAF9F5]">
+  <div className="mx-auto max-w-7xl px-4 py-5 md:px-6 md:py-6">
+    <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+      <AssociatesSubnav />
 
-          {/* KPIs a la derecha en columna */}
-          <div className="flex flex-col gap-2">
-            <KPICard
-              label="Total Asociados"
-              value={data?.total ?? 0}
-              tone="base"
-            />
-            <KPICard label="Estado" value={estadoFilter || "Todos"} tone="gold" />
-          </div>
-        </div>
-
-<button
-  onClick={() =>
-    downloadPDF.mutate({
-      estado: status,
-      search,
-      sort: "createdAt:desc",
-    })
-  }
-  disabled={downloadPDF.isPending}
-  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm mb-6 mt-6 lg:mt-0"
->
-  {downloadPDF.isPending ? (
-    <>
-      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-      Generando PDF...
-    </>
-  ) : (
-    <>
-      <Download className="w-4 h-4" />
-      Descargar PDF
-    </>
-  )}
-</button>
- 
-        {/* Tabla */}
-        <AssociatesTable
-          data={tableData}
-          isLoading={isLoading}
-          isReadOnly={isReadOnly}
-          onView={(id) => setViewId(id)}
-          onEdit={(id) => setEditId(id)}
+      <div className="grid grid-cols-2 gap-2 xl:pt-1">
+        <KPICard
+          label="Asociados"
+          value={data?.total ?? 0}
+          tone="base"
         />
+        <KPICard
+          label="Estado"
+          value={estadoFilter || "Todos"}
+          tone="gold"
+        />
+      </div>
+    </div>
 
-        {/* Paginación con ActionButtons */}
-        {!isLoading && (
-          <div className="flex justify-between items-center mt-6">
-           <PaginationBar
-              page={page}
-              totalPages={data?.pages ?? 1}
-              pageItems={getPageItems(page, data?.pages ?? 1)}
-              onPageChange={(p) => setPage(p)}
-              className="justify-center"
-            />
-          </div>
-        )}
+    <div className="mb-4 rounded-3xl">
+    <StatusFilters
+      status={estadoFilter}
+      onStatusChange={(newStatus) => {
+        setEstadoFilter(newStatus as EstadoFilter);
+        setPage(1);
+      }}
+      search={search}
+      onSearchChange={(newSearch) => {
+        setSearch(newSearch);
+        setPage(1);
+      }}
+      statusOptions={["ACTIVO", "INACTIVO"]}
+      showAllOption={true}
+      onDownload={() =>
+        downloadPDF.mutate({
+          estado: estadoFilter,
+          search,
+          sort: "createdAt:desc",
+        })
+      }
+      isDownloading={downloadPDF.isPending}
+    />
+    </div>
 
-        {/* Modales */}
+    <div className="overflow-hidden rounded-3xl border border-[#E8ECDD] bg-white shadow-sm">
+      <AssociatesTable
+        data={tableData}
+        isLoading={isLoading}
+        isReadOnly={isReadOnly}
+        onView={(id) => setViewId(id)}
+        onEdit={(id) => setEditId(id)}
+      />
+    </div>
+
+    {!isLoading && (
+      <div className="mt-4 flex justify-center">
+        <PaginationBar
+          page={page}
+          totalPages={data?.pages ?? 1}
+          pageItems={getPageItems(page, data?.pages ?? 1)}
+          onPageChange={(p) => setPage(p)}
+          className="justify-center"
+        />
+      </div>
+    )}
+
         <AssociateViewModal
           open={viewId != null}
           onClose={() => setViewId(null)}
