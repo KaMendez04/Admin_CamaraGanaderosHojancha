@@ -56,36 +56,52 @@ export default function BudgetExtraordinary() {
   const form = useForm({
     defaultValues: { name: "", amount: "", date: "" },
     onSubmit: async ({ value }) => {
-      const nextValue = { ...value, amount: money.value }
+  const nextValue = { ...value, amount: money.value };
 
-      const parsed = CreateExtraordinarySchema.safeParse(nextValue)
-      if (!parsed.success) return
+  const parsed = CreateExtraordinarySchema.safeParse(nextValue);
+  if (!parsed.success) return;
 
-      const { name, date } = parsed.data
-      const amountNumber = parseCR(parsed.data.amount)
+  const { name, date } = parsed.data;
+  const amountNumber = parseCR(parsed.data.amount);
 
-      if (date && !isDateInCurrentFiscalYear(date)) {
-        await showErrorAlertRegister(
-          "La fecha debe pertenecer al año fiscal actual."
-        )
-        return
-      }
+  if (!current?.id) {
+    await showErrorAlertRegister("Selecciona un año fiscal.");
+    return;
+  }
 
-      try {
-        await createMutation.mutateAsync({
-          name: name.trim(),
-          amount: String(amountNumber),
-          date: date || undefined,
-        })
+  if (!current.is_active) {
+    await showErrorAlertRegister("El año fiscal seleccionado no está activo.");
+    return;
+  }
 
-        form.reset()
-        money.setValue("")
-        onReload()
-        await showSuccessAlert("El movimiento extraordinario se registró correctamente.")
-      } catch (error) {
-        console.error("Error creating extraordinary:", error)
-      }
-    },
+  if (current.state !== "OPEN") {
+    await showErrorAlertRegister("El año fiscal seleccionado está cerrado.");
+    return;
+  }
+
+  if (date && !isDateInCurrentFiscalYear(date)) {
+    await showErrorAlertRegister(
+      "La fecha debe pertenecer al año fiscal seleccionado."
+    );
+    return;
+  }
+
+  try {
+    await createMutation.mutateAsync({
+      name: name.trim(),
+      amount: String(amountNumber),
+      date: date || undefined,
+      fiscalYearId: current.id,
+    });
+
+    form.reset();
+    money.setValue("");
+    onReload();
+    await showSuccessAlert("El movimiento extraordinario se registró correctamente.");
+  } catch (error) {
+    console.error("Error creating extraordinary:", error);
+  }
+},
   })
 
   const onReload = () => {

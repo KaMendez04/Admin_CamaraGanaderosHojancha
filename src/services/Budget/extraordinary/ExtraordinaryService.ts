@@ -22,7 +22,7 @@ export async function getExtraordinary(id: number): Promise<Extraordinary> {
 }
 
 export async function createExtraordinary(
-  body: Pick<Extraordinary, "name" | "amount" | "date">
+  body: Pick<Extraordinary, "name" | "amount" | "date"> & { fiscalYearId: number }
 ): Promise<Extraordinary> {
   const { data } = await apiConfig.post<Extraordinary>("/extraordinary", body);
   return data;
@@ -30,7 +30,9 @@ export async function createExtraordinary(
 
 export async function updateExtraordinary(
   id: number,
-  patch: Partial<Pick<{ name: string; amount: string; date?: string | null }, "name" | "amount" | "date">>
+  patch: Partial<Pick<{ name: string; amount: string; date?: string | null }, "name" | "amount" | "date">> & {
+    fiscalYearId: number;
+  }
 ) {
   const response = await apiConfig.patch(`/extraordinary/${id}`, patch);
   return response.data;

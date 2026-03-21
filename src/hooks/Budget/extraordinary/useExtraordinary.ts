@@ -72,7 +72,7 @@ export function useCreateExtraordinaryMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: Pick<Extraordinary, "name" | "amount" | "date">) =>
+    mutationFn: (data: Pick<Extraordinary, "name" | "amount" | "date"> & { fiscalYearId: number }) =>
       createExtraordinary(data),
     onSuccess: () => {
       // Invalidar la lista para que se recargue automáticamente
@@ -149,7 +149,7 @@ export function useUpdateExtraordinaryMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, patch }: { id: number; patch: Partial<Pick<Extraordinary, "name" | "amount" | "date">> }) => {
+    mutationFn: async ({ id, patch }: { id: number; patch: Partial<Pick<Extraordinary, "name" | "amount" | "date">> & { fiscalYearId: number } }) => {
       return updateExtraordinary(id, patch);
     },
 

@@ -11,4 +11,5 @@ export interface AssignExtraordinaryDto {
     departmentId: number;
     subTypeName: string;
     date?: string;
+    fiscalYearId: number;
   }
