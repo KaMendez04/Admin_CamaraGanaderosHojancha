@@ -2,32 +2,49 @@ import { CustomSelect } from "../CustomSelect";
 import { ActionButtons } from "../ActionButtons";
 
 export function EditableRequirements({
-  items, index, setIndex, limits,
+  items,
+  index,
+  setIndex,
+  limits,
   onChange,
-  onCancel, onSave, canSave, saving,
+  onCancel,
+  onSave,
+  canSave,
+  saving,
 }: {
   items: Array<{ text: string; order: number }>;
-  index: number; setIndex: (i: number) => void;
+  index: number;
+  setIndex: (i: number) => void;
   limits: { requirement: number };
   onChange: (idx: number, text: string) => void;
   onAdd: (text: string) => void;
-  onCancel: () => void; onSave: () => void; canSave: boolean; saving: boolean;
+  onCancel: () => void;
+  onSave: () => void;
+  canSave: boolean;
+  saving: boolean;
 }) {
   const current = index >= 0 ? items[index] : null;
-  const leftEdit = current ? limits.requirement - (current.text?.length ?? 0) : limits.requirement;
+  const leftEdit = current
+    ? limits.requirement - (current.text?.length ?? 0)
+    : limits.requirement;
 
   const requirementOptions = [
     { value: -1, label: "Selecciona un requisito" },
     ...items.map((r, i) => ({
       value: i,
-      label: r.text.slice(0, 60)
-    }))
+      label: r.text.slice(0, 60) || `Requisito #${i + 1}`,
+    })),
   ];
 
   return (
-    <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-6 shadow space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">Requisitos</h2>
+    <section className="space-y-3 rounded-[24px] border border-[#E6E0D2] bg-[#FCFDF9] p-4 md:p-5">
+      <div>
+        <h2 className="text-lg font-semibold text-[#243018] md:text-xl">
+          Requisitos
+        </h2>
+        <p className="mt-1 text-sm text-slate-500">
+          Selecciona un requisito para editarlo.
+        </p>
       </div>
 
       <CustomSelect
@@ -40,21 +57,23 @@ export function EditableRequirements({
       />
 
       {current && (
-        <div className="border border-gray-300 rounded-xl p-4">
-          <label className="block text-sm text-gray-700 mb-1">Requisito</label>
+        <div className="rounded-xl border border-[#E7E2D7] bg-white p-3">
+          <label className="mb-1 block text-sm font-medium text-[#2F3C22]">
+            Requisito
+          </label>
           <input
             value={current.text}
             maxLength={limits.requirement}
             onChange={(e) => onChange(index, e.target.value)}
-            className="w-full border border-gray-300 rounded-md px-4 py-2"
+            className="w-full rounded-xl border border-[#D8DCCF] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#A8B77A] focus:ring-2 focus:ring-[#DDE7C2]"
           />
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="mt-2 text-xs text-slate-500">
             Quedan {leftEdit} de {limits.requirement} caracteres
           </p>
         </div>
       )}
 
-      <div className="flex justify-end pt-2">
+      <div className="flex justify-end pt-1">
         <ActionButtons
           size="sm"
           showSave
@@ -71,6 +90,6 @@ export function EditableRequirements({
           cancelText="Cancelar"
         />
       </div>
-    </div>
+    </section>
   );
 }

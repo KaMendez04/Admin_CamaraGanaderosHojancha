@@ -3,56 +3,76 @@ import { HeaderBlock } from "../../components/PagesEdition/HeaderBlock";
 import { EditableBenefits } from "../../components/PagesEdition/EditableBenefits";
 import { EditableRequirements } from "../../components/PagesEdition/EditableRequirements";
 import { useAssociatesEdition } from "../../hooks/EditionSection/AssociatesEdition";
-import { ActionButtons } from "../../components/ActionButtons";
-import { useNavigate } from "@tanstack/react-router";
 
 export default function AssociatesEdition() {
   const {
-  loading, 
-  savingHeader,       
-  savingBenefits,     
-  savingRequirements, 
-  error, 
-  limits, 
-  reload,
-    // header
-    headerTitle, headerDescription, setHeaderTitle, setHeaderDescription,
-    resetHeader, saveHeader, canSaveHeader,
-    // benefits
-    benefits, benefitIndex, setBenefitIndex,
-    updateBenefitText, resetCurrentBenefit, saveCurrentBenefit, canSaveBenefit,
-    // requirements
-    requirements, requirementIndex, setRequirementIndex,
-    updateRequirement, addRequirement,
-    resetCurrentRequirement, saveRequirements, canSaveReq,
+    loading,
+    savingHeader,
+    savingBenefits,
+    savingRequirements,
+    error,
+    limits,
+    reload,
+    headerTitle,
+    headerDescription,
+    setHeaderTitle,
+    setHeaderDescription,
+    resetHeader,
+    saveHeader,
+    canSaveHeader,
+    benefits,
+    benefitIndex,
+    setBenefitIndex,
+    updateBenefitText,
+    resetCurrentBenefit,
+    saveCurrentBenefit,
+    canSaveBenefit,
+    requirements,
+    requirementIndex,
+    setRequirementIndex,
+    updateRequirement,
+    addRequirement,
+    resetCurrentRequirement,
+    saveRequirements,
+    canSaveReq,
   } = useAssociatesEdition();
-  const navigate = useNavigate()
+
 
   return (
-    <div className="min-h-screen bg-[#f3f8ef] text-[#2E321B] p-4">
-      <div className="max-w-5xl mx-auto">
-        <NavbarEditionSection/>
+    <div className="min-h-screen bg-[#f3f8ef] px-4 py-4 text-[#2E321B] md:px-6 md:py-5">
+      <div className="mx-auto max-w-5xl">
+        <div className="mb-4">
+          <NavbarEditionSection />
+        </div>
 
-        <div className="text-center mb-6 ">
-          <h1 className="text-2xl font-bold mb-2">Edición de la Sección Sobre Asociados</h1>
-          <p className="text-base text-[#475C1D]">
+        <div className="mx-auto mb-5 max-w-3xl text-center">
+          <h1 className="text-2xl font-semibold tracking-[-0.02em] text-[#243018] md:text-3xl">
+            Edición de la Sección Sobre Asociados
+          </h1>
+          <p className="mt-2 text-sm text-[#5F6E3E] md:text-base">
             Edita cada bloque de información relevante para quienes desean ser asociados.
           </p>
         </div>
 
         {loading ? (
-          <div className="text-center py-16">Cargando…</div>
+          <div className="rounded-[28px] border border-[#DDD8CA] bg-white p-6 text-center shadow-sm">
+            <p className="text-sm text-slate-500">Cargando…</p>
+          </div>
         ) : error ? (
-          <div className="text-center py-16 text-red-600">
-            Error: {error}
+          <div className="rounded-[28px] border border-red-200 bg-white p-6 text-center shadow-sm">
+            <p className="text-sm text-red-600">Error: {error}</p>
             <div className="mt-4">
-              <button onClick={reload} className="px-4 py-2 rounded-md border">Reintentar</button>
+              <button
+                onClick={reload}
+                className="rounded-xl border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50"
+              >
+                Reintentar
+              </button>
             </div>
           </div>
         ) : (
-          <>
-            {/* Encabezado con botones locales */}
-            <div className="mb-6 bg-[#ffffff] border border-[#DCD6C9] rounded-xl p-4 shadow">
+          <div className="rounded-[28px] border border-[#DDD8CA] bg-white p-4 shadow-sm md:p-5">
+            <div className="space-y-4">
               <HeaderBlock
                 title={headerTitle}
                 desc={headerDescription}
@@ -64,25 +84,22 @@ export default function AssociatesEdition() {
                 canSave={canSaveHeader}
                 saving={savingHeader}
               />
-            </div>
 
-            {/* Beneficios con select + botones locales */}
-            <div className="mb-6 bg-[#ffffff] border border-[#DCD6C9] rounded-xl p-4 shadow">
               <EditableBenefits
                 items={benefits}
                 index={benefitIndex}
                 setIndex={setBenefitIndex}
-                limits={{ benefitTitle: limits.benefitTitle, benefitDesc: limits.benefitDesc }}
+                limits={{
+                  benefitTitle: limits.benefitTitle,
+                  benefitDesc: limits.benefitDesc,
+                }}
                 onChange={updateBenefitText}
                 onCancel={resetCurrentBenefit}
                 onSave={saveCurrentBenefit}
                 canSave={canSaveBenefit}
                 saving={savingBenefits}
               />
-            </div>
 
-            {/* Requisitos con select, agregar/eliminar + botones locales */}
-            <div className="mb-6 bg-[#ffffff] border border-[#DCD6C9] rounded-xl p-4 shadow">
               <EditableRequirements
                 items={requirements}
                 index={requirementIndex}
@@ -95,17 +112,9 @@ export default function AssociatesEdition() {
                 canSave={canSaveReq}
                 saving={savingRequirements}
               />
-            </div>
 
-            <div className="flex justify-end mt-6 ">
-            <ActionButtons
-                onBack={() => navigate({ to: "/Principal" })}
-                showBack={true}
-                backText="Regresar"
-                showText={true}
-              />            
-              </div>
-          </>
+            </div>
+          </div>
         )}
       </div>
     </div>

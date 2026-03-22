@@ -4,8 +4,6 @@ import { ActionButtons } from "../../../components/ActionButtons"
 import type { EventInput } from "../../../models/editionSection/EventEditionType"
 import { useCloudinaryUpload } from "../../../hooks/Cloudinary/useCloudinaryUpload"
 import { Loader2, Upload } from "lucide-react"
-
-// ✅ USAR SOLO BirthDatePicker
 import { BirthDatePicker } from "@/components/ui/birthDayPicker"
 
 const CROP_W = 1200
@@ -15,7 +13,6 @@ function isCloudinaryUrl(url: string) {
   return typeof url === "string" && url.includes("/upload/")
 }
 
-// ✅ Extraer URL base sin transformaciones (para preview si ya viene de Cloudinary)
 function getBaseCloudinaryUrl(url: string): string {
   if (!url || !isCloudinaryUrl(url)) return url
 
@@ -46,10 +43,6 @@ async function loadImage(src: string): Promise<HTMLImageElement> {
   })
 }
 
-/**
- * Recorta y escala para llenar (cover) un canvas 1200x630, centrado según cropPercent (0-100)
- * - cropPercent.x/y: 50/50 = centro
- */
 async function cropToBlob(
   src: string,
   cropPercent: { x: number; y: number },
@@ -61,20 +54,16 @@ async function cropToBlob(
   const iw = img.naturalWidth
   const ih = img.naturalHeight
 
-  // cover scale
   const scale = Math.max(outW / iw, outH / ih)
   const sw = outW / scale
   const sh = outH / scale
 
-  // centro en px dentro de la imagen original según %
   const cx = (Math.max(0, Math.min(100, cropPercent.x)) / 100) * iw
   const cy = (Math.max(0, Math.min(100, cropPercent.y)) / 100) * ih
 
-  // source rect top-left
   let sx = cx - sw / 2
   let sy = cy - sh / 2
 
-  // clamp
   sx = Math.max(0, Math.min(iw - sw, sx))
   sy = Math.max(0, Math.min(ih - sh, sy))
 
@@ -110,16 +99,11 @@ export default function EventCreator({
   onSubmit: (data: EventInput) => void
 }) {
   const [title, setTitle] = useState("")
-  const [date, setDate] = useState("") // ISO YYYY-MM-DD
+  const [date, setDate] = useState("")
   const [description, setDescription] = useState("")
-
-  // input text puede ser URL pegada
   const [illustration, setIllustration] = useState("")
-
-  // ✅ si el usuario escogió archivo, lo guardamos aquí (SIN subir)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
-  const [localPreview, setLocalPreview] = useState<string>("") // objectURL
-
+  const [localPreview, setLocalPreview] = useState<string>("")
   const [isSaving, setIsSaving] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
 
@@ -146,6 +130,7 @@ export default function EventCreator({
     const day = String(today.getDate()).padStart(2, "0")
     return `${year}-${month}-${day}`
   }
+
   const minDate = getTodayDate()
 
   useEffect(() => {
@@ -158,21 +143,16 @@ export default function EventCreator({
     setHasChanges(changed)
   }, [title, date, description, illustration, pendingFile])
 
-  // reset offset cuando cambia la imagen
   useEffect(() => {
     setOffset({ x: 0, y: 0 })
   }, [illustration, localPreview])
 
-  // liberar objectURL
   useEffect(() => {
     return () => {
       if (localPreview) URL.revokeObjectURL(localPreview)
     }
   }, [localPreview])
 
-  // ✅ fuente real para preview:
-  // - si hay archivo local => localPreview
-  // - si no => illustration (pero si es cloudinary, usamos base para permitir “cover” limpio)
   const previewSrc = useMemo(() => {
     if (pendingFile && localPreview) return localPreview
     if (!illustration) return ""
@@ -215,18 +195,14 @@ export default function EventCreator({
 
   const handlePick = () => fileRef.current?.click()
 
-  // ✅ YA NO SUBE. Solo setea pendingFile + preview
   const onPickFile = (file: File | null) => {
     if (!file) return
 
-    // limpiar preview anterior
     if (localPreview) URL.revokeObjectURL(localPreview)
 
     const obj = URL.createObjectURL(file)
     setPendingFile(file)
     setLocalPreview(obj)
-
-    // limpiamos el input text (opcional)
     setIllustration("")
     setOffset({ x: 0, y: 0 })
 
@@ -234,8 +210,7 @@ export default function EventCreator({
   }
 
   const onPointerDown = (e: React.PointerEvent) => {
-    if (!dragRef.current) return
-    if (!previewSrc) return
+    if (!dragRef.current || !previewSrc) return
 
     dragState.current = {
       dragging: true,
@@ -312,7 +287,6 @@ export default function EventCreator({
     }
   }
 
-  // ✅ wrapper para esperar el upload.mutate (sin cambiar tu hook)
   const uploadAsync = (file: File) =>
     new Promise<any>((resolve, reject) => {
       upload.mutate(file, {
@@ -324,7 +298,6 @@ export default function EventCreator({
   const handleSave = async () => {
     if (!title.trim() || !date.trim() || !description.trim()) return
 
-    // ✅ validar que no sea pasada (como en tu lógica original)
     if (date < minDate) {
       showSuccessAlert("No se pueden crear eventos con fechas pasadas")
       return
@@ -334,7 +307,6 @@ export default function EventCreator({
     try {
       let finalIllustration = illustration.trim()
 
-      // ✅ Si hay archivo local, recortamos y subimos SOLO AHORA
       if (pendingFile && localPreview) {
         const blob = await cropToBlob(localPreview, positionAsPercent, CROP_W, CROP_H)
         const croppedFile = blobToFile(blob, `event_${Date.now()}.jpg`)
@@ -351,7 +323,6 @@ export default function EventCreator({
         illustration: finalIllustration || "",
       } as any)
 
-      // reset
       setTitle("")
       setDate("")
       setDescription("")
@@ -383,67 +354,78 @@ export default function EventCreator({
   const canSave = title.trim() !== "" && date.trim() !== "" && description.trim() !== ""
 
   return (
-    <div className="space-y-4 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
-      <h3 className="text-xl font-semibold text-[#2E321B] mb-4">Crear Nuevo Evento</h3>
+    <div className="space-y-3 rounded-[24px] border border-[#E6E0D2] bg-[#FCFDF9] p-4 md:p-5">
+      <div>
+        <h3 className="text-lg font-semibold text-[#243018] md:text-xl">
+          Crear nuevo evento
+        </h3>
+        <p className="mt-1 text-sm text-slate-500">
+          Completa los datos básicos y agrega una ilustración si lo necesitás.
+        </p>
+      </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="mb-1 block text-sm font-medium text-[#2F3C22]">
           Título del evento <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
-          className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
+          className="w-full rounded-xl border border-[#D8DCCF] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#A8B77A] focus:ring-2 focus:ring-[#DDE7C2]"
           placeholder="Ingresa el título del evento"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           maxLength={75}
           disabled={isSaving || upload.isPending}
         />
-        <div className="text-sm text-gray-500 mt-1">Quedan {75 - title.length} de 75 caracteres</div>
+        <div className="mt-1 text-xs text-slate-500">
+          Quedan {75 - title.length} de 75 caracteres
+        </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="mb-1 block text-sm font-medium text-[#2F3C22]">
           Fecha del evento <span className="text-red-500">*</span>
         </label>
 
-<BirthDatePicker
-  value={date}
-  onChange={setDate}
-  minDate={minDate} // hoy (YYYY-MM-DD)
-  helperText="Solo se permiten fechas a partir de hoy"
-  placeholder="Seleccione una fecha"
-  disabled={isSaving || upload.isPending}
-/>
-
-        <div className="text-xs text-gray-500 mt-1">Solo se permiten fechas a partir de hoy</div>
+        <BirthDatePicker
+          value={date}
+          onChange={setDate}
+          minDate={minDate}
+          helperText="Solo se permiten fechas a partir de hoy"
+          placeholder="Seleccione una fecha"
+          disabled={isSaving || upload.isPending}
+        />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="mb-1 block text-sm font-medium text-[#2F3C22]">
           Descripción <span className="text-red-500">*</span>
         </label>
         <textarea
-          className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E] resize-none"
+          className="w-full resize-none rounded-xl border border-[#D8DCCF] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#A8B77A] focus:ring-2 focus:ring-[#DDE7C2]"
           placeholder="Describe el evento"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          rows={4}
+          rows={3}
           maxLength={250}
           disabled={isSaving || upload.isPending}
         />
-        <div className="text-sm text-gray-500 mt-1">Quedan {250 - description.length} de 250 caracteres</div>
+        <div className="mt-1 text-xs text-slate-500">
+          Quedan {250 - description.length} de 250 caracteres
+        </div>
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700 mb-1">Ilustración (opcional)</label>
+        <label className="block text-sm font-medium text-[#2F3C22]">
+          Ilustración (opcional)
+        </label>
 
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <button
             type="button"
             onClick={handlePick}
             disabled={isSaving || upload.isPending}
-            className="inline-flex items-center justify-center gap-2 border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-50 disabled:opacity-60"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#D8DCCF] bg-white px-4 py-2.5 text-sm hover:bg-[#F7F8F3] disabled:opacity-60"
           >
             {isSaving || upload.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -463,7 +445,7 @@ export default function EventCreator({
 
           <input
             type="text"
-            className="flex-1 w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
+            className="w-full flex-1 rounded-xl border border-[#D8DCCF] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#A8B77A] focus:ring-2 focus:ring-[#DDE7C2]"
             placeholder="...o pega una URL (https://...)"
             value={illustration}
             onChange={(e) => {
@@ -480,12 +462,14 @@ export default function EventCreator({
         </div>
 
         {previewSrc && (
-          <div className="mt-3">
-            <p className="text-sm font-medium text-gray-700 mb-2">Vista previa (arrastrá para acomodar):</p>
+          <div className="pt-1">
+            <p className="mb-2 text-sm font-medium text-[#2F3C22]">
+              Vista previa
+            </p>
 
             <div
               ref={dragRef}
-              className="relative w-full aspect-[1200/630] rounded-lg border-2 border-[#DCD6C9] overflow-hidden bg-[#F8F9F3] cursor-grab active:cursor-grabbing"
+              className="relative aspect-[1200/630] w-full cursor-grab overflow-hidden rounded-xl border border-[#DCD6C9] bg-[#F8F9F3] active:cursor-grabbing"
               style={{
                 touchAction: "none",
                 WebkitUserSelect: "none",
@@ -500,7 +484,7 @@ export default function EventCreator({
                 ref={imageRef}
                 src={previewSrc}
                 alt="Vista previa del evento"
-                className="w-full h-full object-cover select-none pointer-events-none"
+                className="h-full w-full select-none object-cover pointer-events-none"
                 draggable={false}
                 style={{
                   objectPosition: `${positionAsPercent.x}% ${positionAsPercent.y}%`,
@@ -515,7 +499,7 @@ export default function EventCreator({
         )}
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end pt-1">
         <ActionButtons
           onSave={handleSave}
           onCancel={handleCancel}
