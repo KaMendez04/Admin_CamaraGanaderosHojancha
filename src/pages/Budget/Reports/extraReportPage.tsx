@@ -8,28 +8,30 @@ import {
   previewExtraReportPDF,
 } from "../../../services/Budget/reportsExtra/extraReportService"
 
-// ✅ solo llamamos lo que ya tenés
 import { usePagination, PaginationBar } from "../../../components/ui/pagination"
 import { BirthDatePicker } from "@/components/ui/birthDayPicker"
-
+import { useFiscalYear } from "@/hooks/Budget/useFiscalYear"
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("es-CR", {
     style: "currency",
     currency: "CRC",
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
   }).format(n || 0)
 
 export default function ExtraReportPage() {
+  const { current: fiscalYear } = useFiscalYear()
+
   const [start, setStart] = useState("")
   const [end, setEnd] = useState("")
   const [name, setName] = useState("")
 
+  // null = no ejecutar query todavía (esperar al año fiscal)
   const [submitted, setSubmitted] = useState<{
     start?: string
     end?: string
     name?: string
-  }>({})
+  } | null>(null)
 
   const [isDownloading, setIsDownloading] = useState(false)
 
@@ -44,41 +46,43 @@ export default function ExtraReportPage() {
 
   const excelMutation = useExtraReportExcel()
 
-  // Auto-aplicar filtros
+  // Solo dispara cuando fiscalYear ya llegó
   useEffect(() => {
+    if (!fiscalYear) return
     setSubmitted({
-      start: start || undefined,
-      end: end || undefined,
+      start: start || fiscalYear.start_date || undefined,
+      end: end || fiscalYear.end_date || undefined,
       name: name || undefined,
     })
-  }, [start, end, name])
+  }, [start, end, name, fiscalYear?.id])
 
-  // ✅ evita que fecha fin quede menor que fecha inicio
   useEffect(() => {
-    if (start && end && end < start) {
-      setEnd("")
-    }
+    if (start && end && end < start) setEnd("")
   }, [start, end])
 
-  // ------- acciones -------
-const handlePreviewPDF = async () => {
-  await previewExtraReportPDF(submitted)
-}
-
-const handleDownloadPDF = async () => {
-  setIsDownloading(true)
-  try {
-    await downloadExtraReportPDF(submitted)
-  } finally {
-    setIsDownloading(false)
+  const resolvedFilters = {
+    start: start || fiscalYear?.start_date || undefined,
+    end: end || fiscalYear?.end_date || undefined,
+    name: name || undefined,
   }
-}
+
+  const handlePreviewPDF = async () => {
+    await previewExtraReportPDF(resolvedFilters)
+  }
+
+  const handleDownloadPDF = async () => {
+    setIsDownloading(true)
+    try {
+      await downloadExtraReportPDF(resolvedFilters)
+    } finally {
+      setIsDownloading(false)
+    }
+  }
 
   const handleDownloadExcel = async () => {
-    await excelMutation.mutateAsync(submitted)
+    await excelMutation.mutateAsync(resolvedFilters)
   }
 
-  // ✅ Paginación (mínimo código aquí)
   const { page, setPage, totalPages, pagedItems, pageItems } = usePagination(
     rows,
     10,
@@ -88,40 +92,23 @@ const handleDownloadPDF = async () => {
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-6xl p-4 md:p-8">
-        {/* Top cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div className="rounded-2xl bg-[#F8F9F3] p-5 shadow-sm">
-            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">
-              TOTAL
-            </div>
-            <div className="mt-2 font-bold text-[#5B732E] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">
-              {fmt(totals.totalAmount)}
-            </div>
+            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">TOTAL</div>
+            <div className="mt-2 font-bold text-[#5B732E] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">{fmt(totals.totalAmount)}</div>
           </div>
-
           <div className="rounded-2xl bg-[#EAEFE0] p-5 shadow-sm">
-            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">
-              USADO
-            </div>
-            <div className="mt-2 font-bold text-[#5B732E] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">
-              {fmt(totals.totalUsed)}
-            </div>
+            <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">USADO</div>
+            <div className="mt-2 font-bold text-[#5B732E] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">{fmt(totals.totalUsed)}</div>
           </div>
-
           <div className="rounded-2xl bg-[#FEF6E0] p-5 shadow-sm">
-            <div className="text-xs font-bold text-[#C6A14B] tracking-wider uppercase">
-              RESTANTE
-            </div>
-            <div className="mt-2 font-bold text-[#C19A3D] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">
-              {fmt(totals.totalRemaining)}
-            </div>
+            <div className="text-xs font-bold text-[#C6A14B] tracking-wider uppercase">RESTANTE</div>
+            <div className="mt-2 font-bold text-[#C19A3D] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">{fmt(totals.totalRemaining)}</div>
           </div>
         </div>
 
-        {/* Filtros */}
         <div className="mt-6 rounded-2xl bg-[#F8F9F3] p-5 shadow-sm">
           <div className="text-sm font-bold text-[#33361D] mb-4">Filtros</div>
-
           <div className="mb-4">
             <input
               placeholder="Buscar por nombre…"
@@ -130,12 +117,9 @@ const handleDownloadPDF = async () => {
               className="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] placeholder:text-gray-400 focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition"
             />
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-[#33361D] mb-1.5">
-                Fecha de inicio
-              </label>
+              <label className="block text-sm font-semibold text-[#33361D] mb-1.5">Fecha de inicio</label>
               <BirthDatePicker
                 value={start}
                 onChange={(date) => setStart(date)}
@@ -144,26 +128,20 @@ const handleDownloadPDF = async () => {
                 triggerClassName="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition hover:bg-white"
               />
             </div>
-
             <div>
-              <label className="block text-sm font-semibold text-[#33361D] mb-1.5">
-                Fecha de fin
-              </label>
+              <label className="block text-sm font-semibold text-[#33361D] mb-1.5">Fecha de fin</label>
               <BirthDatePicker
                 value={end}
                 onChange={(date) => setEnd(date)}
                 minDate={start || undefined}
                 placeholder="Seleccione la fecha de fin"
-                helperText={
-                  start ? "La fecha final no puede ser anterior a la fecha de inicio." : ""
-                }
+                helperText={start ? "La fecha final no puede ser anterior a la fecha de inicio." : ""}
                 triggerClassName="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition hover:bg-white"
               />
             </div>
           </div>
         </div>
 
-        {/* CARD SEPARADO DE ACCIONES */}
         <div className="mt-6 rounded-3xl bg-[#FBFDF7] ring-1 ring-[#E8EEDB] p-5 md:p-6">
           <div className="flex flex-col md:flex-row md:items-center gap-3">
             <div className="md:ml-auto w-full md:w-auto flex flex-wrap gap-3">
@@ -174,7 +152,6 @@ const handleDownloadPDF = async () => {
               >
                 Ver PDF
               </button>
-
               <button
                 onClick={handleDownloadPDF}
                 disabled={isDownloading || isFetching}
@@ -182,7 +159,6 @@ const handleDownloadPDF = async () => {
               >
                 {isDownloading ? "Descargando…" : "Descargar PDF"}
               </button>
-
               <button
                 onClick={handleDownloadExcel}
                 disabled={excelMutation.isPending || isFetching}
@@ -194,9 +170,7 @@ const handleDownloadPDF = async () => {
           </div>
         </div>
 
-        {/* Tabla */}
         <div className="mt-6 rounded-2xl bg-[#F8F9F3] overflow-hidden shadow-sm">
-          {/* ===== Header (solo desktop) ===== */}
           <div className="hidden md:block bg-[#EAEFE0] px-4 py-3">
             <div className="grid grid-cols-[1fr_1fr_1fr_1fr] gap-4 text-sm font-bold text-[#33361D]">
               <div>Nombre</div>
@@ -205,88 +179,37 @@ const handleDownloadPDF = async () => {
               <div className="text-right">Restante</div>
             </div>
           </div>
-
-          {/* ===== Body ===== */}
           <div className="bg-white">
             {pagedItems.map((r: any, i: number) => (
-              <div
-                key={i}
-                className="
-                  border-b border-[#EAEFE0]
-                  px-4 py-3
-                  text-sm text-[#33361D]
-                  hover:bg-[#F8F9F3]
-                  transition
-                  grid
-                  grid-cols-1
-                  gap-2
-                  md:grid-cols-[1fr_1fr_1fr_1fr]
-                  md:gap-4
-                "
-              >
-                {/* Nombre */}
+              <div key={i} className="border-b border-[#EAEFE0] px-4 py-3 text-sm text-[#33361D] hover:bg-[#F8F9F3] transition grid grid-cols-1 gap-2 md:grid-cols-[1fr_1fr_1fr_1fr] md:gap-4">
                 <div>
-                  <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
-                    Nombre
-                  </span>
+                  <span className="md:hidden block text-xs font-semibold text-[#6B7280]">Nombre</span>
                   <span className="font-medium">{r.name}</span>
                 </div>
-
-                {/* Monto */}
                 <div className="md:text-right">
-                  <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
-                    Monto
-                  </span>
-                  <span className="tabular-nums whitespace-nowrap font-medium text-[#5B732E]">
-                    {fmt(r.amount)}
-                  </span>
+                  <span className="md:hidden block text-xs font-semibold text-[#6B7280]">Monto</span>
+                  <span className="tabular-nums whitespace-nowrap font-medium text-[#5B732E]">{fmt(r.amount)}</span>
                 </div>
-
-                {/* Usado */}
                 <div className="md:text-right">
-                  <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
-                    Usado
-                  </span>
-                  <span className="tabular-nums whitespace-nowrap text-[#5B732E]">
-                    {fmt(r.used)}
-                  </span>
+                  <span className="md:hidden block text-xs font-semibold text-[#6B7280]">Usado</span>
+                  <span className="tabular-nums whitespace-nowrap text-[#5B732E]">{fmt(r.used)}</span>
                 </div>
-
-                {/* Restante */}
                 <div className="md:text-right">
-                  <span className="md:hidden block text-xs font-semibold text-[#6B7280]">
-                    Restante
-                  </span>
-                  <span className="tabular-nums whitespace-nowrap font-bold text-[#C19A3D]">
-                    {fmt(r.remaining)}
-                  </span>
+                  <span className="md:hidden block text-xs font-semibold text-[#6B7280]">Restante</span>
+                  <span className="tabular-nums whitespace-nowrap font-bold text-[#C19A3D]">{fmt(r.remaining)}</span>
                 </div>
               </div>
             ))}
-
-            {/* Estados */}
             {(rows ?? []).length === 0 && !(isLoading && !data) && (
-              <div className="py-10 text-center text-gray-400 font-medium">
-                Sin resultados
-              </div>
+              <div className="py-10 text-center text-gray-400 font-medium">Sin resultados</div>
             )}
-
             {isLoading && !data && (
-              <div className="py-10 text-center text-gray-400 font-medium">
-                Cargando...
-              </div>
+              <div className="py-10 text-center text-gray-400 font-medium">Cargando...</div>
             )}
           </div>
-
-          {/* ✅ Paginación */}
           {!isFetching && (rows ?? []).length > 0 && totalPages > 1 && (
             <div className="bg-white px-4 py-4 border-t border-[#EAEFE0]">
-              <PaginationBar
-                page={page}
-                totalPages={totalPages}
-                pageItems={pageItems}
-                onPageChange={setPage}
-              />
+              <PaginationBar page={page} totalPages={totalPages} pageItems={pageItems} onPageChange={setPage} />
             </div>
           )}
         </div>

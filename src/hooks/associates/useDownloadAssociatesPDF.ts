@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { downloadAssociatesPDF } from "../../services/Associates/adminAssociatesService";
 import { downloadBlob } from "../../utils/pdf";
+import { getCostaRicaFileStamp } from "@/utils/dateForPdf";
 
 export function useDownloadAssociatesPDF() {
   return useMutation({
@@ -9,7 +10,7 @@ export function useDownloadAssociatesPDF() {
       return { blob, params }
     },
     onSuccess: ({ blob }) => {
-      downloadBlob(blob, "asociados.pdf")
+      downloadBlob(blob, `asociados_${getCostaRicaFileStamp()}.pdf`)
     },
   })
 }

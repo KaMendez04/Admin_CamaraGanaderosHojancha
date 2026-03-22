@@ -25,7 +25,7 @@ export default function AssociatesApprovedPage() {
   const isReadOnly = role === "JUNTA";
 
   const estadoParam =
-    estadoFilter === "ACTIVO" ? true :
+    estadoFilter === "ACTIVO"   ? true  :
     estadoFilter === "INACTIVO" ? false :
     undefined;
 

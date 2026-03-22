@@ -75,8 +75,11 @@ export function usePersonalPdf() {
     mutationFn: async (id: number) => getPersonalPdfBlob(id),
   })
 
-  const download = async (id: number, filename = "personal.pdf") => {
+  const download = async (id: number, name?: string, lastname1?: string) => {
     const blob = await m.mutateAsync(id)
+    const filename = name && lastname1 
+      ? `personal_${name}_${lastname1}.pdf`
+      : `personal_${id}.pdf`
     downloadBlob(blob, filename)
   }
 

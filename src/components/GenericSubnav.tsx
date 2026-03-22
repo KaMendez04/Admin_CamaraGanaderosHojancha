@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router"
+import { Link, useLocation } from "@tanstack/react-router"
 import { getCurrentUser } from "../auth/auth"
 import type { RoleCode } from "../types/roles"
 
@@ -23,8 +23,7 @@ export function GenericSubnav({
   description,
   className = "",
 }: GenericSubnavProps) {
-  const { location } = useRouterState()
-  const pathname = location.pathname
+  const { pathname } = useLocation()
 
   const role = (getCurrentUser()?.role?.name ?? "").toUpperCase() as RoleCode
 
