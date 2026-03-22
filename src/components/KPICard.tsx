@@ -11,7 +11,7 @@ export function KPICard({ label, value, tone = "base" }: KPICardProps) {
   } as const;
 
   return (
-    <div className={`min-w-[150px] rounded-2xl px-4 py-3 ${toneMap[tone]}`}>
+    <div className={`min-w-[150px] rounded-2xl px-6 py-4 ${toneMap[tone]}`}>
       <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
         {label}
       </div>

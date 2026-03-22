@@ -123,6 +123,7 @@ export function AssociatesTable({
       size: 130,
       cell: (info) => (
         <ActionButtons
+          size="sm"
           onView={() => onView(info.row.original.idAsociado)}
           onEdit={() => onEdit(info.row.original.idAsociado)}
           showEdit={true}

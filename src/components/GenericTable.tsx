@@ -11,7 +11,11 @@ type GenericTableProps<T> = {
   isLoading: boolean;
 };
 
-export function GenericTable<T>({ data, columns, isLoading }: GenericTableProps<T>) {
+export function GenericTable<T>({
+  data,
+  columns,
+  isLoading,
+}: GenericTableProps<T>) {
   const table = useReactTable({
     data,
     columns,
@@ -21,8 +25,8 @@ export function GenericTable<T>({ data, columns, isLoading }: GenericTableProps<
 
   if (isLoading) {
     return (
-      <div className="rounded-2xl bg-[#F8F9F3] p-8 text-center text-[#556B2F] font-medium">
-        Cargando...
+      <div className="rounded-3xl border border-[#DDE5CF] bg-[#F9FBF6] px-6 py-10 text-center">
+        <div className="text-sm font-medium text-slate-500">Cargando...</div>
       </div>
     );
   }
@@ -30,14 +34,15 @@ export function GenericTable<T>({ data, columns, isLoading }: GenericTableProps<
   const rows = table.getRowModel().rows;
 
   return (
-    <div className="rounded-lg bg-[#F8F9F3] shadow-sm">
+    <div className="overflow-hidden rounded-3xl border border-[#DDE5CF] bg-[#FBFCF8] shadow-sm">
+      {/* MOBILE */}
       <div className="block md:hidden">
         {rows.length === 0 ? (
-          <div className="py-8 text-center text-gray-400 font-medium bg-white">
+          <div className="px-4 py-10 text-center text-sm font-medium text-slate-400">
             Sin resultados
           </div>
         ) : (
-          <div className="space-y-3 p-3 bg-[#F8F9F3]">
+          <div className="space-y-3 p-3">
             {rows.map((row) => {
               const isTotal = !!(row.original as any)?.__isTotal;
 
@@ -45,18 +50,22 @@ export function GenericTable<T>({ data, columns, isLoading }: GenericTableProps<
                 <div
                   key={row.id}
                   className={[
-                    "rounded-xl border border-[#EAEFE0] p-3",
-                    isTotal ? "bg-[#F8F9F3] font-bold" : "bg-white",
+                    "rounded-2xl border p-4 shadow-sm",
+                    isTotal
+                      ? "border-[#DDE5CF] bg-[#F4F8EC]"
+                      : "border-[#E6EBDD] bg-white",
                   ].join(" ")}
                 >
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     {row.getVisibleCells().map((cell) => {
                       const header = cell.column.columnDef.header;
 
                       return (
-                        <div key={cell.id} className="grid grid-cols-12 gap-2 items-start">
-                          {/* Label */}
-                          <div className="col-span-5 text-[11px] font-bold text-[#5B732E] uppercase tracking-wider">
+                        <div
+                          key={cell.id}
+                          className="grid grid-cols-12 items-start gap-2"
+                        >
+                          <div className="col-span-5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6A7486]">
                             {header
                               ? String(
                                   typeof header === "function"
@@ -66,9 +75,11 @@ export function GenericTable<T>({ data, columns, isLoading }: GenericTableProps<
                               : "Campo"}
                           </div>
 
-                          {/* Value */}
-                          <div className="col-span-7 text-sm text-[#2E321B] whitespace-normal break-words">
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          <div className="col-span-7 text-sm text-[#1F2937] break-words">
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
                           </div>
                         </div>
                       );
@@ -81,19 +92,23 @@ export function GenericTable<T>({ data, columns, isLoading }: GenericTableProps<
         )}
       </div>
 
-      <div className="hidden md:block">
+      {/* DESKTOP */}
+      <div className="hidden overflow-x-auto md:block">
         <table className="w-full table-fixed">
-          <thead className="bg-[#F8F9F3]">
+          <thead className="bg-[#f4f5ee]">
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
+              <tr key={headerGroup.id} className="border-b border-[#DDE5CF]">
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="px-4 py-3 text-xs font-bold text-[#5B732E] uppercase tracking-wider text-center"
+                    className="px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.08em] text-[#5F7728]"
                   >
                     {header.isPlaceholder
                       ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                   </th>
                 ))}
               </tr>
@@ -105,7 +120,7 @@ export function GenericTable<T>({ data, columns, isLoading }: GenericTableProps<
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="py-8 text-center text-gray-400 font-medium"
+                  className="px-4 py-12 text-center text-sm font-medium text-slate-400"
                 >
                   Sin resultados
                 </td>
@@ -118,8 +133,8 @@ export function GenericTable<T>({ data, columns, isLoading }: GenericTableProps<
                   <tr
                     key={row.id}
                     className={[
-                      "border-b border-[#EAEFE0]",
-                      isTotal ? "bg-[#F8F9F3] font-bold" : "",
+                      "border-b border-[#E8EDE0] transition-colors",
+                      isTotal ? "bg-[#F4F8EC] font-semibold" : "",
                     ].join(" ")}
                   >
                     {row.getVisibleCells().map((cell) => {
@@ -129,11 +144,14 @@ export function GenericTable<T>({ data, columns, isLoading }: GenericTableProps<
                       return (
                         <td
                           key={cell.id}
-                          className="px-4 py-3 text-center text-sm align-top"
+                          className="px-4 py-4 text-center align-middle text-sm"
                           title={isString ? (raw as string) : undefined}
                         >
-                          <div className="whitespace-normal break-words">
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          <div className="break-words whitespace-normal text-[#1F2937]">
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
                           </div>
                         </td>
                       );

@@ -51,7 +51,7 @@ export default function AdminRequestsPage() {
   return (
     <div className="min-h-screen bg-[#FAF9F5]">
      <div className="mx-auto max-w-7xl px-4 py-5 md:px-6 md:py-6 ">
-    <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+    <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
       <AssociatesSubnav />
 
       <div className="grid grid-cols-2 gap-2 xl:pt-1">

@@ -142,6 +142,7 @@ export function RequestsTable({
 
         return (
           <ActionButtons
+            size="sm"
             onView={() => onView(solicitudId)}
             onApprove={canApprove ? () => onApprove(sol) : undefined}
             onReject={canReject ? () => onReject(solicitudId) : undefined}

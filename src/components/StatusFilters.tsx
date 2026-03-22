@@ -1,4 +1,4 @@
-import { Download } from "lucide-react";
+import { ActionButtons } from "./ActionButtons";
 
 interface StatusFiltersProps {
   status: string | undefined;
@@ -23,7 +23,6 @@ export function StatusFilters({
   searchPlaceholder = "Buscar por cédula, nombre, email...",
   statusOptions = ["PENDIENTE", "APROBADO", "RECHAZADO"],
   showAllOption = true,
-
   downloadLabel = "Descargar PDF",
   onDownload,
   isDownloading = false,
@@ -42,25 +41,14 @@ export function StatusFilters({
             />
           </div>
 
-          {!hideDownloadButton && (
-            <button
-              type="button"
-              onClick={onDownload}
-              disabled={isDownloading}
-              className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-[#D8E2C0] bg-white px-4 text-sm font-medium text-[#5B732E] transition hover:bg-[#F7FAF1] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {isDownloading ? (
-                <>
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#5B732E] border-t-transparent" />
-                  Generando...
-                </>
-              ) : (
-                <>
-                  <Download className="h-4 w-4" />
-                  {downloadLabel}
-                </>
-              )}
-            </button>
+          {!hideDownloadButton && onDownload && (
+            <ActionButtons
+              onDownload={onDownload}
+              showDownload={true}
+              isLoading={isDownloading}
+              showText={true}
+              downloadText={downloadLabel}
+            />
           )}
         </div>
 
