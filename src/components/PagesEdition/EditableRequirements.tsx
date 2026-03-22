@@ -35,6 +35,8 @@ export function EditableRequirements({
         onChange={(value) => setIndex(Number(value))}
         options={requirementOptions}
         placeholder="Selecciona un requisito"
+        searchable={true}
+        searchPlaceholder="Buscar requisito..."
       />
 
       {current && (
@@ -54,6 +56,7 @@ export function EditableRequirements({
 
       <div className="flex justify-end pt-2">
         <ActionButtons
+          size="sm"
           showSave
           showCancel
           showText

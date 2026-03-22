@@ -486,6 +486,8 @@ const { current } = useFiscalYear();
                   placeholder={!editTypeDepartmentId ? "Seleccione depto…" : "Tipo…"}
                   disabled={!editTypeDepartmentId}
                   zIndex={60}
+                  searchable={true}
+                  searchPlaceholder="Buscar tipo..."
                 />
               </div>
 
@@ -541,6 +543,8 @@ const { current } = useFiscalYear();
                   placeholder={!editSubTypeDepartmentId ? "Seleccione depto…" : "Tipo…"}
                   disabled={!editSubTypeDepartmentId}
                   zIndex={60}
+                  searchable={true}
+                  searchPlaceholder="Buscar tipo..."
                 />
               </div>
 
@@ -552,6 +556,8 @@ const { current } = useFiscalYear();
                   placeholder={!editSubTypeTypeId ? "Seleccione tipo…" : "Subtipo…"}
                   disabled={!editSubTypeTypeId}
                   zIndex={60}
+                  searchable={true}
+                  searchPlaceholder="Buscar subtipo..."
                 />
               </div>
             </div>

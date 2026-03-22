@@ -94,6 +94,8 @@ export function LogsFilters({ value, onChange, onClear }: LogsFiltersProps) {
               options={MODULE_OPTIONS}
               placeholder="Módulo"
               buttonClassName="rounded-xl border-[#DCD6C9] min-h-[46px]"
+              searchable={true}
+              searchPlaceholder="Buscar módulo..."
             />
           </div>
 
@@ -116,6 +118,8 @@ export function LogsFilters({ value, onChange, onClear }: LogsFiltersProps) {
               options={ENTITY_OPTIONS}
               placeholder="Entidad"
               buttonClassName="rounded-xl border-[#DCD6C9] min-h-[46px]"
+              searchable={true}
+              searchPlaceholder="Buscar entidad..."
             />
           </div>
 

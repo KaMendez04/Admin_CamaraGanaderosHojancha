@@ -420,6 +420,8 @@ export default function EventEditor({
         onChange={(value) => setSelectedEventId(value ? Number(value) : null)}
         options={eventOptions}
         placeholder="Selecciona un evento para editar"
+        searchable={true}
+        searchPlaceholder="Buscar evento..."
       />
 
       {selectedEvent && (

@@ -192,6 +192,8 @@ export default function PSpendProjectionsPage() {
                   placeholder={!departmentId ? "Seleccione un departamento" : "Todos"}
                   disabled={!departmentId}
                   zIndex={40}
+                  searchable={true}
+                  searchPlaceholder="Buscar tipo..."
                 />
               </div>
               <div className="md:col-span-2">
@@ -203,6 +205,8 @@ export default function PSpendProjectionsPage() {
                   placeholder={!spendTypeId ? "Seleccione un tipo" : "Todos"}
                   disabled={!spendTypeId}
                   zIndex={30}
+                  searchable={true}
+                  searchPlaceholder="Buscar subtipo..."
                 />
               </div>
               <div>

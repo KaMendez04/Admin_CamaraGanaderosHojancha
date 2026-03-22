@@ -111,6 +111,8 @@ export default function FAQEditor({
         onChange={(value) => setSelectedFaqId(value ? Number(value) : null)}
         options={faqOptions}
         placeholder="Selecciona una pregunta para editar"
+        searchable={true}
+        searchPlaceholder="Buscar pregunta..."
       />
 
       {/* Formulario */}

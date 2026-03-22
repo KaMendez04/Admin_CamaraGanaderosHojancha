@@ -189,6 +189,8 @@ export default function PIncomeProjectionsPage() {
                   placeholder={!departmentId ? "Seleccione un departamento" : "Todos"}
                   disabled={!departmentId}
                   zIndex={40}
+                  searchable={true}
+                  searchPlaceholder="Buscar tipo..."
                 />
               </div>
               <div className="md:col-span-2">
@@ -200,6 +202,8 @@ export default function PIncomeProjectionsPage() {
                   placeholder={!incomeTypeId ? "Seleccione un tipo" : "Todos"}
                   disabled={!incomeTypeId}
                   zIndex={30}
+                  searchable={true}
+                  searchPlaceholder="Buscar subtipo..."
                 />
               </div>
               <div>

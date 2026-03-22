@@ -37,6 +37,8 @@ export function EditableBenefits({
         onChange={(value) => setIndex(Number(value))}
         options={benefitOptions}
         placeholder="Selecciona un beneficio"
+        searchable={true}
+        searchPlaceholder="Buscar beneficio..."
       />
 
       <div className="flex items-center gap-3">
@@ -71,6 +73,7 @@ export function EditableBenefits({
 
       <div className="flex justify-end pt-2">
         <ActionButtons
+          size="sm"
           showSave
           showCancel
           showText

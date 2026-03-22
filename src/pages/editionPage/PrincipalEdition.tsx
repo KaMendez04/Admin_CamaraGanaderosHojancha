@@ -4,12 +4,10 @@ import { usePrincipalEdit } from "../../hooks/EditionSection/PrincipalHook"
 import { CharCounter } from "../../components/CharCounter"
 import { showSuccessAlert } from "../../utils/alerts"
 import { ActionButtons } from "../../components/ActionButtons"
-import { useNavigate } from "@tanstack/react-router"
 
 const DEFAULT_TITLE = "Asociación Cámara Ganaderos Hojancha"
 
 function PrincipalEdition() {
-  const navigate = useNavigate()
   const { data, loading, saving, error, save, create } = usePrincipalEdit()
 
   const [description, setDescription] = useState("")
@@ -58,62 +56,92 @@ function PrincipalEdition() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f8ef] text-[#2E321B] p-4">
-      <div className="max-w-5xl mx-auto">
-        <NavbarEditionSection />
+    <div className="min-h-screen bg-[#F3F8EF] px-4 py-4 text-[#2E321B] md:px-6 md:py-5">
+      <div className="mx-auto max-w-5xl">
+        <div className="mb-4">
+          <NavbarEditionSection />
+        </div>
 
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold mb-2">Edición de la Sección Principal</h1>
-          <p className="text-base text-[#475C1D]">
+        <div className="mx-auto mb-5 max-w-3xl text-center">
+          <h1 className="text-2xl font-semibold tracking-[-0.02em] text-[#243018] md:text-3xl">
+            Edición de la Sección Principal
+          </h1>
+          <p className="mt-2 text-sm text-[#5F6E3E] md:text-base">
             {isEditing
               ? "Modifica la información principal que aparece en la página de inicio."
-              : "Aún no existe un registro de la sección principal. Crea uno nuevo con título por defecto."}
+              : "Aún no existe un registro de la sección principal. Crea uno nuevo con el título por defecto."}
           </p>
         </div>
 
-        <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
+        <div className="rounded-[28px] border border-[#DDD8CA] bg-white p-4 shadow-sm md:p-5">
           {loading ? (
-            <p>Cargando…</p>
+            <div className="flex min-h-[180px] items-center justify-center">
+              <p className="text-sm text-slate-500">Cargando…</p>
+            </div>
           ) : (
-            <div className="space-y-6">
-              {/* Título Principal (deshabilitado) */}
-                <div className="space-y-4 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                  Título Principal <span className="text-xs text-gray-500">(No editable)</span>
-                </label>
+            <div className="space-y-4">
+              <section className="rounded-[24px] border border-[#E6E0D2] bg-[#FCFDF9] p-4 md:p-5">
+                <div className="mb-3">
+                  <label
+                    htmlFor="title"
+                    className="block text-lg font-semibold text-[#2F3C22]"
+                  >
+                    Título Principal{" "}
+                    <span className="text-sm font-medium text-slate-500">
+                      (No editable)
+                    </span>
+                  </label>
+                </div>
+
                 <textarea
                   id="title"
-                  rows={2}
+                  rows={1}
                   value={DEFAULT_TITLE}
                   disabled
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 resize-none bg-gray-50 text-gray-600 cursor-not-allowed"
+                  className="w-full resize-none rounded-2xl border border-[#D8DCCF] bg-[#F6F7F3] px-4 py-3 text-base text-slate-600 outline-none"
                 />
-                <p className="mt-1 text-xs text-gray-500">
+
+                <p className="mt-2 text-sm text-slate-500">
                   Este título es fijo y no se puede modificar.
                 </p>
-              </div>
+              </section>
 
-              {/* Descripción */}
-              <div className="space-y-4 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                  Descripción
-                </label>
+              <section className="rounded-[24px] border border-[#E6E0D2] bg-[#FCFDF9] p-4 md:p-5">
+                <div className="mb-3">
+                  <label
+                    htmlFor="description"
+                    className="block text-lg font-semibold text-[#2F3C22]"
+                  >
+                    Descripción
+                  </label>
+                </div>
+
                 <textarea
                   id="description"
-                  rows={5}
+                  rows={4}
                   value={description}
                   maxLength={250}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
+                  className="w-full resize-none rounded-2xl border border-[#D8DCCF] bg-white px-4 py-3 text-base leading-relaxed text-[#2E321B] outline-none transition focus:border-[#A8B77A] focus:ring-2 focus:ring-[#DDE7C2]"
                   placeholder="Escribe aquí la descripción que se mostrará en la página de inicio…"
                   disabled={saving}
                 />
-                <CharCounter value={description} max={250} />
-              </div>
 
-              {/* Botones usando ActionButtons */}
-              <div className="flex justify-end">
+                <div className="mt-2 flex justify-end">
+                  <CharCounter value={description} max={250} />
+                </div>
+              </section>
+
+              {error && (
+                <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                  {error}
+                </div>
+              )}
+
+              <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-center sm:justify-end">
+
                 <ActionButtons
+                  size="sm"
                   onSave={handleSave}
                   onCancel={handleCancel}
                   showSave={true}
@@ -124,20 +152,8 @@ function PrincipalEdition() {
                   cancelConfirmText="Los cambios no guardados se perderán."
                 />
               </div>
-
-              {error && <p className="text-sm text-red-600">{error}</p>}
             </div>
           )}
-        </div>
-
-        {/* Botón de regresar abajo */}
-        <div className="flex justify-end mt-8">
-          <ActionButtons
-            onBack={() => navigate({ to: "/Principal" })}
-            showBack={true}
-            backText="Regresar"
-            showText={true}
-          />
         </div>
       </div>
     </div>

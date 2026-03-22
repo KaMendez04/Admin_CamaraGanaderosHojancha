@@ -270,7 +270,9 @@ export function ActionButtons({
     "inline-flex items-center justify-center rounded-xl border border-[#E6D8A8] bg-[#FFFDF7] text-[#9B7A29] transition hover:bg-[#FFF7E8] disabled:opacity-50 disabled:cursor-not-allowed";
   const baseSuccessSoft =
     "inline-flex items-center justify-center rounded-xl border border-[#D6E3B2] bg-[#FBFDF7] text-[#5F7728] transition hover:bg-[#F2F7E7] disabled:opacity-50 disabled:cursor-not-allowed";
-
+const baseBack =
+    "inline-flex items-center justify-center rounded-3xl bg-[#5B732E] text-white transition hover:bg-[#51682A] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm";
+  
   const handleApprove = async () => {
     if (requireConfirmApprove) {
       const result = await Swal.fire({
@@ -640,7 +642,7 @@ export function ActionButtons({
           type="button"
           onClick={onBack}
           disabled={disabled}
-          className={`${baseGhost} ${buttonSize} ${current.gap}`}
+          className={`${baseBack} ${buttonSize} ${current.gap}`}
           title="Regresar"
           aria-label="Regresar"
         >

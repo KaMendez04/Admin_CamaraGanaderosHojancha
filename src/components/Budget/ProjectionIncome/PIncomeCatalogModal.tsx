@@ -491,6 +491,8 @@ export default function CatalogModal({
                   placeholder={!editTypeDepartmentId ? "Seleccione depto…" : "Tipo…"}
                   disabled={!editTypeDepartmentId}
                   zIndex={60}
+                  searchable={true}
+                  searchPlaceholder="Buscar tipo..."
                 />
               </div>
 
@@ -551,6 +553,8 @@ export default function CatalogModal({
                   placeholder={!editSubTypeDepartmentId ? "Seleccione depto…" : "Tipo…"}
                   disabled={!editSubTypeDepartmentId}
                   zIndex={60}
+                  searchable={true}
+                  searchPlaceholder="Buscar tipo..."
                 />
               </div>
 
@@ -562,6 +566,8 @@ export default function CatalogModal({
                   placeholder={!editSubTypeTypeId ? "Seleccione tipo…" : "Subtipo…"}
                   disabled={!editSubTypeTypeId}
                   zIndex={60}
+                  searchable={true}
+                  searchPlaceholder="Buscar subtipo..."
                 />
               </div>
             </div>

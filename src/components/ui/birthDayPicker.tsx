@@ -202,7 +202,7 @@ function _BirthDatePicker({
               />
             </div>
 
-            <div className="w-[96px]">
+            <div className="w-[110px]">
               <CustomSelect
                 size="sm"
                 value={displayMonth.getFullYear()}
