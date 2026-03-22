@@ -19,7 +19,9 @@ export function BarChartSection({
   isLoading,
   formatCurrency,
 }: BarChartSectionProps) {
-  const chartHeight = Math.max(260, data.length * 42)
+  const safeData = Array.isArray(data) ? data : []
+  const hasData = safeData.length > 0
+  const chartHeight = Math.max(280, safeData.length * 44)
 
   return (
     <section className="rounded-3xl border border-[#E7EBD8] bg-white p-4 shadow-sm sm:p-5">
@@ -27,20 +29,27 @@ export function BarChartSection({
         <h2 className="text-base font-bold text-[#243018] sm:text-lg">
           Ingresos vs Egresos
         </h2>
-        <p className="text-xs sm:text-sm text-[#6C775A]">
+        <p className="text-xs text-[#6C775A] sm:text-sm">
           Comparativa por departamento
         </p>
       </div>
 
       {isLoading ? (
         <div className="flex h-[300px] items-center justify-center">
-          <div className="h-10 w-10 rounded-full border-[3px] border-[#5A7018] border-t-transparent animate-spin" />
+          <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-[#5A7018] border-t-transparent" />
+        </div>
+      ) : !hasData ? (
+        <div className="flex h-[260px] items-center justify-center text-sm text-[#6C775A]">
+          No hay datos disponibles.
         </div>
       ) : (
-        <div style={{ height: chartHeight }}>
-          <ResponsiveContainer width="100%" height="100%">
+        <div
+          className="w-full min-w-0 overflow-hidden"
+          style={{ height: chartHeight, minHeight: 280 }}
+        >
+          <ResponsiveContainer width="100%" height={chartHeight}>
             <BarChart
-              data={data}
+              data={safeData}
               layout="vertical"
               margin={{ top: 8, right: 16, left: 8, bottom: 8 }}
               barCategoryGap={10}
@@ -56,16 +65,28 @@ export function BarChartSection({
                 </linearGradient>
               </defs>
 
-              <CartesianGrid stroke="#EEF1E3" strokeDasharray="3 3" horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 11, fill: "#778062" }} tickLine={false} axisLine={false} />
+              <CartesianGrid
+                stroke="#EEF1E3"
+                strokeDasharray="3 3"
+                horizontal={false}
+              />
+
+              <XAxis
+                type="number"
+                tick={{ fontSize: 11, fill: "#778062" }}
+                tickLine={false}
+                axisLine={false}
+              />
+
               <YAxis
                 type="category"
                 dataKey="name"
-                width={95}
+                width={110}
                 tick={{ fontSize: 11, fill: "#344224", fontWeight: 600 }}
                 tickLine={false}
                 axisLine={false}
               />
+
               <Tooltip
                 formatter={(value: number) => formatCurrency(value)}
                 contentStyle={{
@@ -74,8 +95,19 @@ export function BarChartSection({
                   borderRadius: "12px",
                 }}
               />
-              <Bar dataKey="ingresos" fill="url(#incomeGradient)" radius={[0, 8, 8, 0]} maxBarSize={16} />
-              <Bar dataKey="egresos" fill="url(#spendGradient)" radius={[0, 8, 8, 0]} maxBarSize={16} />
+
+              <Bar
+                dataKey="ingresos"
+                fill="url(#incomeGradient)"
+                radius={[0, 8, 8, 0]}
+                maxBarSize={16}
+              />
+              <Bar
+                dataKey="egresos"
+                fill="url(#spendGradient)"
+                radius={[0, 8, 8, 0]}
+                maxBarSize={16}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
