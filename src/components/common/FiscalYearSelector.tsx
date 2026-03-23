@@ -16,12 +16,20 @@ export default function FiscalYearSelector() {
 
   useEffect(() => {
     const onDocClick = (e: MouseEvent) => {
-      if (!barRef.current) return
-      if (!barRef.current.contains(e.target as Node)) setOpen(false)
+      const target = e.target as Node | null
+      if (!target || !barRef.current) return
+
+      // No cerrar si el click es dentro de un CustomSelect
+      const isInsideCustomSelect = (target as Element).closest('[data-radix-popover-content]')
+      if (isInsideCustomSelect) return
+
+      if (!barRef.current.contains(target)) {
+        setOpen(false)
+      }
     }
 
-    document.addEventListener("mousedown", onDocClick)
-    return () => document.removeEventListener("mousedown", onDocClick)
+    document.addEventListener("click", onDocClick)
+    return () => document.removeEventListener("click", onDocClick)
   }, [])
 
   const fiscalYearOptions = list.map((fy) => ({
@@ -47,7 +55,6 @@ export default function FiscalYearSelector() {
 
   return (
     <div className="w-full" ref={barRef}>
-      {/* ====== Pastilla encabezado ====== */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -62,11 +69,9 @@ export default function FiscalYearSelector() {
         )}
       </button>
 
-      {/* ====== Barra desplegable ====== */}
       {open && (
         <div
           className="mt-3 flex flex-col gap-3 rounded-2xl border-2 border-[#EAEFE0] bg-[#F8F9F3] px-4 py-3 shadow-sm sm:flex-row sm:flex-wrap sm:items-center"
-          onClick={(e) => e.stopPropagation()}
         >
           <span className="text-sm font-semibold text-[#33361D] sm:min-w-[80px]">
             Año fiscal
@@ -89,17 +94,19 @@ export default function FiscalYearSelector() {
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
             {current?.state === "OPEN" && (
               <ActionButtons
+                size="sm"
                 showCancelAlt
                 onCancelAlt={handleCloseFiscalYear}
                 requireConfirmCancelAlt
                 cancelAltText="Cerrar"
                 cancelAltConfirmTitle={`¿Cerrar ${current.year}?`}
-                cancelAltConfirmText={` (quedará inactivo)`}
+                cancelAltConfirmText=" (quedará inactivo)"
                 showText
               />
             )}
 
             <ActionButtons
+              size="sm"
               showCreateAlt
               onCreateAlt={handleCreateFiscalYear}
               requireConfirmCreateAlt
