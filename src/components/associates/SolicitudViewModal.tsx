@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { Solicitud } from "../../schemas/adminSolicitudes";
 import { FincaAccordion } from "./FincaAccordion";
 import { Download, FolderOpen, X, Clock, CheckCircle, XCircle } from "lucide-react";
@@ -56,34 +56,68 @@ const formatDate = (dateString: string) =>
     day: "numeric",
   });
 
-function InfoField({ label, value, wide = false }: { label: string; value: string; wide?: boolean }) {
+function hasValue(value: ReactNode) {
+  if (value === null || value === undefined) return false;
+  if (typeof value === "string") return value.trim().length > 0;
+  return true;
+}
+
+function InfoField({
+  label,
+  value,
+  wide = false,
+}: {
+  label: string;
+  value: ReactNode;
+  wide?: boolean;
+}) {
   return (
-    <div className={wide ? "col-span-2" : ""}>
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-[#556B2F] mb-1">{label}</p>
-      <p className="text-sm font-medium text-[#33361D]">{value}</p>
+    <div className={`min-w-0 ${wide ? "md:col-span-2" : ""}`}>
+      <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-[#556B2F]">
+        {label}
+      </p>
+      <div className="min-w-0 max-w-full whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-medium leading-snug text-[#33361D]">
+        {hasValue(value) ? value : "—"}
+      </div>
     </div>
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
   return (
-    <div>
-      <div className="flex items-center gap-2 mb-3">
-        <div className="w-1 h-4 rounded-full bg-[#5B732E]" />
-        <h4 className="text-xs font-bold uppercase tracking-widest text-[#5B732E]">{title}</h4>
+    <div className="min-w-0">
+      <div className="mb-3 flex items-center gap-2">
+        <div className="h-4 w-1 rounded-full bg-[#5B732E]" />
+        <h4 className="text-xs font-bold uppercase tracking-widest text-[#5B732E]">
+          {title}
+        </h4>
       </div>
-      <div className="grid grid-cols-2 gap-x-6 gap-y-4 pl-3">{children}</div>
+      <div className="grid min-w-0 grid-cols-1 gap-x-6 gap-y-4 pl-0 sm:pl-3 md:grid-cols-2">
+        {children}
+      </div>
     </div>
   );
 }
 
 function LoadingSkeleton({ onClose }: { onClose: () => void }) {
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-8" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-3xl rounded-2xl bg-white p-8 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#5B732E]" />
-          <p className="mt-4 text-[#556B2F] font-medium">Cargando detalles...</p>
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-b-2 border-[#5B732E]" />
+          <p className="mt-4 font-medium text-[#556B2F]">Cargando detalles...</p>
         </div>
       </div>
     </div>
@@ -111,8 +145,14 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
 
   const personalFields = [
     { label: "Cédula", value: solicitud.persona.cedula },
-    { label: "Nombre completo", value: `${solicitud.persona.nombre} ${solicitud.persona.apellido1} ${solicitud.persona.apellido2}` },
-    { label: "Fecha de nacimiento", value: formatDate(solicitud.persona.fechaNacimiento) },
+    {
+      label: "Nombre completo",
+      value: `${solicitud.persona.nombre} ${solicitud.persona.apellido1} ${solicitud.persona.apellido2}`,
+    },
+    {
+      label: "Fecha de nacimiento",
+      value: formatDate(solicitud.persona.fechaNacimiento),
+    },
     { label: "Teléfono", value: solicitud.persona.telefono },
     { label: "Email", value: solicitud.persona.email },
     { label: "Dirección", value: solicitud.persona.direccion || "—", wide: true },
@@ -126,113 +166,131 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] overflow-hidden flex flex-col"
+        className="flex max-h-[92vh] w-full max-w-3xl min-w-0 flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-
-        {/* ── HEADER ── */}
-        <div className="bg-gradient-to-r from-[#F8F9F3] to-[#EAEFE0] px-6 pt-5 pb-4 border-b border-[#EAEFE0]">
-
-          {/* Row 1: icon + name + badge + close */}
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <div className={`flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center ${status.iconBg}`}>
-                <StatusIcon className={`w-4 h-4 ${status.iconColor}`} />
+        <div className="border-b border-[#EAEFE0] bg-gradient-to-r from-[#F8F9F3] to-[#EAEFE0] px-4 pb-4 pt-5 sm:px-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex min-w-0 items-start gap-3">
+              <div className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl ${status.iconBg}`}>
+                <StatusIcon className={`h-4 w-4 ${status.iconColor}`} />
               </div>
-              <div>
-                <p className="text-[10px] font-bold text-[#556B2F] uppercase tracking-wider mb-0.5">
+
+              <div className="min-w-0">
+                <p className="mb-0.5 text-[10px] font-bold uppercase tracking-wider text-[#556B2F]">
                   Solicitud de asociación
                 </p>
-                <h3 className="text-xl font-bold text-[#33361D] leading-tight">
+
+                <h3 className="min-w-0 whitespace-normal break-words [overflow-wrap:anywhere] text-xl font-bold leading-tight text-[#33361D]">
                   {solicitud.persona.nombre} {solicitud.persona.apellido1} {solicitud.persona.apellido2}
                 </h3>
-                <p className="text-[11px] text-[#556B2F] mt-0.5">
+
+                <p className="mt-0.5 min-w-0 whitespace-normal break-words [overflow-wrap:anywhere] text-[11px] text-[#556B2F]">
                   {solicitud.persona.cedula} · {formatDate(solicitud.createdAt)}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold ${status.pill}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
+            <div className="flex flex-wrap items-center gap-2 sm:flex-shrink-0">
+              <span
+                className={`inline-flex max-w-full items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold whitespace-normal break-words [overflow-wrap:anywhere] ${status.pill}`}
+              >
+                <span className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${status.dot}`} />
                 {status.label}
               </span>
+
               <button
                 onClick={onClose}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-[#556B2F] hover:bg-[#EAEFE0] transition"
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-[#556B2F] transition hover:bg-[#EAEFE0]"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="h-3.5 w-3.5" />
               </button>
             </div>
           </div>
 
-          {/* Row 2: action buttons — compact */}
-          <div className="flex gap-2 mt-3">
+          <div className="mt-3 flex flex-wrap gap-2">
             <button
-              onClick={() => openSolicitudPDF.mutate(Number(solicitud?.idSolicitud))}
+              onClick={() => openSolicitudPDF.mutate(Number(solicitud.idSolicitud))}
               disabled={openSolicitudPDF.isPending}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#5B732E] text-white text-xs font-semibold hover:bg-[#556B2F] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex max-w-full items-center gap-1.5 rounded-lg bg-[#5B732E] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#556B2F] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {openSolicitudPDF.isPending ? (
-                <><div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />Generando...</>
+                <>
+                  <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Generando...
+                </>
               ) : (
-                <><Download className="w-3 h-3" />Descargar PDF</>
+                <>
+                  <Download className="h-3 w-3 flex-shrink-0" />
+                  Descargar PDF
+                </>
               )}
             </button>
 
             {checkingDocs ? (
-              <div className="h-7 w-32 rounded-lg bg-[#EAEFE0] animate-pulse" />
+              <div className="h-7 w-32 animate-pulse rounded-lg bg-[#EAEFE0]" />
             ) : hasDocs ? (
               <button
                 onClick={() => {
                   docsLink.mutate(Number(solicitud.idSolicitud), {
                     onSuccess: (r) => window.open(r.url, "_blank", "noopener,noreferrer"),
                     onError: (err: any) => {
-                      const msg = err?.response?.data?.message || err?.message || "No se pudieron abrir los documentos";
+                      const msg =
+                        err?.response?.data?.message ||
+                        err?.message ||
+                        "No se pudieron abrir los documentos";
                       toast.error(Array.isArray(msg) ? msg.join(", ") : msg);
                     },
                   });
                 }}
                 disabled={docsLink.isPending}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#33361D] text-white text-xs font-semibold hover:bg-[#2b2d18] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex max-w-full items-center gap-1.5 rounded-lg bg-[#33361D] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#2b2d18] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {docsLink.isPending ? (
-                  <><div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />Abriendo...</>
+                  <>
+                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    Abriendo...
+                  </>
                 ) : (
-                  <><FolderOpen className="w-3 h-3" />Ver documentos</>
+                  <>
+                    <FolderOpen className="h-3 w-3 flex-shrink-0" />
+                    Ver documentos
+                  </>
                 )}
               </button>
             ) : (
-              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#EAEFE0] text-[#556B2F] text-xs font-medium">
-                <FolderOpen className="w-3 h-3 opacity-50" />
-                Sin documentos adjuntos
+              <div className="inline-flex min-w-0 max-w-full items-center gap-1.5 rounded-lg border border-[#EAEFE0] bg-white px-3 py-1.5 text-xs font-medium text-[#556B2F]">
+                <FolderOpen className="h-3 w-3 flex-shrink-0 opacity-50" />
+                <span className="min-w-0 whitespace-normal break-words [overflow-wrap:anywhere]">
+                  Sin documentos adjuntos
+                </span>
               </div>
             )}
           </div>
         </div>
 
-        {/* ── TABS ── */}
-        <div className="flex border-b border-[#EAEFE0] px-6 bg-white">
+        <div className="flex flex-wrap border-b border-[#EAEFE0] bg-white px-4 sm:px-6">
           <button
             onClick={() => setSelectedTab("info")}
-            className={`px-4 py-3 font-semibold text-sm transition ${
+            className={`px-4 py-3 text-sm font-semibold transition ${
               selectedTab === "info"
-                ? "text-[#5B732E] border-b-2 border-[#5B732E]"
+                ? "border-b-2 border-[#5B732E] text-[#5B732E]"
                 : "text-[#33361D] hover:text-[#5B732E]"
             }`}
           >
             Información General
           </button>
+
           {hasFincas && (
             <button
               onClick={() => setSelectedTab("finca")}
-              className={`px-4 py-3 font-semibold text-sm transition ${
+              className={`px-4 py-3 text-sm font-semibold transition ${
                 selectedTab === "finca"
-                  ? "text-[#5B732E] border-b-2 border-[#5B732E]"
+                  ? "border-b-2 border-[#5B732E] text-[#5B732E]"
                   : "text-[#33361D] hover:text-[#5B732E]"
               }`}
             >
@@ -241,15 +299,17 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
           )}
         </div>
 
-        {/* ── BODY ── */}
-        <div className="flex-1 overflow-y-auto px-7 py-5 space-y-6">
-
+        <div className="flex-1 space-y-6 overflow-y-auto px-4 py-5 sm:px-7">
           {solicitud.estado === "RECHAZADO" && solicitud.motivo && (
-            <div className="rounded-xl bg-[#F7E9E6] border border-[#E8C5C0] p-4 flex gap-3">
-              <XCircle className="w-4 h-4 text-[#8C3A33] flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-[10px] font-bold text-[#8C3A33] uppercase tracking-widest mb-0.5">Motivo de rechazo</p>
-                <p className="text-sm text-[#8C3A33]">{solicitud.motivo}</p>
+            <div className="flex min-w-0 gap-3 rounded-xl border border-[#E8C5C0] bg-[#F7E9E6] p-4">
+              <XCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#8C3A33]" />
+              <div className="min-w-0">
+                <p className="mb-0.5 text-[10px] font-bold uppercase tracking-widest text-[#8C3A33]">
+                  Motivo de rechazo
+                </p>
+                <p className="min-w-0 whitespace-normal break-words [overflow-wrap:anywhere] text-sm leading-snug text-[#8C3A33]">
+                  {solicitud.motivo}
+                </p>
               </div>
             </div>
           )}
@@ -258,7 +318,7 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
             <>
               <Section title="Información Personal">
                 {personalFields.map((f, i) => (
-                  <InfoField key={i} label={f.label} value={f.value} wide={(f as any).wide} />
+                  <InfoField key={i} label={f.label} value={f.value} wide={Boolean(f.wide)} />
                 ))}
               </Section>
 
@@ -273,12 +333,17 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
               {nucleoFamiliar && (
                 <>
                   <div className="border-t border-[#EAEFE0]" />
+
                   <Section title="Núcleo Familiar">
                     <InfoField label="Hombres" value={String(nucleoFamiliar.nucleoHombres)} />
                     <InfoField label="Mujeres" value={String(nucleoFamiliar.nucleoMujeres)} />
-                    <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-widest text-[#C19A3D] mb-1">Total</p>
-                      <p className="text-sm font-medium text-[#33361D]">{nucleoFamiliar.nucleoTotal}</p>
+                    <div className="min-w-0">
+                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-[#C19A3D]">
+                        Total
+                      </p>
+                      <div className="min-w-0 max-w-full whitespace-normal break-words [overflow-wrap:anywhere] text-sm font-medium leading-snug text-[#33361D]">
+                        {nucleoFamiliar.nucleoTotal}
+                      </div>
                     </div>
                   </Section>
                 </>
@@ -307,11 +372,10 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
           )}
         </div>
 
-        {/* ── FOOTER ── */}
-        <div className="px-6 py-3 border-t border-[#EAEFE0] bg-[#F8F9F3] flex justify-end">
+        <div className="flex justify-end border-t border-[#EAEFE0] bg-[#F8F9F3] px-4 py-3 sm:px-6">
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-[#5B732E] text-white text-sm font-semibold hover:bg-[#556B2F] transition shadow-sm"
+            className="rounded-xl bg-[#5B732E] px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#556B2F]"
           >
             Cerrar
           </button>

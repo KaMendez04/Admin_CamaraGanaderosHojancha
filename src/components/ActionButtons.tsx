@@ -559,7 +559,7 @@ const handleCancelAlt = async () => {
           type="button"
           onClick={onCreate}
           disabled={isSaving || disabled}
-          className="inline-flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-[#5B732E] text-white text-sm font-medium hover:bg-[#556B2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1.5 px-2 py-1.5 rounded-full bg-[#5B732E] text-white text-sm font-medium hover:bg-[#556B2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           title="Crear"
           aria-label="Crear"
         >

@@ -12,6 +12,14 @@
   }
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  overflow-x: hidden;
+}
+
 /* ─── SweetAlert2 — estilos Cámara Ganaderos ─────────────────────────────── */
 
 .swal2-popup.camara-popup {

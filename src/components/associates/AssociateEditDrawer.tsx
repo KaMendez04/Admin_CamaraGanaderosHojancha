@@ -72,22 +72,28 @@ export function AssociateEditDrawer({ open, onClose, initial, onSave }: Props) {
     const currentStatus = initial.estado ?? false;
     
     const result = await Swal.fire({
-      title: currentStatus ? '¿Desactivar asociado?' : '¿Activar asociado?',
-      html: currentStatus 
-        ? `Estás a punto de <span style="color: #dc2626; font-weight: 600;">desactivar</span> a <span style="color: #33361D; font-weight: 600;">${initial.nombreCompleto}</span>. El asociado no podrá acceder a la plataforma hasta que sea reactivado.`
-        : `Estás a punto de <span style="color: #16a34a; font-weight: 600;">activar</span> a <span style="color: #33361D; font-weight: 600;">${initial.nombreCompleto}</span>. El asociado podrá acceder a la plataforma.`,
-      icon: 'warning',
+      title: currentStatus ? "¿Desactivar asociado?" : "¿Activar asociado?",
+      html: currentStatus
+        ? `Estás a punto de <span style="color:#dc2626;font-weight:700;">desactivar</span> a <span style="color:#1F3D2C;font-weight:700;">${initial.nombreCompleto}</span>. El asociado no podrá acceder a la plataforma hasta que sea reactivado.`
+        : `Estás a punto de <span style="color:#5B732E;font-weight:700;">activar</span> a <span style="color:#1F3D2C;font-weight:700;">${initial.nombreCompleto}</span>. El asociado podrá acceder a la plataforma.`,
+      icon: "warning",
+      iconColor: "#CDBF6A",
+      background: "#F7F3E8",
+      color: "#1F3D2C",
       showCancelButton: true,
-      confirmButtonColor: currentStatus ? '#dc2626' : '#5B732E',
-      cancelButtonColor: '#dc2626',
-      confirmButtonText: currentStatus ? 'Sí, desactivar' : 'Sí, activar',
-      cancelButtonText: 'Cancelar',
-      reverseButtons: false,
+      confirmButtonText: currentStatus ? "Sí, desactivar" : "Sí, activar",
+      cancelButtonText: "Cancelar",
+      buttonsStyling: false,
       customClass: {
-        popup: 'rounded-2xl',
-        confirmButton: 'rounded-xl px-6 py-3 font-semibold',
-        cancelButton: 'rounded-xl px-6 py-3 font-semibold',
-      }
+        popup: "rounded-[32px] px-8 py-10",
+        title: "!text-[#1F3D2C] !text-3xl !font-extrabold",
+        htmlContainer: "!text-[#556B2F] !text-lg !leading-relaxed",
+        actions: "!mt-8 !flex !gap-6",
+        confirmButton:
+          "!bg-[#E3342F] !text-white !font-bold !rounded-full !px-8 !py-4 !shadow-[0_10px_25px_rgba(227,52,47,0.22)] hover:!bg-[#cf2e2a] transition",
+        cancelButton:
+          "!bg-[#789A3B] !text-white !font-bold !rounded-full !px-8 !py-4 !shadow-[0_10px_25px_rgba(120,154,59,0.22)] hover:!bg-[#6c8c34] transition",
+      },
     });
 
     if (result.isConfirmed && initial.idAsociado) {
