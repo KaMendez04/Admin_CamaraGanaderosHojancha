@@ -77,10 +77,12 @@ export function EditVolunteerIndividualModal({
         title: "!text-[#1F3D2C] !text-3xl !font-extrabold",
         htmlContainer: "!text-[#556B2F] !text-lg !leading-relaxed",
         actions: "!mt-8 !flex !gap-6",
-        confirmButton:
-          "!bg-[#E3342F] !text-white !font-bold !rounded-full !px-8 !py-4 !shadow-[0_10px_25px_rgba(227,52,47,0.22)] hover:!bg-[#cf2e2a] transition",
-        cancelButton:
-          "!bg-[#789A3B] !text-white !font-bold !rounded-full !px-8 !py-4 !shadow-[0_10px_25px_rgba(120,154,59,0.22)] hover:!bg-[#6c8c34] transition",
+        confirmButton: currentStatus
+          ? "!bg-[#E3342F] !text-white !font-bold !rounded-full !px-8 !py-4 !shadow-[0_10px_25px_rgba(227,52,47,0.22)] hover:!bg-[#cf2e2a] transition"
+          : "!bg-[#789A3B] !text-white !font-bold !rounded-full !px-8 !py-4 !shadow-[0_10px_25px_rgba(120,154,59,0.22)] hover:!bg-[#6c8c34] transition",
+        cancelButton: currentStatus
+          ? "!bg-[#789A3B] !text-white !font-bold !rounded-full !px-8 !py-4 !shadow-[0_10px_25px_rgba(120,154,59,0.22)] hover:!bg-[#6c8c34] transition"
+          : "!bg-[#E3342F] !text-white !font-bold !rounded-full !px-8 !py-4 !shadow-[0_10px_25px_rgba(227,52,47,0.22)] hover:!bg-[#cf2e2a] transition",
       },
     });
 
@@ -90,7 +92,7 @@ export function EditVolunteerIndividualModal({
       onClose();
     }
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
