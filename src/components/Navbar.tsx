@@ -1,5 +1,5 @@
 import React from "react"
-import { LogOut, Menu, User, Settings } from "lucide-react"
+import { LogOut, Menu, User, Settings, House } from "lucide-react"
 import { useNavigate } from "@tanstack/react-router"
 import { getCurrentUser, clearSession } from "../auth/auth"
 import { showConfirmOutAlert } from "../utils/alerts"
@@ -23,20 +23,16 @@ export default function Navbar({ isSidebarOpen, setSidebarOpen }: Props) {
     typeof window !== "undefined" ? window.innerWidth >= 768 : true,
   )
 
-  // ✅ NUEVO: controlar si el dropdown de usuario está abierto
   const [userMenuOpen, setUserMenuOpen] = React.useState(false)
 
   const navigate = useNavigate()
   const user = getCurrentUser()
   const username = user?.username || user?.email || "Usuario"
-  
+
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen)
 
   const handleLogout = async () => {
-    // ✅ 1) cerrar dropdown antes de abrir el modal
     setUserMenuOpen(false)
-
-    // ✅ 2) esperar 1 tick para que Radix cierre y libere el foco
     await new Promise<void>((r) => requestAnimationFrame(() => r()))
 
     const confirmed = await showConfirmOutAlert(
@@ -64,27 +60,41 @@ export default function Navbar({ isSidebarOpen, setSidebarOpen }: Props) {
           isSidebarOpen && isDesktop ? "translate-x-64" : "translate-x-0",
         ].join(" ")}
       >
-        {/* Botón menú */}
-        <button
-          onClick={toggleSidebar}
-          className="inline-flex items-center justify-center h-10 w-10 rounded-xl border border-transparent text-[#2E321B] hover:text-[#708C3E] hover:bg-black/[0.03] transition"
-          aria-label="Abrir menú"
-          type="button"
-        >
-          <Menu className="w-6 h-6" />
-        </button>
+        {/* Izquierda */}
+        <div className="flex items-center gap-2">
+          {/* Botón menú */}
+          <button
+            onClick={toggleSidebar}
+            className="inline-flex items-center justify-center h-10 w-10 rounded-xl border border-transparent text-[#2E321B] hover:text-[#708C3E] hover:bg-black/[0.03] transition"
+            aria-label="Abrir menú"
+            type="button"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+
+          {/* Botón inicio / principal */}
+          <button
+            onClick={() => navigate({ to: "/Principal" })}
+            className="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-white text-[#708C3E] 
+            hover:bg-[#F3F5EA] hover:text-[#5E772F] transition"
+            aria-label="Ir a principal"
+            type="button"
+            title="Principal"
+          >
+            <House className="w-5 h-5" />
+          </button>
+        </div>
 
         {/* Derecha */}
         <div className="flex items-center gap-3">
           <NotificationDropdown />
 
-          {/* Dropdown usuario */}
           <DropdownMenu open={userMenuOpen} onOpenChange={setUserMenuOpen}>
             <DropdownMenuTrigger asChild>
               <Button
                 type="button"
                 className={[
-                  "inline-flex items-center gap-2 rounded-xl px-3 py-2",
+                  "inline-flex items-center gap-2 rounded-xl px-5 py-5 ",
                   "bg-white/70",
                   "text-[#2E321B] hover:text-[#8B6C2E] hover:bg-[#FEF6E0] hover:border-[#DCD6C9]",
                   "transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FEF6E0]/25",
@@ -112,14 +122,13 @@ export default function Navbar({ isSidebarOpen, setSidebarOpen }: Props) {
 
               <DropdownMenuSeparator className="my-2 bg-[#E6E1D6]" />
 
-              {/* Configuración */}
               <DropdownMenuItem
                 className={[
                   "rounded-xl px-2.5 py-2 cursor-pointer",
                   "focus:bg-[#F3F5EA] focus:text-[#2E321B]",
                 ].join(" ")}
                 onSelect={() => {
-                  setUserMenuOpen(false) // ✅ opcional, pero consistente
+                  setUserMenuOpen(false)
                   navigate({ to: "/settings" })
                 }}
               >
@@ -129,7 +138,6 @@ export default function Navbar({ isSidebarOpen, setSidebarOpen }: Props) {
 
               <DropdownMenuSeparator className="my-2 bg-[#E6E1D6]" />
 
-              {/* Cerrar sesión */}
               <DropdownMenuItem
                 className={[
                   "rounded-xl px-2.5 py-2 cursor-pointer",

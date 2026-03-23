@@ -1,6 +1,4 @@
-import { ActionButtons } from "./ActionButtons"
 import { GenericSubnav, type NavItem } from "./GenericSubnav"
-import { useNavigate } from "@tanstack/react-router"
 
 
 const items: NavItem[] = [
@@ -43,18 +41,9 @@ const items: NavItem[] = [
 ]
 
 export default function NavbarEditionSection() {
-    const navigate = useNavigate()
 
   return (
     <div className="flex justify-center gap-4">
-      <ActionButtons
-        size="sm"
-        onBack={() => navigate({ to: "/Principal" })}
-        showBack={true}
-        backText="Regresar"
-        showText={false}
-      />
-    
     <GenericSubnav
       items={items}
       layoutId="edition-subnav-active"

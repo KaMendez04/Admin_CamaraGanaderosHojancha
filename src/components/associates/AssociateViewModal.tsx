@@ -6,6 +6,7 @@ import { FolderOpen, X } from "lucide-react";
 import { useAsociadoHasDocs, useDocsLinkByAsociado } from "../../hooks/associates/useSolicitudDocsLink";
 import { toast } from "sonner";
 import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll";
+import { ActionButtons } from "../ActionButtons";
 
 type Props = {
   open: boolean;
@@ -297,12 +298,13 @@ export function AssociateViewModal({ open, onClose, associate, isLoading }: Prop
 
         {/* ── FOOTER ── */}
         <div className="px-6 py-3 border-t border-[#EAEFE0] bg-[#F8F9F3] flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-[#5B732E] text-white text-sm font-semibold hover:bg-[#556B2F] transition shadow-sm"
-          >
-            Cerrar
-          </button>
+          <ActionButtons
+            size="sm"
+            onCancel={onClose}
+            showText={true}
+            cancelText="Cerrar"
+            showCancel={true}
+          />
         </div>
       </div>
     </div>

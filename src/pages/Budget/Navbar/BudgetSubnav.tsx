@@ -1,6 +1,4 @@
-import { ActionButtons } from "@/components/ActionButtons"
 import { GenericSubnav,  type NavItem} from "../../../components/GenericSubnav"
-import { useNavigate } from "@tanstack/react-router"
 
 const items: NavItem[] = [
   { to: "/budget", label: "Inicio", exact: true, allowedRoles: ["ADMIN", "JUNTA"] },
@@ -13,16 +11,8 @@ const items: NavItem[] = [
 ]
 
 export default function BudgetSubnav() {
-  const navigate = useNavigate()
   return (
     <div className="flex justify-center gap-4">
-       <ActionButtons
-            size="sm"
-            onBack={() => navigate({ to: "/Principal" })}
-            showBack={true}
-            backText="Regresar"
-            showText={false}
-          />
       <GenericSubnav items={items} layoutId="budget-subnav-active" />
     </div>
   )
