@@ -12,89 +12,83 @@ export function AuditUsersLogDetailModal({ open, onOpenChange, log }: AuditUsers
   if (!open || !log) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-[#FAF9F5] border border-[#E6E1D6] rounded-3xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      onClick={(e) => e.target === e.currentTarget && onOpenChange(false)}
+    >
+      <div className="bg-white border border-[#E2DDD4] rounded-2xl shadow-2xl w-full max-w-5xl max-h-[88vh] overflow-hidden flex flex-col">
 
         {/* Header */}
-        <div className="px-6 py-5 border-b border-[#E6E1D6] bg-white/60 flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#E6EDC8] text-[#5B732E]">
-                <History className="h-5 w-5" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-[#374321]">
-                  Detalle del registro #{log.id}
-                </h2>
-                <p className="text-sm text-[#556B2F] mt-1">
-                  Revisa la información general y los cambios registrados en la bitácora.
-                </p>
-              </div>
+        <div className="flex items-center justify-between gap-4 px-5 py-4 border-b border-[#EDE9E2] bg-[#FAFAF8]">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#EBF0DC] text-[#5B732E]">
+              <History className="h-4.5 w-4.5" />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-base font-bold text-[#2E321B] leading-tight">
+                Detalle del registro #{log.id}
+              </h2>
+              <p className="text-xs text-[#7A8C5A] mt-0.5 leading-tight">
+                Bitácora de cambios de usuarios
+              </p>
             </div>
           </div>
+
+          {/* Badge acción inline en el header */}
+          <div className="hidden sm:flex items-center gap-1.5 shrink-0">
+            <span className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${getActionBadgeClass(log.actionType)}`}>
+              {getActionLabel(log.actionType)}
+            </span>
+          </div>
+
           <button
             type="button"
             onClick={() => onOpenChange(false)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#E6E1D6] bg-white text-[#556B2F] transition hover:bg-[#F8F9F3] flex-shrink-0"
+            className="shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#E2DDD4] bg-white text-[#7A8C5A] transition hover:bg-[#F4F8EF] hover:text-[#374321]"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+        {/* Badge mobile */}
+        <div className="sm:hidden flex flex-wrap items-center gap-1.5 px-5 py-2.5 border-b border-[#EDE9E2] bg-[#FAFAF8]">
+          <span className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${getActionBadgeClass(log.actionType)}`}>
+            {getActionLabel(log.actionType)}
+          </span>
+        </div>
 
-          {/* Badge acción */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getActionBadgeClass(log.actionType)}`}>
-              {getActionLabel(log.actionType)}
-            </span>
-          </div>
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
 
           {/* Info general + Cambios detectados */}
-          <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-            <SectionCard icon={<FileText className="h-4 w-4 text-[#708C3E]" />} title="Información general">
-              <DetailRow label="Fecha" value={formatDateTime(log.createdAt)} />
-              <DetailRow label="Realizado por" value={log.actorUser?.username ?? "Sistema"} />
-              <DetailRow label="Correo actor" value={log.actorUser?.email ?? "—"} />
-              <DetailRow label="Usuario afectado" value={log.targetUser?.username ?? "—"} />
-              <DetailRow label="Correo afectado" value={log.targetUser?.email ?? "—"} />
-              <DetailRow label="Acción" value={getActionLabel(log.actionType)} />
-              <DetailRow label="Descripción" value={log.description ?? "—"} />
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+            <SectionCard icon={<FileText className="h-3.5 w-3.5 text-[#708C3E]" />} title="Información general">
+              <DetailRow label="Fecha"             value={formatDateTime(log.createdAt)} />
+              <DetailRow label="Realizado por"     value={log.actorUser?.username ?? "Sistema"} />
+              {log.actorUser?.email && (
+                <DetailRow label="Correo actor"    value={log.actorUser.email} />
+              )}
+              {log.targetUser?.username && (
+                <DetailRow label="Afectado"        value={log.targetUser.username} />
+              )}
+              {log.targetUser?.email && (
+                <DetailRow label="Correo afectado" value={log.targetUser.email} />
+              )}
+              <DetailRow label="Acción"            value={getActionLabel(log.actionType)} />
+              {log.description && (
+                <DetailRow label="Descripción"     value={log.description} />
+              )}
             </SectionCard>
 
-            <SectionCard icon={<ShieldCheck className="h-4 w-4 text-[#708C3E]" />} title="Cambios detectados">
-              {log.snapshotBefore && log.snapshotAfter ? (
-                <>
-                  {log.snapshotBefore.username !== log.snapshotAfter.username && (
-                    <DetailRow label="Nombre" value={`${log.snapshotBefore.username ?? "—"} → ${log.snapshotAfter.username ?? "—"}`} />
-                  )}
-                  {log.snapshotBefore.email !== log.snapshotAfter.email && (
-                    <DetailRow label="Correo" value={`${log.snapshotBefore.email ?? "—"} → ${log.snapshotAfter.email ?? "—"}`} />
-                  )}
-                  {log.snapshotBefore.isActive !== log.snapshotAfter.isActive && (
-                    <DetailRow label="Estado" value={`${log.snapshotBefore.isActive ? "Activo" : "Inactivo"} → ${log.snapshotAfter.isActive ? "Activo" : "Inactivo"}`} />
-                  )}
-                  {log.snapshotBefore.roleId !== log.snapshotAfter.roleId && (
-                    <DetailRow label="Rol" value={`${log.snapshotBefore.roleId ?? "—"} → ${log.snapshotAfter.roleId ?? "—"}`} />
-                  )}
-                  {log.snapshotBefore.username === log.snapshotAfter.username &&
-                   log.snapshotBefore.email === log.snapshotAfter.email &&
-                   log.snapshotBefore.isActive === log.snapshotAfter.isActive &&
-                   log.snapshotBefore.roleId === log.snapshotAfter.roleId && (
-                    <p className="text-sm text-gray-500">{log.description ?? "Sin cambios detectados"}</p>
-                  )}
-                </>
-              ) : (
-                <p className="text-sm text-gray-500">{log.description ?? "Sin datos de cambios"}</p>
-              )}
+            <SectionCard icon={<ShieldCheck className="h-3.5 w-3.5 text-[#708C3E]" />} title="Cambios detectados">
+              <UserChangesGrid log={log} />
             </SectionCard>
           </div>
 
           {/* Snapshots */}
-          <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-            <SnapshotCard title="Snapshot anterior" data={log.snapshotBefore} compareWith={log.snapshotAfter} />
-            <SnapshotCard title="Snapshot nuevo" data={log.snapshotAfter} compareWith={log.snapshotBefore} />
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+            <UserSnapshotCard title="Snapshot anterior" data={log.snapshotBefore} compareWith={log.snapshotAfter} />
+            <UserSnapshotCard title="Snapshot nuevo"    data={log.snapshotAfter}  compareWith={log.snapshotBefore} />
           </div>
         </div>
       </div>
@@ -102,34 +96,83 @@ export function AuditUsersLogDetailModal({ open, onOpenChange, log }: AuditUsers
   )
 }
 
-function SectionCard({ title, icon, children }: {
+/* ─── Section card ─────────────────────────────────────────── */
+function SectionCard({
+  title,
+  icon,
+  children,
+}: {
   title: string
   icon: React.ReactNode
   children: React.ReactNode
 }) {
   return (
-    <div className="rounded-2xl border border-[#E6E1D6] bg-[#F8F9F3] p-5">
-      <div className="mb-4 flex items-center gap-2 text-sm font-bold text-[#374321]">
+    <div className="rounded-xl border border-[#E8E4DC] bg-[#FAFAF8] overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[#EDE9E2] bg-white">
         {icon}
-        {title}
+        <span className="text-xs font-bold text-[#374321] uppercase tracking-wide">{title}</span>
       </div>
-      <div className="space-y-3">{children}</div>
+      <div className="px-4 py-1 divide-y divide-[#F0EDE8]">
+        {children}
+      </div>
     </div>
   )
 }
 
+/* ─── Detail row compacto ──────────────────────────────────── */
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid grid-cols-1 gap-1 sm:grid-cols-[160px_1fr] sm:gap-3">
-      <span className="text-[11px] font-semibold uppercase tracking-wide text-[#556B2F]">
+    <div className="flex items-baseline gap-3 py-2">
+      <span className="w-32 shrink-0 text-[10px] font-semibold uppercase tracking-wider text-[#7A8C5A]">
         {label}
       </span>
-      <span className="break-words text-sm text-[#33361D]">{value}</span>
+      <span className="text-sm text-[#33361D] break-words min-w-0">{value}</span>
     </div>
   )
 }
 
-// Campos que se ocultan si están vacíos/null/false
+/* ─── User changes grid (solo muestra campos que cambiaron) ── */
+function UserChangesGrid({ log }: { log: AuditUsersLog }) {
+  const b = log.snapshotBefore
+  const a = log.snapshotAfter
+
+  if (!b || !a) {
+    return (
+      <p className="py-3 text-sm text-[#A0A0A0]">
+        {log.description ?? "Sin datos de cambios"}
+      </p>
+    )
+  }
+
+  const changes: { label: string; value: string }[] = []
+
+  if (b.username !== a.username)
+    changes.push({ label: "Nombre",  value: `${b.username ?? "—"} → ${a.username ?? "—"}` })
+  if (b.email !== a.email)
+    changes.push({ label: "Correo",  value: `${b.email ?? "—"} → ${a.email ?? "—"}` })
+  if (b.isActive !== a.isActive)
+    changes.push({ label: "Estado",  value: `${b.isActive ? "Activo" : "Inactivo"} → ${a.isActive ? "Activo" : "Inactivo"}` })
+  if (b.roleId !== a.roleId)
+    changes.push({ label: "Rol",     value: `${b.roleId ?? "—"} → ${a.roleId ?? "—"}` })
+
+  if (changes.length === 0) {
+    return (
+      <p className="py-3 text-sm text-[#A0A0A0]">
+        {log.description ?? "Sin cambios detectados"}
+      </p>
+    )
+  }
+
+  return (
+    <div className="divide-y divide-[#F0EDE8]">
+      {changes.map((c) => (
+        <DetailRow key={c.label} label={c.label} value={c.value} />
+      ))}
+    </div>
+  )
+}
+
+/* ─── Snapshot card para usuarios ─────────────────────────── */
 const SKIP_IF_EMPTY = [
   "pendingEmail",
   "emailChangeTokenExpiresAt",
@@ -137,7 +180,6 @@ const SKIP_IF_EMPTY = [
   "hasResetPasswordToken",
 ]
 
-// Campos de fecha que se formatean con formatDateTime
 const DATE_KEYS = [
   "resetPasswordTokenExpiresAt",
   "emailChangeTokenExpiresAt",
@@ -145,36 +187,40 @@ const DATE_KEYS = [
 ]
 
 const FRIENDLY_KEYS: Record<string, string> = {
-  id: "ID",
-  username: "Nombre",
-  email: "Correo",
-  isActive: "Activo",
-  roleId: "Rol ID",
-  pendingEmail: "Correo pendiente",
-  hasResetPasswordToken: "Token reset",
-  hasEmailChangeToken: "Token correo",
-  resetPasswordTokenExpiresAt: "Última recuperación de contraseña",
-  emailChangeTokenExpiresAt: "Expira correo",
-  passwordChangedAt: "Contraseña cambiada",
+  id:                          "ID",
+  username:                    "Nombre",
+  email:                       "Correo",
+  isActive:                    "Estado",
+  roleId:                      "Rol ID",
+  pendingEmail:                "Correo pendiente",
+  hasResetPasswordToken:       "Token reset",
+  hasEmailChangeToken:         "Token correo",
+  resetPasswordTokenExpiresAt: "Última recuperación",
+  emailChangeTokenExpiresAt:   "Expira correo",
+  passwordChangedAt:           "Contraseña cambiada",
 }
 
 function isEmptyValue(value: any): boolean {
   return value === null || value === undefined || value === "" || value === false
 }
 
-function SnapshotCard({ title, data, compareWith }: {
+function UserSnapshotCard({
+  title,
+  data,
+  compareWith,
+}: {
   title: string
   data?: Record<string, any> | null
   compareWith?: Record<string, any> | null
 }) {
   if (!data) {
     return (
-      <div className="rounded-2xl border border-[#E6E1D6] bg-white p-5">
-        <div className="mb-4 flex items-center gap-2 text-sm font-bold text-[#374321]">
-          <CalendarDays className="h-4 w-4 text-[#708C3E]" />
-          {title}
+      <div className="rounded-xl border border-[#E8E4DC] bg-[#FAFAF8] overflow-hidden">
+        <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[#EDE9E2] bg-white">
+          <CalendarDays className="h-3.5 w-3.5 text-[#708C3E]" />
+          <span className="text-xs font-bold text-[#374321] uppercase tracking-wide">{title}</span>
         </div>
-        <div className="rounded-xl bg-[#F8F9F3] p-4 text-sm text-gray-500">Sin datos</div>
+        <p className="px-4 py-4 text-sm text-[#A0A0A0]">Sin datos</p>
       </div>
     )
   }
@@ -185,15 +231,16 @@ function SnapshotCard({ title, data, compareWith }: {
   })
 
   return (
-    <div className="rounded-2xl border border-[#E6E1D6] bg-white p-5">
-      <div className="mb-4 flex items-center gap-2 text-sm font-bold text-[#374321]">
-        <CalendarDays className="h-4 w-4 text-[#708C3E]" />
-        {title}
+    <div className="rounded-xl border border-[#E8E4DC] bg-[#FAFAF8] overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[#EDE9E2] bg-white">
+        <CalendarDays className="h-3.5 w-3.5 text-[#708C3E]" />
+        <span className="text-xs font-bold text-[#374321] uppercase tracking-wide">{title}</span>
       </div>
+
       {entries.length === 0 ? (
-        <div className="rounded-xl bg-[#F8F9F3] p-4 text-sm text-gray-500">Sin datos</div>
+        <p className="px-4 py-4 text-sm text-[#A0A0A0]">Sin datos</p>
       ) : (
-        <div className="space-y-2">
+        <div className="divide-y divide-[#F0EDE8]">
           {entries.map(([key, value]) => {
             const changed = compareWith && compareWith[key] !== value
 
@@ -201,26 +248,31 @@ function SnapshotCard({ title, data, compareWith }: {
               value === null || value === undefined || value === ""
                 ? "—"
                 : key === "isActive"
-                ? (value === true || value === "true" ? "Sí" : "No")
+                ? (value === true || value === "true" ? "Activo" : "Inactivo")
                 : DATE_KEYS.includes(key)
-                  ? formatDateTime(String(value))
-                  : String(value)
+                ? formatDateTime(String(value))
+                : String(value)
 
             return (
               <div
                 key={key}
-                className={`rounded-xl border p-3 ${
-                  changed
-                    ? "border-[#DCCCA3] bg-[#FFF8E7]"
-                    : "border-[#EEF1E7] bg-[#F8F9F3]"
-                }`}
+                className={`flex items-baseline gap-3 px-4 py-2 ${changed ? "bg-[#FFFBF0]" : ""}`}
               >
-                <div className="text-[11px] font-semibold uppercase tracking-wide text-[#556B2F] mb-1">
+                <span className={`w-36 shrink-0 text-[10px] font-semibold uppercase tracking-wider ${
+                  changed ? "text-[#9B7A29]" : "text-[#7A8C5A]"
+                }`}>
                   {FRIENDLY_KEYS[key] ?? key}
-                </div>
-                <div className="text-sm text-[#33361D] break-words">
+                </span>
+                <span className={`text-sm break-words min-w-0 ${
+                  changed ? "font-medium text-[#33361D]" : "text-[#5A5A5A]"
+                }`}>
                   {displayValue}
-                </div>
+                </span>
+                {changed && (
+                  <span className="ml-auto shrink-0 inline-flex h-4 items-center rounded-full bg-[#F5E8B0] px-1.5 text-[9px] font-bold text-[#9B7A29] uppercase tracking-wider">
+                    Cambio
+                  </span>
+                )}
               </div>
             )
           })}

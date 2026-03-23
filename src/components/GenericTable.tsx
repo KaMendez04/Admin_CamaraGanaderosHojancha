@@ -74,7 +74,7 @@ export function GenericTable<TData>({
                     <th
                       key={header.id}
                       style={{ width: header.getSize() }}
-                      className="bg-[#FAFBF8] px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.04em] text-slate-500"
+                      className="bg-[#f2f5ec] px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.04em] text-slate-500"
                     >
                       {header.isPlaceholder
                         ? null

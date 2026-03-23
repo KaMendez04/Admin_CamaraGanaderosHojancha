@@ -59,10 +59,10 @@ export function UnifiedVolunteersTable({
 
     columnHelper.accessor("nombreCompleto", {
       header: "Nombre",
-      size: 230,
+      size: 180,
       cell: (info) => (
         <div
-          className="max-w-[240px] truncate text-sm font-semibold text-slate-900"
+          className="max-w-[180px] truncate text-sm font-semibold text-slate-900"
           title={String(info.getValue())}
         >
           {info.getValue()}

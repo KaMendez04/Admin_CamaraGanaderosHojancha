@@ -57,9 +57,9 @@ import ConfirmEmailChangePage from "@/pages/ConfirmEmailChangePage";
 import SettingsAccountPage from "@/pages/settings/SettingsAccountPage";
 import SettingsUsersPage from "@/pages/settings/SettingsUsersPage";
 import SettingsLayoutPage from "@/pages/settings/SettingsLayoutPage";
-import LogsLayoutPage from "@/pages/logsPage/LogsLayoutPage";
 import LogsBudgetPage from "@/pages/logsPage/LogsBudgetPage";
 import LogsUsersPage from "@/pages/logsPage/LogsUsersPage";
+import LogsSubnav from "@/pages/logsPage/LogsSubnav";
 
 // ================================
 // Root
@@ -76,7 +76,6 @@ const loginRoute = new Route({
   getParentRoute: () => rootRoute,
   path: "/login",
   component: LoginPage,
-  // ✅ FIXED: Validar el search params
   validateSearch: (search: Record<string, unknown>): { from?: string } => {
     return {
       from: typeof search.from === 'string' ? search.from : undefined,
@@ -195,11 +194,17 @@ const settingsUsersRoute = new Route({
 const logsLayoutRoute = new Route({
   getParentRoute: () => appLayoutRoute,
   path: "/logs",
-  beforeLoad: ({ context, location }) => {
-    const locationHref = getLocationHref(location)
-    return requireRole(context, ["ADMIN"], locationHref)
-  },
-  component: LogsLayoutPage,
+  component: () => (
+    <div className="min-h-[calc(100vh-64px)] bg-[#F2F6EC]">
+      <div className="mx-auto w-full max-w-[1400px] px-4 py-4 md:px-6 md:py-5">
+        <div className="mb-4 flex justify-center">
+          <LogsSubnav />
+        </div>
+ 
+        <Outlet />
+      </div>
+    </div>
+  ),
 })
 
 const logsIndexRoute = new Route({

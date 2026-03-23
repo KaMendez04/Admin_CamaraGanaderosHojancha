@@ -57,12 +57,12 @@ export function VolunteerRequestsTable({
             : row.organizacion?.nombre;
         },
         {
-          id: "solicitante",
+          id: "nombre",
           header: "Solicitante",
-          size: 220,
+          size: 140,
           cell: (info) => (
             <div
-              className="max-w-[240px] truncate text-sm font-semibold text-slate-900"
+              className="max-w-[140px] truncate text-sm font-semibold text-slate-900"
               title={String(info.getValue())}
             >
               {info.getValue() || "N/A"}
@@ -70,7 +70,7 @@ export function VolunteerRequestsTable({
           ),
         }
       ),
-columnHelper.accessor("tipoSolicitante", {
+      columnHelper.accessor("tipoSolicitante", {
         header: "Tipo",
         size: 120,
         cell: (info) => {
