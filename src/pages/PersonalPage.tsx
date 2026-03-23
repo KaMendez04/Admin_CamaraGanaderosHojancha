@@ -7,7 +7,6 @@ import { EditPersonalPageModal } from "../components/Personal/EditPersonalPageMo
 import { PersonalTable } from "../components/Personal/PersonalPageTable";
 
 import { personalApi } from "../services/personalPageService";
-import { fetchCedulaData } from "../services/cedulaService";
 import { getCurrentUser } from "../auth/auth";
 
 import type { PersonalPageType } from "../models/PersonalPageType";
@@ -56,6 +55,7 @@ export default function PersonalPage() {
 
   const role = getCurrentUser()?.role?.name?.toUpperCase();
   const isReadOnly = role === "JUNTA";
+  
 
   async function load() {
     try {
@@ -74,7 +74,6 @@ export default function PersonalPage() {
     load();
   }, []);
 
-  const lookupCedula = (id: string) => fetchCedulaData(id);
 
   const totalCount = items.length;
   const activeCount = items.filter((item) => item.isActive).length;
@@ -128,7 +127,7 @@ export default function PersonalPage() {
           <div className="flex-1">
             <div className="flex items-center justify-between gap-4 rounded-3xl border border-[#E6E1D6] bg-white px-6 py-4 shadow-sm">
               <div>
-                <h2 className="font-bold text-[#374321]">
+                <h2 className="text-[20px] font-bold tracking-[-0.02em] text-slate-900 md:text-[26px]">
                   Gestión del Personal
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
@@ -211,17 +210,15 @@ export default function PersonalPage() {
           setPersonalPage={setEditPersonalPage}
           isNew={false}
           onSaved={load}
-          lookup={lookupCedula}
         />
       )}
 
       {!isReadOnly && newPersonalPage && (
-        <EditPersonalPageModal
+       <EditPersonalPageModal
           personalPage={newPersonalPage}
           setPersonalPage={setNewPersonalPage}
           isNew={true}
           onSaved={load}
-          lookup={lookupCedula}
         />
       )}
     </div>

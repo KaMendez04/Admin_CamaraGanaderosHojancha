@@ -1,15 +1,13 @@
-import { useForm } from "@tanstack/react-form"
-import { z } from "zod"
-import type { PersonalPageType } from "../../models/PersonalPageType"
-import { personalSchema } from "../../schemas/PersonalSchema"
+import { useForm } from "@tanstack/react-form";
+import { z } from "zod";
+import type { PersonalPageType } from "../../models/PersonalPageType";
 
-// Convierte un shape de Zod en validador para TanStack Form (string[] | undefined)
 const zodFieldValidator =
-  (shape: z.ZodTypeAny) =>
+  (schema: z.ZodTypeAny) =>
   ({ value }: { value: unknown }): string[] | undefined => {
-    const res = shape.safeParse(value)
-    return res.success ? undefined : res.error.issues.map((i) => i.message)
-  }
+    const res = schema.safeParse(value);
+    return res.success ? undefined : res.error.issues.map((i) => i.message);
+  };
 
 export function useEditPersonalPageModal(defaults: PersonalPageType) {
   const form = useForm({
@@ -27,49 +25,29 @@ export function useEditPersonalPageModal(defaults: PersonalPageType) {
       startWorkDate: defaults.startWorkDate ?? "",
       endWorkDate: (defaults.endWorkDate ?? "") as string | null,
     },
-    onSubmit: async () => {
-      // La validación corre con los validators de cada Field
-    },
-  })
+    onSubmit: async () => {},
+  });
 
-  // Atajos de validadores para usar directo en <form.Field validators={...}>
-  const v = personalSchema.shape
   const validators = {
-    name: { onChange: zodFieldValidator(v.name) },
-    lastname1: { onChange: zodFieldValidator(v.lastname1) },
-    lastname2: { onChange: zodFieldValidator(v.lastname2) },
-    birthDate: { 
+    name: { onChange: zodFieldValidator(z.string().trim().min(1, "Requerido")) },
+    lastname1: { onChange: zodFieldValidator(z.string().trim().min(1, "Requerido")) },
+    lastname2: { onChange: zodFieldValidator(z.string().trim().min(1, "Requerido")) },
+    birthDate: { onChange: zodFieldValidator(z.string().min(1, "Requerido")) },
+    email: {
       onChange: zodFieldValidator(
-        z
-          .string()
-          .min(1, "Requerido")
-          .refine((value) => {
-            // No permitir fechas del año actual
-            const currentYear = new Date().getFullYear();
-            const birthYear = parseInt(value.split('-')[0]);
-            if (birthYear >= currentYear) {
-              return false;
-            }
-            
-            // Validar edad mínima 18 años
-            const birth = new Date(value);
-            const today = new Date();
-            const age = today.getFullYear() - birth.getFullYear();
-            const hasBirthdayPassed =
-              today.getMonth() > birth.getMonth() ||
-              (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate());
-            const realAge = hasBirthdayPassed ? age : age - 1;
-            return realAge >= 18;
-          }, { message: "Debe tener al menos 18 años y no puede ser del año actual" })
-      ) 
+        z.string().trim().min(1, "Requerido").email("Correo inválido")
+      ),
     },
-    email: { onChange: zodFieldValidator(v.email) },
-    phone: { onChange: zodFieldValidator(v.phone) },
-    direction: { onChange: zodFieldValidator(v.direction) },
-    occupation: { onChange: zodFieldValidator(v.occupation) },
-    startWorkDate: { onChange: zodFieldValidator(v.startWorkDate) },
-    endWorkDate: { onChange: zodFieldValidator(v.endWorkDate) },
-  } as const
+    phone: {
+      onChange: zodFieldValidator(
+        z.string().regex(/^\d{8}$/, "Debe tener 8 dígitos")
+      ),
+    },
+    direction: { onChange: zodFieldValidator(z.string().trim().min(1, "Requerido")) },
+    occupation: { onChange: zodFieldValidator(z.string().trim().min(1, "Requerido")) },
+    startWorkDate: { onChange: () => undefined },
+    endWorkDate: { onChange: () => undefined },
+  } as const;
 
-  return { form, validators }
+  return { form, validators };
 }

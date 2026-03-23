@@ -48,7 +48,7 @@ export function GenericSubnav({
       {(title || description) && (
         <div className="mb-3">
           {title && (
-            <h1 className="text-[20px] font-semibold tracking-[-0.02em] text-slate-900 md:text-[22px]">
+            <h1 className="text-[26px] font-bold tracking-[-0.02em] text-slate-900 md:text-[26px]">
               {title}
             </h1>
           )}
