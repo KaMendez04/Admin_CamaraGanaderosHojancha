@@ -1,19 +1,22 @@
-// src/pages/PersonalPage.tsx
 import { useEffect, useMemo, useState } from "react";
+import { Plus } from "lucide-react";
+
 import { usePersonalPageState } from "../hooks/Personal/usePersonalPageState";
-import { PersonalPageHeader } from "../components/Personal/PersonalPageHeader";
-import { PersonalPageSearch } from "../components/Personal/PersonalPageSearch";
 import { PersonalPageInfoModal } from "../components/Personal/PersonalPageInfoModal";
 import { EditPersonalPageModal } from "../components/Personal/EditPersonalPageModal";
+import { PersonalTable } from "../components/Personal/PersonalPageTable";
+
 import { personalApi } from "../services/personalPageService";
 import { fetchCedulaData } from "../services/cedulaService";
 import { getCurrentUser } from "../auth/auth";
-import type { PersonalPageType } from "../models/PersonalPageType";
-import { PersonalTable } from "../components/Personal/PersonalPageTable";
-import { ActionButtons } from "../components/ActionButtons";
-import { useNavigate } from "@tanstack/react-router";
 
-// ===== API -> UI (incluye fechas laborales) =====
+import type { PersonalPageType } from "../models/PersonalPageType";
+
+import { StatusFilters } from "../components/StatusFilters";
+import { KPICard } from "../components/KPICard";
+import { PaginationBar, usePagination } from "@/components/ui/pagination";
+
+// ===== API -> UI =====
 function mapApiToUi(p: any): PersonalPageType {
   return {
     IdUser: p.IdUser ?? p.id ?? 0,
@@ -37,6 +40,8 @@ export default function PersonalPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [status, setStatus] = useState<string | undefined>(undefined);
+
   const {
     search,
     setSearch,
@@ -48,14 +53,13 @@ export default function PersonalPage() {
     setNewPersonalPage,
     openNewPersonalPage,
   } = usePersonalPageState();
-  const navigate = useNavigate();
-  
-  // Rol (solo JUNTA es read-only)
+
   const role = getCurrentUser()?.role?.name?.toUpperCase();
   const isReadOnly = role === "JUNTA";
 
   async function load() {
     try {
+      setLoading(true);
       const data = await personalApi.list();
       setItems(data.map(mapApiToUi));
       setError(null);
@@ -70,53 +74,127 @@ export default function PersonalPage() {
     load();
   }, []);
 
-  const filtered = useMemo(() => {
-    return items.filter((s: any) =>
-      `${s.name} ${s.lastname1} ${s.lastname2} ${s.IDE}`
-        .toLowerCase()
-        .includes(search.toLowerCase())
-    );
-  }, [search, items]);
-
-
   const lookupCedula = (id: string) => fetchCedulaData(id);
 
+  const totalCount = items.length;
+  const activeCount = items.filter((item) => item.isActive).length;
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Cargando…</div>;
-  if (error) return <div className="min-h-screen flex items-center justify-center text-red-600">Error: {error}</div>;
+  const filtered = useMemo(() => {
+    return items.filter((item) => {
+      const matchesSearch = `${item.name} ${item.lastname1} ${item.lastname2} ${item.IDE} ${item.email ?? ""}`
+        .toLowerCase()
+        .includes(search.toLowerCase());
+
+      const matchesStatus =
+        !status
+          ? true
+          : status === "ACTIVO"
+          ? item.isActive
+          : !item.isActive;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [items, search, status]);
+
+  const {
+    page,
+    setPage,
+    totalPages,
+    pagedItems,
+    pageItems,
+  } = usePagination(filtered, 10, [search, status]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Cargando…
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-600">
+        Error: {error}
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen w-full bg-[#FAF9F5] px-6 py-10 relative">
-      <div className="max-w-7xl mx-auto">
-        {/* Header: solo ADMIN ve botón Agregar */}
-        {!isReadOnly && <PersonalPageHeader onAdd={openNewPersonalPage} />}
+    <div className="min-h-screen w-full bg-[#FAF9F5] px-6 py-8 relative">
+      <div className="max-w-7xl mx-auto space-y-4">
+        {/* Header superior + KPIs */}
+        <section className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-center">
+          <div className="flex-1">
+            <div className="flex items-center justify-between gap-4 rounded-3xl border border-[#E6E1D6] bg-white px-6 py-4 shadow-sm">
+              <div>
+                <h2 className="font-bold text-[#374321]">
+                  Gestión del Personal
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Administra, consulta y da seguimiento al personal registrado.
+                </p>
+              </div>
 
-        <div className="mb-6">
-          <PersonalPageSearch value={search} onChange={setSearch} />
-        </div>
-
-
-        {/* Tabla Reutilizable */}
-        <PersonalTable
-          data={filtered}
-          isLoading={false}
-          isReadOnly={isReadOnly}
-          onView={setSelectedPersonalPage}
-          onEdit={(item) => {
-            if (!isReadOnly) setEditPersonalPage(item);
-          }}
-        />
-
-        <div className="mt-6 flex justify-between items-center">
-          <div className="text-sm text-[#556B2F] font-medium">
-            {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
+              {!isReadOnly && (
+                <button
+                  onClick={openNewPersonalPage}
+                  className="bg-[#708C3E] hover:bg-[#5e7630] text-white rounded-full w-11 h-11 flex items-center justify-center shadow-lg transition-transform duration-200 hover:scale-110 shrink-0"
+                  aria-label="Agregar nuevo personal"
+                >
+                  <Plus className="w-5 h-5" />
+                </button>
+              )}
+            </div>
           </div>
-          <ActionButtons
-            onBack={() => navigate({ to: "/Principal" })}
-            showBack={true}
-            backText="Regresar"
-            showText={true}
-          />   
+
+        </section>
+
+          <div className="flex justify-between  gap-2">
+            <div className="flex-1">
+            {/* Filtros */}
+            <StatusFilters
+              status={status}
+              onStatusChange={setStatus}
+              search={search}
+              onSearchChange={setSearch}
+              searchPlaceholder="Buscar por cédula, nombre, apellido o email..."
+              statusOptions={["ACTIVO", "INACTIVO"]}
+              showAllOption={true}
+              hideDownloadButton={true}
+            />
+            </div>
+            <div className="flex gap-2">
+            <KPICard label="Total" value={totalCount} />
+            <KPICard label="Activos" value={activeCount} tone="gold" />
+            </div>
+          </div>
+
+        {/* Tabla */}
+        <section className="rounded-3xl border border-[#E6E1D6] bg-white shadow-sm overflow-hidden">
+          <div className="overflow-hidden rounded-3xl border border-[#E8ECDD] bg-white shadow-sm">
+            <PersonalTable
+              data={pagedItems}
+              isLoading={false}
+              isReadOnly={isReadOnly}
+              onView={setSelectedPersonalPage}
+              onEdit={(item) => {
+                if (!isReadOnly) setEditPersonalPage(item);
+              }}
+            />
+          </div>
+        </section>
+
+        {/* Footer inferior */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+
+          <PaginationBar
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            pageItems={pageItems}
+          />
+
         </div>
       </div>
 
@@ -127,7 +205,6 @@ export default function PersonalPage() {
         />
       )}
 
-      {/* Editar y Nuevo solo para ADMIN */}
       {!isReadOnly && editPersonalPage && (
         <EditPersonalPageModal
           personalPage={editPersonalPage}

@@ -31,7 +31,6 @@ export function PersonalPageInfoModal({ item, onClose }: PersonalPageInfoModalPr
   }
 
   const handleDownload = async () => {
-    // ✅ Ajusta aquí según tu modelo real. En tu log: item.IdUser = 1
     const id = Number((item as any).id ?? (item as any).idPersonal ?? (item as any).IdUser)
 
     if (!Number.isFinite(id) || id <= 0) {
@@ -103,7 +102,7 @@ export function PersonalPageInfoModal({ item, onClose }: PersonalPageInfoModalPr
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="md:col-span-2">{row("Puesto / ocupación", show((item as any).occupation))}</div>
-              {row("Estadoo", (item as any).isActive ? "Activo" : "Inactivo")}
+              {row("Estado", (item as any).isActive ? "Activo" : "Inactivo")}
               {row("Fecha de inicio laboral", show((item as any).startWorkDate))}
               {!(item as any).isActive && row("Fecha de salida", show((item as any).endWorkDate))}
             </div>

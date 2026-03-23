@@ -81,7 +81,7 @@ export function GenericSubnav({
 
       {/* Mobile: 2 o menos items */}
       {!hasManyItems && (
-        <div className="inline-flex flex-wrap rounded-full border border-[#E8ECDD] bg-[#FAFBF8] p-1 sm:hidden">
+        <div className="inline-flex flex-wrap justify-center rounded-full border border-[#E8ECDD] bg-[#FAFBF8] sm:hidden">
           {visibleItems.map((item) => {
             const active = isActive(item.to, item.exact);
 
