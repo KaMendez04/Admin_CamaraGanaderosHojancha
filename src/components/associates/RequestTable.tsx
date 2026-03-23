@@ -21,11 +21,23 @@ type RequestsTableProps = {
   isLoading: boolean;
   isReadOnly: boolean;
   onView: (id: number) => void;
-  onApprove: (sol: SolicitudRow) => void | Promise<void>; 
+  onApprove: (sol: SolicitudRow) => void | Promise<void>;
   onReject: (id: number) => void;
   approvingId: number | null;
 };
 
+function statusClass(estado: SolicitudRow["estado"]) {
+  switch (estado) {
+    case "PENDIENTE":
+      return "border border-[#F3E7A4] bg-[#FFF8D8] text-[#9A7B00]";
+    case "APROBADO":
+      return "border border-[#D9E6B8] bg-[#F4F8EA] text-[#5F7728]";
+    case "RECHAZADO":
+      return "border border-[#F0D0CB] bg-[#FCF1EF] text-[#A14B43]";
+    default:
+      return "border border-slate-200 bg-slate-50 text-slate-600";
+  }
+}
 
 export function RequestsTable({
   data,
@@ -43,77 +55,94 @@ export function RequestsTable({
       header: "Cédula",
       size: 120,
       cell: (info) => (
-        <div className="font-medium text-[#33361D]">{info.getValue()}</div>
+        <div className="text-sm font-medium text-slate-700">
+          {info.getValue()}
+        </div>
       ),
     }),
+
     columnHelper.accessor(
-      (row) => `${row.persona.nombre} ${row.persona.apellido1} ${row.persona.apellido2}`,
+      (row) =>
+        `${row.persona.nombre} ${row.persona.apellido1} ${row.persona.apellido2}`,
       {
         id: "nombreCompleto",
         header: "Nombre",
-        size: 200,
+        size: 230,
         cell: (info) => (
-          <div className="font-medium text-[#33361D] truncate" title={info.getValue()}>
+          <div
+            className="max-w-[240px] truncate text-sm font-semibold text-slate-900"
+            title={info.getValue()}
+          >
             {info.getValue()}
           </div>
         ),
       }
     ),
+
     columnHelper.accessor("persona.telefono", {
       header: "Teléfono",
-      size: 100,
-      cell: (info) => <div className="text-[#33361D]">{info.getValue()}</div>,
+      size: 120,
+      cell: (info) => (
+        <div className="text-sm text-slate-600">{info.getValue()}</div>
+      ),
     }),
+
     columnHelper.accessor("persona.email", {
       header: "Email",
-      size: 180,
+      size: 220,
       cell: (info) => (
-        <div className="text-[#33361D] truncate" title={info.getValue()}>
+        <div
+          className="max-w-[240px] truncate text-sm text-slate-600"
+          title={info.getValue()}
+        >
           {info.getValue()}
         </div>
       ),
     }),
+
     columnHelper.accessor("estado", {
       header: "Estado",
-      size: 110,
+      size: 120,
       cell: (info) => (
-        <span
-          className={`justify-center items-center flex px-2 py-1 rounded-lg text-xs font-bold ${
-            info.getValue() === "PENDIENTE"
-              ? "bg-yellow-100 text-yellow-800"
-              : info.getValue() === "APROBADO"
-              ? "bg-[#E6EDC8] text-[#5A7018]"
-              : "bg-[#F7E9E6] text-[#8C3A33]"
-          }`}
-        >
-          {info.getValue()}
-        </span>
+        <div className="flex justify-center">
+          <span
+            className={`inline-flex min-w-[110px] items-center justify-center rounded-full px-3 py-1 text-[11px] font-semibold tracking-[0.02em] ${statusClass(
+              info.getValue()
+            )}`}
+          >
+            {info.getValue()}
+          </span>
+        </div>
       ),
     }),
+
     columnHelper.accessor("createdAt", {
       header: "Fecha",
       size: 110,
       cell: (info) => (
-        <div className="text-[#33361D]">
+        <div className="text-sm text-slate-500">
           {new Date(info.getValue()).toLocaleDateString("es-CR")}
         </div>
       ),
     }),
+
     columnHelper.display({
       id: "acciones",
       header: () => <div className="text-center">Acciones</div>,
-      size: 160,
+      size: 150,
       cell: (info) => {
         const sol = info.row.original;
         const solicitudId = sol.idSolicitud;
         const isThisApproving = approvingId === solicitudId;
 
         const estado = sol.estado;
-        const canApprove = (estado === "PENDIENTE" || estado === "RECHAZADO") && !isReadOnly;
-        const canReject = (estado === "PENDIENTE") && !isReadOnly; // ✅ SOLO pendientes
+        const canApprove =
+          (estado === "PENDIENTE" || estado === "RECHAZADO") && !isReadOnly;
+        const canReject = estado === "PENDIENTE" && !isReadOnly;
 
         return (
           <ActionButtons
+            size="sm"
             onView={() => onView(solicitudId)}
             onApprove={canApprove ? () => onApprove(sol) : undefined}
             onReject={canReject ? () => onReject(solicitudId) : undefined}
@@ -123,7 +152,6 @@ export function RequestsTable({
           />
         );
       },
-
     }),
   ];
 

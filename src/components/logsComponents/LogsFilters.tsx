@@ -1,4 +1,4 @@
-import { Filter, Search } from "lucide-react"
+import { Filter, Search, X } from "lucide-react"
 import { BirthDatePicker } from "@/components/ui/birthDayPicker"
 import { CustomSelect } from "../CustomSelect"
 
@@ -27,132 +27,123 @@ const MODULE_OPTIONS = [
   { value: "EXTRAORDINARY", label: "Extraordinarios" },
 ]
 
-const ENTITY_OPTIONS = [
-  { value: "ALL", label: "Todas las entidades" },
-  { value: "USER", label: "Usuario" },
-  { value: "INCOME", label: "Ingreso real" },
-  { value: "SPEND", label: "Egreso real" },
-  { value: "P_INCOME", label: "Ingreso proyectado" },
-  { value: "P_SPEND", label: "Egreso proyectado" },
-  { value: "EXTRAORDINARY", label: "Movimiento extraordinario" },
-]
-
 const ACTION_OPTIONS = [
   { value: "ALL", label: "Todas las acciones" },
   { value: "CREATE", label: "Creación" },
   { value: "UPDATE", label: "Actualización" },
   { value: "DELETE", label: "Eliminación" },
   { value: "ALLOCATE", label: "Asignación" },
-  { value: "ASSIGN_TO_INCOME", label: "Asignación a ingreso" },
+  { value: "ASSIGN_TO_INCOME", label: "Asign. a ingreso" },
   { value: "USER_ACTIVATED", label: "Activación" },
   { value: "USER_DEACTIVATED", label: "Desactivación" },
-  { value: "USER_PASSWORD_CHANGED", label: "Cambio de contraseña" },
-  { value: "USER_EMAIL_CHANGE_REQUESTED", label: "Solicitud cambio correo" },
-  { value: "USER_EMAIL_CHANGE_CONFIRMED", label: "Confirmación cambio correo" },
+  { value: "USER_PASSWORD_CHANGED", label: "Cambio contraseña" },
+  { value: "USER_EMAIL_CHANGE_REQUESTED", label: "Solicitud correo" },
+  { value: "USER_EMAIL_CHANGE_CONFIRMED", label: "Confirmación correo" },
 ]
 
-const labelClass =
-  "mb-1.5 block text-[11px] font-semibold text-[#556B2F] uppercase tracking-wide"
+const labelClass = "mb-1 block text-[10px] font-semibold uppercase tracking-wider text-[#7A8C5A]"
 
 export function LogsFilters({ value, onChange, onClear }: LogsFiltersProps) {
+  const hasActiveFilters =
+    value.search ||
+    value.module !== "ALL" ||
+    value.entityType !== "ALL" ||
+    value.actionType !== "ALL" ||
+    value.from ||
+    value.to
+
   return (
-    <div className="rounded-3xl border border-[#E6E1D6] bg-[#FAF9F5] shadow-sm overflow-hidden">
-      <div className="border-b border-[#E6E1D6] bg-white/60 px-5 py-4">
+    <div className="rounded-2xl border border-[#E2DDD4] bg-white shadow-sm">
+      <div className="flex items-center justify-between border-b border-[#EDE9E2] px-4 py-2.5">
         <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#E6EDC8] text-[#5B732E]">
-            <Filter className="h-4 w-4" />
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#EBF0DC] text-[#5B732E]">
+            <Filter className="h-3.5 w-3.5" />
           </div>
-          <div>
-            <h2 className="text-base font-bold text-[#374321]">Filtros</h2>
-            <p className="text-xs text-[#556B2F]">
-              Refina la búsqueda de registros de la bitácora.
-            </p>
-          </div>
+          <span className="text-sm font-semibold text-[#374321]">Filtros</span>
+          {hasActiveFilters && (
+            <span className="inline-flex h-5 items-center rounded-full bg-[#5B732E] px-2 text-[10px] font-bold text-white">
+              Activos
+            </span>
+          )}
         </div>
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={onClear}
+            className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium text-[#7A8C5A] transition hover:bg-[#F4F8EF] hover:text-[#374321]"
+          >
+            <X className="h-3 w-3" />
+            Limpiar
+          </button>
+        )}
       </div>
 
-      <div className="p-5 space-y-5">
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <div className="lg:col-span-2">
+      <div className="px-4 py-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr_160px_160px]">
+          {/* Buscar */}
+          <div>
             <label className={labelClass}>Buscar</label>
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#708C3E]" />
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#9BAD78]" />
               <input
                 value={value.search}
                 onChange={(e) => onChange({ ...value, search: e.target.value })}
-                placeholder="Buscar por usuario, entidad, acción o descripción..."
-                className="w-full rounded-xl border border-[#DCD6C9] bg-white py-3 pl-10 pr-3 text-sm text-[#33361D] placeholder:text-gray-400 outline-none transition focus:border-[#708C3E] focus:ring-2 focus:ring-[#708C3E]/20"
+                placeholder="Usuario, entidad, descripción..."
+                className="h-9 w-full rounded-xl border border-[#DDD8CE] bg-[#FAFAF8] py-2 pl-8 pr-3 text-sm text-[#33361D] placeholder:text-[#B5B0A6] outline-none transition focus:border-[#7A9C4A] focus:bg-white focus:ring-2 focus:ring-[#7A9C4A]/15"
               />
             </div>
           </div>
 
+          {/* Módulo */}
           <div>
             <label className={labelClass}>Módulo</label>
             <CustomSelect
               value={value.module}
               onChange={(module) => onChange({ ...value, module })}
               options={MODULE_OPTIONS}
-              placeholder="Módulo"
-              buttonClassName="rounded-xl border-[#DCD6C9] min-h-[46px]"
+              placeholder="Todos"
+              buttonClassName="rounded-xl border-[#DDD8CE] bg-[#FAFAF8] h-9 text-sm"
+              searchable
+              searchPlaceholder="Buscar módulo..."
             />
           </div>
 
+          {/* Acción */}
           <div>
             <label className={labelClass}>Acción</label>
             <CustomSelect
               value={value.actionType}
               onChange={(actionType) => onChange({ ...value, actionType })}
               options={ACTION_OPTIONS}
-              placeholder="Acción"
-              buttonClassName="rounded-xl border-[#DCD6C9] min-h-[46px]"
+              placeholder="Todas"
+              buttonClassName="rounded-xl border-[#DDD8CE] bg-[#FAFAF8] h-9 text-sm"
+              searchable
+              searchPlaceholder="Buscar acción..."
             />
           </div>
 
-          <div>
-            <label className={labelClass}>Entidad</label>
-            <CustomSelect
-              value={value.entityType}
-              onChange={(entityType) => onChange({ ...value, entityType })}
-              options={ENTITY_OPTIONS}
-              placeholder="Entidad"
-              buttonClassName="rounded-xl border-[#DCD6C9] min-h-[46px]"
-            />
-          </div>
-
-          <div className="hidden lg:block" />
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1fr_auto]">
+          {/* Desde */}
           <div>
             <label className={labelClass}>Desde</label>
             <BirthDatePicker
               value={value.from}
               onChange={(from) => onChange({ ...value, from })}
-              placeholder="Fecha inicial"
+              placeholder="Inicial"
               helperText=""
-              triggerClassName="h-11 rounded-xl border-[#DCD6C9] bg-white"
+              triggerClassName="h-9 rounded-xl border-[#DDD8CE] bg-[#FAFAF8] text-sm"
             />
           </div>
 
+          {/* Hasta */}
           <div>
             <label className={labelClass}>Hasta</label>
             <BirthDatePicker
               value={value.to}
               onChange={(to) => onChange({ ...value, to })}
-              placeholder="Fecha final"
+              placeholder="Final"
               helperText=""
-              triggerClassName="h-11 rounded-xl border-[#DCD6C9] bg-white"
+              triggerClassName="h-9 rounded-xl border-[#DDD8CE] bg-[#FAFAF8] text-sm"
             />
-          </div>
-
-          <div className="flex items-end">
-            <button
-              type="button"
-              onClick={onClear}
-              className="inline-flex h-11 w-full items-center justify-center rounded-xl border-2 border-[#5B732E] bg-white px-5 text-sm font-semibold text-[#5B732E] transition hover:bg-[#EAEFE0] lg:w-auto"
-            >
-              Limpiar filtros
-            </button>
           </div>
         </div>
       </div>

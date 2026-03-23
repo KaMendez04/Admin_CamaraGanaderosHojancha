@@ -258,6 +258,8 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
           options={typeOptions}
           placeholder={!departmentId ? "Seleccione un departamento…" : "Seleccione…"}
           disabled={!departmentId || disabled}
+          searchable={true}
+          searchPlaceholder="Buscar tipo..."
         />
         {errors.typeId && <p className="text-xs text-red-600">{errors.typeId}</p>}
       </div>
@@ -270,6 +272,8 @@ export default function SpendForm({ onSuccess, disabled, fiscalYearId }: Props) 
           options={subTypeOptions}
           placeholder={!typeKey ? "Seleccione un tipo…" : "Seleccione…"}
           disabled={!typeKey || disabled}
+          searchable={true}
+          searchPlaceholder="Buscar subtipo..."
         />
         {errors.subTypeId && <p className="text-xs text-red-600">{errors.subTypeId}</p>}
       </div>

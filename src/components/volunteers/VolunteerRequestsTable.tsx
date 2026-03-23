@@ -4,7 +4,8 @@ import { GenericTable } from "../GenericTable";
 import type { SolicitudVoluntariadoListResponse } from "../../schemas/volunteerSchemas";
 import { ActionButtons } from "../ActionButtons";
 
-type SolicitudVoluntariadoListItem = SolicitudVoluntariadoListResponse['items'][number];
+type SolicitudVoluntariadoListItem =
+  SolicitudVoluntariadoListResponse["items"][number];
 
 interface VolunteerRequestsTableProps {
   data: SolicitudVoluntariadoListItem[];
@@ -14,6 +15,25 @@ interface VolunteerRequestsTableProps {
   onApprove: (solicitud: SolicitudVoluntariadoListItem) => void | Promise<void>;
   onReject: (id: number) => void;
   approvingId: number | null;
+}
+
+function tipoClass(tipo: "INDIVIDUAL" | "ORGANIZACION") {
+  return tipo === "INDIVIDUAL"
+    ? "border border-[#CFE3DA] bg-[#F3FAF7] text-[#2D5F4F]"
+    : "border border-[#EADAB0] bg-[#FFF9EC] text-[#8B6C2E]";
+}
+
+function estadoClass(estado: "PENDIENTE" | "APROBADO" | "RECHAZADO") {
+  switch (estado) {
+    case "PENDIENTE":
+      return "border border-[#F3E7A4] bg-[#FFF8D8] text-[#9A7B00]";
+    case "APROBADO":
+      return "border border-[#D9E6B8] bg-[#F4F8EA] text-[#5F7728]";
+    case "RECHAZADO":
+      return "border border-[#F0D0CB] bg-[#FCF1EF] text-[#A14B43]";
+    default:
+      return "border border-slate-200 bg-slate-50 text-slate-600";
+  }
 }
 
 export function VolunteerRequestsTable({
@@ -29,24 +49,6 @@ export function VolunteerRequestsTable({
 
   const columns: ColumnDef<SolicitudVoluntariadoListItem, any>[] = useMemo(
     () => [
-      columnHelper.accessor("tipoSolicitante", {
-        header: "Tipo",
-        size: 120,
-        cell: (info) => {
-          const isIndividual = info.getValue() === "INDIVIDUAL";
-          return (
-            <span
-              className={`justify-center items-center flex px-2 py-1 rounded-lg text-xs font-bold ${
-                isIndividual
-                  ? "bg-[#D4E8E0] text-[#2D5F4F]"
-                  : "bg-[#F5E6C5] text-[#8B6C2E]"
-              }`}
-            >
-              {info.getValue()}
-            </span>
-          );
-        },
-      }),
       columnHelper.accessor(
         (row) => {
           const isIndividual = row.tipoSolicitante === "INDIVIDUAL";
@@ -55,16 +57,38 @@ export function VolunteerRequestsTable({
             : row.organizacion?.nombre;
         },
         {
-          id: "solicitante",
+          id: "nombre",
           header: "Solicitante",
-          size: 200,
+          size: 140,
           cell: (info) => (
-            <div className="font-medium text-[#33361D] truncate" title={info.getValue()}>
+            <div
+              className="max-w-[140px] truncate text-sm font-semibold text-slate-900"
+              title={String(info.getValue())}
+            >
               {info.getValue() || "N/A"}
             </div>
           ),
         }
       ),
+      columnHelper.accessor("tipoSolicitante", {
+        header: "Tipo",
+        size: 120,
+        cell: (info) => {
+          const tipo = info.getValue() as "INDIVIDUAL" | "ORGANIZACION";
+          return (
+            <div className="flex justify-center md:justify-center sm:justify-start">
+              <span
+                className={`inline-flex min-w-[110px] items-center justify-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.02em] ${tipoClass(
+                  tipo
+                )}`}
+              >
+                {tipo === "INDIVIDUAL" ? "Individual" : "Organización"}
+              </span>
+            </div>
+          );
+        },
+      }),
+
       columnHelper.accessor(
         (row) => {
           const isIndividual = row.tipoSolicitante === "INDIVIDUAL";
@@ -75,14 +99,15 @@ export function VolunteerRequestsTable({
         {
           id: "identificacion",
           header: "Identificación",
-          size: 120,
+          size: 130,
           cell: (info) => (
-            <div className="font-medium text-[#33361D]">
+            <div className="text-sm font-medium text-slate-700">
               {info.getValue() || "—"}
             </div>
           ),
         }
       ),
+
       columnHelper.accessor(
         (row) => {
           const isIndividual = row.tipoSolicitante === "INDIVIDUAL";
@@ -93,69 +118,79 @@ export function VolunteerRequestsTable({
         {
           id: "email",
           header: "Email",
-          size: 180,
+          size: 220,
           cell: (info) => (
-            <div className="text-[#33361D] truncate" title={info.getValue()}>
+            <div
+              className="max-w-[240px] truncate text-sm text-slate-600"
+              title={String(info.getValue())}
+            >
               {info.getValue() || "—"}
             </div>
           ),
         }
       ),
+
       columnHelper.accessor("estado", {
         header: "Estado",
-        size: 100,
+        size: 120,
         cell: (info) => {
-          const colorMap: Record<'PENDIENTE' | 'APROBADO' | 'RECHAZADO', string> = {
-            PENDIENTE: "bg-yellow-100 text-yellow-800",
-            APROBADO: "bg-[#E6EDC8] text-[#5A7018]",
-            RECHAZADO: "bg-[#F7E9E6] text-[#8C3A33]",
-          };
-          const estado = info.getValue() as keyof typeof colorMap;
+          const estado = info.getValue() as
+            | "PENDIENTE"
+            | "APROBADO"
+            | "RECHAZADO";
 
           return (
-            <span
-              className={`justify-center items-center flex px-2 py-1 rounded-lg text-xs font-bold ${colorMap[estado]}`}
-            >
-              {estado}
-            </span>
+            <div className="flex justify-center md:justify-center">
+              <span
+                className={`inline-flex min-w-[110px] items-center justify-center rounded-full px-3 py-1 text-[11px] font-semibold tracking-[0.02em] ${estadoClass(
+                  estado
+                )}`}
+              >
+                {estado}
+              </span>
+            </div>
           );
         },
       }),
+
       columnHelper.accessor("fechaSolicitud", {
         header: "Fecha",
-        size: 100,
+        size: 110,
         cell: (info) => {
           const date = new Date(info.getValue());
           return (
-            <div className="text-[#33361D]">
+            <div className="text-sm text-slate-500">
               {new Intl.DateTimeFormat("es-CR", {
                 year: "numeric",
                 month: "2-digit",
                 day: "2-digit",
-                timeZone: "UTC"  
+                timeZone: "UTC",
               }).format(date)}
             </div>
           );
         },
       }),
+
       columnHelper.display({
         id: "acciones",
         header: () => <div className="text-center">Acciones</div>,
-        size: 150,
+        size: 140,
         cell: (info) => {
           const estado = info.row.original.estado;
           const solicitud = info.row.original;
           const solicitudId = solicitud.idSolicitudVoluntariado;
           const isThisApproving = approvingId === solicitudId;
 
-          const canApprove = (estado === "PENDIENTE" || estado === "RECHAZADO") && !isReadOnly;
-          const canReject = (estado === "PENDIENTE") && !isReadOnly; // ✅ SOLO pendientes
+          const canApprove =
+            (estado === "PENDIENTE" || estado === "RECHAZADO") && !isReadOnly;
+          const canReject = estado === "PENDIENTE" && !isReadOnly;
 
           return (
             <ActionButtons
+              size="sm"
               onView={() => onView(solicitudId)}
               onApprove={canApprove ? () => onApprove(solicitud) : undefined}
-              onReject={canReject ? () => onReject(solicitudId) : undefined} // ✅ RECHAZADO => undefined
+              onReject={canReject ? () => onReject(solicitudId) : undefined}
               showApproveReject={canApprove || canReject}
               isApproving={isThisApproving}
               isReadOnly={isReadOnly}
@@ -167,5 +202,12 @@ export function VolunteerRequestsTable({
     [isReadOnly, approvingId, onView, onApprove, onReject]
   );
 
-  return <GenericTable data={data} columns={columns} isLoading={isLoading} />;
+  return (
+    <GenericTable
+      data={data}
+      columns={columns}
+      isLoading={isLoading}
+      emptyMessage="No hay solicitudes disponibles."
+    />
+  );
 }

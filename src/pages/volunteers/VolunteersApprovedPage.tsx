@@ -6,13 +6,16 @@ import { StatusFilters } from "../../components/StatusFilters";
 import { KPICard } from "../../components/KPICard";
 import { getCurrentUser } from "../../auth/auth";
 import { ApprovedVolunteerViewModal } from "../../components/volunteers/ApprovedVolunteerViewModal";
-import { UnifiedVolunteersTable, type UnifiedVolunteerRow } from "../../components/volunteers/UnifiedVolunteersTable";
+import {
+  UnifiedVolunteersTable,
+  type UnifiedVolunteerRow,
+} from "../../components/volunteers/UnifiedVolunteersTable";
 import { useVolunteerApprovedDetail } from "../../hooks/Volunteers/individual/useVolunteerApprovedDetail";
 import { EditOrganizationModal } from "../../components/volunteers/organizations/EditOrganizationModal";
 import { EditVolunteerIndividualModal } from "../../components/volunteers/EditVolunteerIndividualModal";
-import { Download } from "lucide-react";
 import { useDownloadListadoVoluntariosPDF } from "@/hooks/Volunteers/useVoluntariosPdf";
 import { getPageItems, PaginationBar } from "@/components/ui/pagination";
+import VolunteersSubnav from "./VolunteersSubnav";
 
 type EstadoFilter = "ACTIVO" | "INACTIVO" | undefined;
 
@@ -20,22 +23,33 @@ export default function VolunteersApprovedPage() {
   const [search, setSearch] = useState<string>("");
   const [page, setPage] = useState(1);
   const [estadoFilter, setEstadoFilter] = useState<EstadoFilter>("ACTIVO");
-  const [editId, setEditId] = useState<{ id: number; tipo: "INDIVIDUAL" | "ORGANIZACION" } | null>(null);
-  const [viewId, setViewId] = useState<{ id: number; tipo: "INDIVIDUAL" | "ORGANIZACION" } | null>(null);
+  const [editId, setEditId] = useState<{
+    id: number;
+    tipo: "INDIVIDUAL" | "ORGANIZACION";
+  } | null>(null);
+  const [viewId, setViewId] = useState<{
+    id: number;
+    tipo: "INDIVIDUAL" | "ORGANIZACION";
+  } | null>(null);
+
   const limit = 10;
   const downloadListadoPDF = useDownloadListadoVoluntariosPDF();
-
 
   const role = getCurrentUser()?.role?.name?.toUpperCase();
   const isReadOnly = role === "JUNTA";
 
   const isActiveParam =
-    estadoFilter === "ACTIVO" ? true :
-    estadoFilter === "INACTIVO" ? false :
-    undefined;
+    estadoFilter === "ACTIVO"
+      ? true
+      : estadoFilter === "INACTIVO"
+      ? false
+      : undefined;
 
-  // Fetch de ambos tipos
-  const { data: volunteersData, isLoading: isLoadingVolunteers, refetch: refetchVolunteers } = useVolunteersApprovedList({
+  const {
+    data: volunteersData,
+    isLoading: isLoadingVolunteers,
+    refetch: refetchVolunteers,
+  } = useVolunteersApprovedList({
     isActive: isActiveParam,
     search,
     page: 1,
@@ -43,7 +57,11 @@ export default function VolunteersApprovedPage() {
     sort: "createdAt:desc",
   });
 
-  const { data: organizationsData, isLoading: isLoadingOrganizations, refetch: refetchOrganizations } = useOrganizationsApprovedList({
+  const {
+    data: organizationsData,
+    isLoading: isLoadingOrganizations,
+    refetch: refetchOrganizations,
+  } = useOrganizationsApprovedList({
     isActive: isActiveParam,
     search,
     page: 1,
@@ -51,39 +69,37 @@ export default function VolunteersApprovedPage() {
     sort: "createdAt:desc",
   });
 
-  // Fetch de detalles según el tipo
-  const { data: volunteerDetail, isLoading: isLoadingVolunteerDetail } = useVolunteerApprovedDetail(
-    viewId?.tipo === "INDIVIDUAL" ? viewId.id : 0
-  );
+  const { data: volunteerDetail, isLoading: isLoadingVolunteerDetail } =
+    useVolunteerApprovedDetail(viewId?.tipo === "INDIVIDUAL" ? viewId.id : 0);
 
-  const { data: organizationDetail, isLoading: isLoadingOrganizationDetail } = useOrganizationDetail(
-    viewId?.tipo === "ORGANIZACION" ? viewId.id : null
-  );
+  const { data: organizationDetail, isLoading: isLoadingOrganizationDetail } =
+    useOrganizationDetail(viewId?.tipo === "ORGANIZACION" ? viewId.id : null);
 
-  // Fetch para edición
   const { data: volunteerEditDetail } = useVolunteerApprovedDetail(
     editId?.tipo === "INDIVIDUAL" ? editId.id : 0
   );
 
-  // Fetch para edición de organización
   const { data: organizationEditDetail } = useOrganizationDetail(
     editId?.tipo === "ORGANIZACION" ? editId.id : null
   );
 
-  // Combinar y unificar datos
   const unifiedData = useMemo(() => {
-    const volunteers: UnifiedVolunteerRow[] = (volunteersData?.items || []).map((v) => ({
-      id: v.idVoluntario,
-      tipo: "INDIVIDUAL" as const,
-      identificacion: v.persona.cedula,
-      nombreCompleto: `${v.persona.nombre} ${v.persona.apellido1} ${v.persona.apellido2}`,
-      telefono: v.persona.telefono,
-      email: v.persona.email,
-      estado: v.isActive ?? false,
-      original: v,
-    }));
+    const volunteers: UnifiedVolunteerRow[] = (volunteersData?.items || []).map(
+      (v) => ({
+        id: v.idVoluntario,
+        tipo: "INDIVIDUAL" as const,
+        identificacion: v.persona.cedula,
+        nombreCompleto: `${v.persona.nombre} ${v.persona.apellido1} ${v.persona.apellido2}`,
+        telefono: v.persona.telefono,
+        email: v.persona.email,
+        estado: v.isActive ?? false,
+        original: v,
+      })
+    );
 
-    const organizations: UnifiedVolunteerRow[] = (organizationsData?.items || []).map((o) => ({
+    const organizations: UnifiedVolunteerRow[] = (
+      organizationsData?.items || []
+    ).map((o) => ({
       id: o.idOrganizacion,
       tipo: "ORGANIZACION" as const,
       identificacion: o.cedulaJuridica,
@@ -99,7 +115,6 @@ export default function VolunteersApprovedPage() {
     );
   }, [volunteersData, organizationsData]);
 
-  // Paginación local
   const paginatedData = useMemo(() => {
     const start = (page - 1) * limit;
     const end = start + limit;
@@ -109,40 +124,19 @@ export default function VolunteersApprovedPage() {
   const totalPages = Math.ceil(unifiedData.length / limit);
   const isLoading = isLoadingVolunteers || isLoadingOrganizations;
 
-  // Handler para refrescar datos después de editar
   const handleSaved = () => {
     refetchVolunteers();
     refetchOrganizations();
   };
 
   return (
-    <div className="min-h-screen">
-      <div className="mx-auto max-w-7xl p-4 md:p-8">
-        {/* Filtros y KPIs lado a lado */}
-        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 mb-1">
-          {/* Filtros a la izquierda */}
-          <StatusFilters
-            status={estadoFilter}
-            onStatusChange={(newStatus) => {
-              setEstadoFilter(newStatus as EstadoFilter);
-              setPage(1);
-            }}
-            search={search}
-            onSearchChange={(newSearch) => {
-              setSearch(newSearch);
-              setPage(1);
-            }}
-            statusOptions={["ACTIVO", "INACTIVO"]}
-            showAllOption={true}
-          />
+    <div className="min-h-screen bg-[#FAF9F5]">
+      <div className="mx-auto max-w-7xl px-4 py-5 md:px-6 md:py-6">
+        <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <VolunteersSubnav />
 
-          {/* KPIs a la derecha en columna */}
-          <div className="flex flex-col gap-2 mb-6">
-            <KPICard
-              label="Total Voluntarios"
-              value={unifiedData.length}
-              tone="base"
-            />
+          <div className="grid grid-cols-2 gap-2 xl:pt-1">
+            <KPICard label="Voluntarios" value={unifiedData.length} tone="base" />
             <KPICard
               label="Estado"
               value={
@@ -157,36 +151,37 @@ export default function VolunteersApprovedPage() {
           </div>
         </div>
 
-          <button
-      onClick={() => downloadListadoPDF.mutate()}
-      disabled={downloadListadoPDF.isPending}
-  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5B732E] text-white font-semibold hover:bg-[#556B2F] transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm mb-6 lg:mt-0 sm:mt-6 md:mt-6"
-    >
-      {downloadListadoPDF.isPending ? (
-        <>
-          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          Generando PDF...
-        </>
-      ) : (
-        <>
-          <Download className="w-4 h-4" />
-          Descargar PDF
-        </>
-      )}
-    </button>
+        <div className="mb-4 rounded-3xl">
+          <StatusFilters
+            status={estadoFilter}
+            onStatusChange={(newStatus) => {
+              setEstadoFilter(newStatus as EstadoFilter);
+              setPage(1);
+            }}
+            search={search}
+            onSearchChange={(newSearch) => {
+              setSearch(newSearch);
+              setPage(1);
+            }}
+            statusOptions={["ACTIVO", "INACTIVO"]}
+            showAllOption={true}
+            onDownload={() => downloadListadoPDF.mutate()}
+            isDownloading={downloadListadoPDF.isPending}
+          />
+        </div>
 
-        {/* Tabla Unificada */}
-        <UnifiedVolunteersTable
-          data={paginatedData}
-          isLoading={isLoading}
-          isReadOnly={isReadOnly}
-          onView={(id, tipo) => setViewId({ id, tipo })}
-          onEdit={(id, tipo) => setEditId({ id, tipo })}
-        />
+        <div className="overflow-hidden rounded-3xl border border-[#E8ECDD] bg-white shadow-sm">
+          <UnifiedVolunteersTable
+            data={paginatedData}
+            isLoading={isLoading}
+            isReadOnly={isReadOnly}
+            onView={(id, tipo) => setViewId({ id, tipo })}
+            onEdit={(id, tipo) => setEditId({ id, tipo })}
+          />
+        </div>
 
-        {/* Paginación */}
         {!isLoading && (
-          <div className="flex flex-col gap-3 mt-6">
+          <div className="mt-4 flex justify-center">
             <PaginationBar
               page={page}
               totalPages={totalPages || 1}
@@ -197,7 +192,6 @@ export default function VolunteersApprovedPage() {
           </div>
         )}
 
-        {/* Modal de visualización dinámico */}
         {viewId && viewId.tipo === "INDIVIDUAL" && (
           <ApprovedVolunteerViewModal
             open={true}
@@ -218,7 +212,6 @@ export default function VolunteersApprovedPage() {
           />
         )}
 
-        {/* Modal de edición para INDIVIDUAL */}
         {!isReadOnly && editId?.tipo === "INDIVIDUAL" && volunteerEditDetail && (
           <EditVolunteerIndividualModal
             voluntario={volunteerEditDetail}
@@ -227,14 +220,15 @@ export default function VolunteersApprovedPage() {
           />
         )}
 
-        {/* Modal de edición para ORGANIZACION */}
-        {!isReadOnly && editId?.tipo === "ORGANIZACION" && organizationEditDetail && (
-          <EditOrganizationModal
-            organizacion={organizationEditDetail}
-            onClose={() => setEditId(null)}
-            onSaved={handleSaved}
-          />
-        )}
+        {!isReadOnly &&
+          editId?.tipo === "ORGANIZACION" &&
+          organizationEditDetail && (
+            <EditOrganizationModal
+              organizacion={organizationEditDetail}
+              onClose={() => setEditId(null)}
+              onSaved={handleSaved}
+            />
+          )}
       </div>
     </div>
   );

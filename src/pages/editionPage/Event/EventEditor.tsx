@@ -81,11 +81,8 @@ export default function EventEditor({
   const [date, setDate] = useState("")
   const [description, setDescription] = useState("")
   const [illustration, setIllustration] = useState("")
-
-  // ✅ NUEVO: si el usuario escogió un archivo para reemplazar
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [localPreview, setLocalPreview] = useState<string>("")
-
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -227,7 +224,6 @@ export default function EventEditor({
 
   const handlePick = () => fileRef.current?.click()
 
-  // ✅ NO sube: solo prepara el pendingFile
   const onPickFile = (file: File | null) => {
     if (!file) return
     if (localPreview) URL.revokeObjectURL(localPreview)
@@ -235,16 +231,13 @@ export default function EventEditor({
     const obj = URL.createObjectURL(file)
     setPendingFile(file)
     setLocalPreview(obj)
-
-    // importante: no tocamos illustration aún
     setOffset({ x: 0, y: 0 })
 
     if (fileRef.current) fileRef.current.value = ""
   }
 
   const onPointerDown = (e: React.PointerEvent) => {
-    if (!dragRef.current) return
-    if (!previewSrc) return
+    if (!dragRef.current || !previewSrc) return
 
     dragState.current = {
       dragging: true,
@@ -341,7 +334,6 @@ export default function EventEditor({
     try {
       let finalIllustration = illustration
 
-      // ✅ si hay archivo nuevo, lo recortamos y lo subimos SOLO AHORA
       if (pendingFile && localPreview) {
         const blob = await cropToBlob(localPreview, positionAsPercent, CROP_W, CROP_H)
         const croppedFile = blobToFile(blob, `event_${selectedEvent.id}_${Date.now()}.jpg`)
@@ -365,7 +357,6 @@ export default function EventEditor({
       setInitialDescription(description)
       setInitialIllustration(finalIllustration || "")
 
-      // limpiar pending
       setPendingFile(null)
       if (localPreview) URL.revokeObjectURL(localPreview)
       setLocalPreview("")
@@ -412,80 +403,99 @@ export default function EventEditor({
   const canSave = title.trim() !== "" && date.trim() !== "" && description.trim() !== ""
 
   return (
-    <div className="space-y-6 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
-      <h2 className="text-2xl font-semibold">Editar Evento Existente</h2>
+    <div className="space-y-3 rounded-[24px] border border-[#E6E0D2] bg-[#FCFDF9] p-4 md:p-5">
+      <div>
+        <h2 className="text-lg font-semibold text-[#243018] md:text-xl">
+          Editar evento existente
+        </h2>
+        <p className="mt-1 text-sm text-slate-500">
+          Selecciona un evento para actualizarlo o eliminarlo.
+        </p>
+      </div>
 
       <CustomSelect
         value={selectedEventId ?? ""}
         onChange={(value) => setSelectedEventId(value ? Number(value) : null)}
         options={eventOptions}
         placeholder="Selecciona un evento para editar"
+        searchable={true}
+        searchPlaceholder="Buscar evento..."
       />
 
       {selectedEvent && (
         <div className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-4">
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="mb-1 block text-sm font-medium text-[#2F3C22]">
                   Título del evento <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
+                  className="w-full rounded-xl border border-[#D8DCCF] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#A8B77A] focus:ring-2 focus:ring-[#DDE7C2]"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Título"
                   maxLength={75}
                   disabled={isSaving || isDeleting || upload.isPending}
                 />
-                <div className="text-sm text-gray-500 mt-1">Quedan {75 - title.length} de 75 caracteres</div>
+                <div className="mt-1 text-xs text-slate-500">
+                  Quedan {75 - title.length} de 75 caracteres
+                </div>
               </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Fecha del evento <span className="text-red-500">*</span>
-              </label>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[#2F3C22]">
+                  Fecha del evento <span className="text-red-500">*</span>
+                </label>
 
-              <BirthDatePicker
-                value={date}
-                onChange={(iso) => setDate(iso)}
-                minDate={minDate} // hoy en formato YYYY-MM-DD
-                helperText="Solo se permiten fechas a partir de hoy"
-                placeholder="Seleccione una fecha"
-                disabled={isSaving || isDeleting || upload.isPending}
-              />
-            </div>
+                <BirthDatePicker
+                  value={date}
+                  onChange={(iso) => setDate(iso)}
+                  minDate={minDate}
+                  helperText="Solo se permiten fechas a partir de hoy"
+                  placeholder="Seleccione una fecha"
+                  disabled={isSaving || isDeleting || upload.isPending}
+                />
+              </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="mb-1 block text-sm font-medium text-[#2F3C22]">
                   Descripción <span className="text-red-500">*</span>
                 </label>
                 <textarea
-                  rows={5}
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E] resize-none"
+                  rows={4}
+                  className="w-full resize-none rounded-xl border border-[#D8DCCF] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#A8B77A] focus:ring-2 focus:ring-[#DDE7C2]"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Descripción"
                   maxLength={250}
                   disabled={isSaving || isDeleting || upload.isPending}
                 />
-                <div className="text-sm text-gray-500 mt-1">Quedan {250 - description.length} de 250 caracteres</div>
+                <div className="mt-1 text-xs text-slate-500">
+                  Quedan {250 - description.length} de 250 caracteres
+                </div>
               </div>
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Ilustración (opcional)</label>
+                <label className="mb-1 block text-sm font-medium text-[#2F3C22]">
+                  Ilustración (opcional)
+                </label>
 
-                <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row">
                   <button
                     type="button"
                     onClick={handlePick}
                     disabled={isSaving || isDeleting || upload.isPending}
-                    className="inline-flex items-center justify-center gap-2 border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-50 disabled:opacity-60"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#D8DCCF] bg-white px-4 py-2.5 text-sm hover:bg-[#F7F8F3] disabled:opacity-60"
                   >
-                    {upload.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    {upload.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
                     Elegir imagen
                   </button>
 
@@ -499,11 +509,10 @@ export default function EventEditor({
 
                   <input
                     type="text"
-                    className="flex-1 w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
+                    className="w-full flex-1 rounded-xl border border-[#D8DCCF] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#A8B77A] focus:ring-2 focus:ring-[#DDE7C2]"
                     value={illustration}
                     onChange={(e) => {
                       setIllustration(e.target.value)
-                      // si escribe URL, cancelamos archivo
                       if (pendingFile) setPendingFile(null)
                       if (localPreview) {
                         URL.revokeObjectURL(localPreview)
@@ -519,14 +528,18 @@ export default function EventEditor({
 
               {previewSrc && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Vista previa (arrastrá para acomodar)
+                  <label className="mb-1 block text-sm font-medium text-[#2F3C22]">
+                    Vista previa
                   </label>
 
                   <div
                     ref={dragRef}
-                    className="relative w-full aspect-[1200/630] rounded-lg border-2 border-[#DCD6C9] overflow-hidden bg-[#F8F9F3] cursor-grab active:cursor-grabbing"
-                    style={{ touchAction: "none", WebkitUserSelect: "none", userSelect: "none" }}
+                    className="relative aspect-[1200/630] w-full cursor-grab overflow-hidden rounded-xl border border-[#DCD6C9] bg-[#F8F9F3] active:cursor-grabbing"
+                    style={{
+                      touchAction: "none",
+                      WebkitUserSelect: "none",
+                      userSelect: "none",
+                    }}
                     onPointerDown={onPointerDown}
                     onPointerMove={onPointerMove}
                     onPointerUp={onPointerUp}
@@ -536,7 +549,7 @@ export default function EventEditor({
                       ref={imageRef}
                       src={previewSrc}
                       alt="Vista previa del evento"
-                      className="w-full h-full object-cover select-none pointer-events-none"
+                      className="h-full w-full select-none object-cover pointer-events-none"
                       draggable={false}
                       style={{
                         objectPosition: `${positionAsPercent.x}% ${positionAsPercent.y}%`,
@@ -550,8 +563,9 @@ export default function EventEditor({
             </div>
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-end pt-1">
             <ActionButtons
+              size="sm"
               onCancel={handleCancel}
               onSave={handleSave}
               onDelete={handleDelete}

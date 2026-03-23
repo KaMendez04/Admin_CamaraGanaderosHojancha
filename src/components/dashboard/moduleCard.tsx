@@ -43,7 +43,7 @@ export function ModuleCard({
 
         <div className="flex items-center gap-2">
           {badge ? (
-            <span className="inline-flex min-w-6 items-center justify-center rounded-full bg-yellow-100 px-2 py-0.5 text-[11px] font-bold text-yellow-800">
+            <span className="inline-flex min-w-6 items-center justify-center rounded-full bg-[#d6f8e9] px-2 py-0.5 text-[11px] font-bold text-[#2D5F4F]">
               {badge}
             </span>
           ) : null}

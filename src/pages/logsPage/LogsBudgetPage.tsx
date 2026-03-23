@@ -7,7 +7,6 @@ import {
   getActionBadgeClass,
   getActionLabel,
   getEntityLabel,
-  getModuleLabel,
 } from "@/utils/auditLogUtils"
 import { LogsFilters, type LogsFiltersValue } from "../../components/logsComponents/LogsFilters"
 import type { AuditLog } from "@/models/logsModel/AuditLog"
@@ -50,23 +49,18 @@ export default function LogsPage() {
 
   const visibleRows = React.useMemo(() => {
     if (!filters.search.trim()) return data
-
     const q = filters.search.trim().toLowerCase()
-
     return data.filter((row) => {
       const text =
-        `${row.actorUser?.username ?? ""} ${row.actorUser?.email ?? ""} ${row.description ?? ""} ${getEntityLabel(
-          row.entityType,
-        )} ${getActionLabel(row.actionType)} ${row.entityId}`.toLowerCase()
-
+        `${row.actorUser?.username ?? ""} ${row.actorUser?.email ?? ""} ${row.description ?? ""} ${getEntityLabel(row.entityType)} ${getActionLabel(row.actionType)} ${row.entityId}`.toLowerCase()
       return text.includes(q)
     })
   }, [data, filters.search])
 
   const { page, setPage, totalPages, pagedItems, pageItems } = usePagination(
     visibleRows,
-    8,
-    [filters.search, filters.module, filters.entityType, filters.actionType, filters.from, filters.to],
+    10,
+    [filters.search, filters.module, filters.entityType, filters.actionType, filters.from, filters.to]
   )
 
   const columns = React.useMemo<ColumnDef<AuditLog>[]>(
@@ -74,8 +68,9 @@ export default function LogsPage() {
       {
         accessorKey: "createdAt",
         header: "Fecha",
+        size: 160,
         cell: ({ row }) => (
-          <span className="font-medium text-[#2E321B]">
+          <span className="whitespace-nowrap text-xs text-slate-500">
             {formatDateTime(row.original.createdAt)}
           </span>
         ),
@@ -83,39 +78,35 @@ export default function LogsPage() {
       {
         id: "actor",
         header: "Usuario",
+        size: 180,
         cell: ({ row }) => (
           <div>
-            <div className="font-medium text-[#2E321B]">
+            <div className="text-sm font-medium text-slate-800 leading-tight">
               {row.original.actorUser?.username ?? "Sistema"}
             </div>
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-slate-400 leading-tight mt-0.5">
               {row.original.actorUser?.email ?? "—"}
             </div>
           </div>
         ),
       },
       {
-        id: "module",
-        header: "Módulo",
-        cell: ({ row }) => (
-          <span className="text-[#2E321B]">{getModuleLabel(row.original)}</span>
-        ),
-      },
-      {
         accessorKey: "entityType",
-        header: "Entidad",
+        header: "Módulo",
+        size: 140,
         cell: ({ row }) => (
-          <span className="text-[#2E321B]">{getEntityLabel(row.original.entityType)}</span>
+          <span className="text-sm text-slate-700">
+            {getEntityLabel(row.original.entityType)}
+          </span>
         ),
       },
       {
         accessorKey: "actionType",
         header: "Acción",
+        size: 130,
         cell: ({ row }) => (
           <span
-            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getActionBadgeClass(
-              row.original.actionType,
-            )}`}
+            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${getActionBadgeClass(row.original.actionType)}`}
           >
             {getActionLabel(row.original.actionType)}
           </span>
@@ -125,18 +116,30 @@ export default function LogsPage() {
         id: "summary",
         header: "Descripción",
         cell: ({ row }) => (
-          <div className="text-[#2E321B]">{buildChangeSummary(row.original)}</div>
+          <span
+            className="block max-w-[300px] truncate text-sm text-slate-500"
+            title={buildChangeSummary(row.original)}
+          >
+            {buildChangeSummary(row.original)}
+          </span>
         ),
       },
       {
         id: "detail",
-        header: "Detalle",
+        header: () => <div className="text-center">Detalle</div>,
+        size: 80,
         cell: ({ row }) => (
-          <ActionButtons onView={() => setSelectedLog(row.original)} showText={false} />
+          <div className="flex justify-center">
+            <ActionButtons
+              size="sm"
+              onView={() => setSelectedLog(row.original)}
+              showText={false}
+            />
+          </div>
         ),
       },
     ],
-    [],
+    []
   )
 
   const clearFilters = () => {
@@ -148,39 +151,48 @@ export default function LogsPage() {
       from: "",
       to: "",
     })
+    setPage(1)
   }
 
   return (
     <>
-      <div className="">
-        <aside className="">
-          <LogsFilters value={filters} onChange={setFilters} onClear={clearFilters} />
-        </aside>
-
-        <section className="min-w-0">
-          <div className="rounded-3xl border border-[#E6E1D6] bg-[#FAF9F5] shadow-sm overflow-hidden">
-            <div className="border-b border-[#E6E1D6] bg-white/60 px-5 py-4">
-              <h3 className="text-base font-bold text-[#374321]">Registros</h3>
-              <p className="text-sm text-[#556B2F] mt-1">
-                {visibleRows.length} resultado(s) encontrado(s)
+      <div className="space-y-4">
+                <section className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <div>
+              <h2 className="text-lg font-bold text-[#2E321B]">Registros de Presupuesto</h2>
+              <p className="text-xs text-[#7A8C5A] mt-0.5">
+                {visibleRows.length} resultado{visibleRows.length !== 1 ? "s" : ""} encontrado{visibleRows.length !== 1 ? "s" : ""}
               </p>
             </div>
+          </div>
+        <LogsFilters
+          value={filters}
+          onChange={(value) => {
+            setFilters(value)
+            setPage(1)
+          }}
+          onClear={clearFilters}
+        />
 
-            <div className="p-4 sm:p-5">
-              <GenericTable<AuditLog>
-                data={pagedItems}
-                columns={columns}
-                isLoading={isLoading}
-              />
+          <div className="overflow-hidden rounded-2xl border border-[#E2DDD4] bg-white shadow-sm">
+            <GenericTable<AuditLog>
+              data={pagedItems}
+              columns={columns}
+              isLoading={isLoading}
+            />
 
-              <PaginationBar
-                page={page}
-                totalPages={totalPages}
-                onPageChange={setPage}
-                pageItems={pageItems}
-                className="mt-5"
-              />
-            </div>
+            {!isLoading && totalPages > 1 && (
+              <div className="border-t border-[#EDE9E2] px-5 py-3">
+                <PaginationBar
+                  page={page}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                  pageItems={pageItems}
+                  className="justify-center"
+                />
+              </div>
+            )}
           </div>
         </section>
       </div>

@@ -209,6 +209,8 @@ export default function SpendReportPage() {
                 options={typeOptions}
                 placeholder="Todos"
                 zIndex={40}
+                searchable={true}
+                searchPlaceholder="Buscar tipo..."
               />
             </div>
             <div className="md:col-span-2">
@@ -219,6 +221,8 @@ export default function SpendReportPage() {
                 options={subTypeOptions}
                 placeholder="Todos"
                 zIndex={30}
+                searchable={true}
+                searchPlaceholder="Buscar subtipo..."
               />
             </div>
             <div>

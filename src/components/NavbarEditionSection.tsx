@@ -1,44 +1,65 @@
+import { ActionButtons } from "./ActionButtons"
 import { GenericSubnav, type NavItem } from "./GenericSubnav"
+import { useNavigate } from "@tanstack/react-router"
+
 
 const items: NavItem[] = [
-  { 
-    to: "/edition/principal", 
+  {
+    to: "/edition/principal",
     label: "Principal",
     exact: true,
-    allowedRoles: ["ADMIN"]
+    allowedRoles: ["ADMIN"],
   },
-  { 
-    to: "/edition/about", 
+  {
+    to: "/edition/about",
     label: "Sobre Nosotros",
-    allowedRoles: ["ADMIN"]
+    allowedRoles: ["ADMIN"],
   },
-  { 
-    to: "/edition/servicios", 
+  {
+    to: "/edition/servicios",
     label: "Servicios",
-    allowedRoles: ["ADMIN"]
+    allowedRoles: ["ADMIN"],
   },
-  { 
-    to: "/edition/associates", 
+  {
+    to: "/edition/associates",
     label: "Asociados",
-    allowedRoles: ["ADMIN"]
+    allowedRoles: ["ADMIN"],
   },
-  { 
-    to: "/edition/volunteers", 
+  {
+    to: "/edition/volunteers",
     label: "Voluntarios",
-    allowedRoles: ["ADMIN"]
+    allowedRoles: ["ADMIN"],
   },
-  { 
-    to: "/edition/faq", 
+  {
+    to: "/edition/faq",
     label: "Preguntas",
-    allowedRoles: ["ADMIN"]
+    allowedRoles: ["ADMIN"],
   },
-  { 
-    to: "/edition/events", 
+  {
+    to: "/edition/events",
     label: "Eventos",
-    allowedRoles: ["ADMIN"]
+    allowedRoles: ["ADMIN"],
   },
 ]
 
 export default function NavbarEditionSection() {
-  return <GenericSubnav items={items} layoutId="edition-subnav-active" />
+    const navigate = useNavigate()
+
+  return (
+    <div className="flex justify-center gap-4">
+      <ActionButtons
+        size="sm"
+        onBack={() => navigate({ to: "/Principal" })}
+        showBack={true}
+        backText="Regresar"
+        showText={false}
+      />
+    
+    <GenericSubnav
+      items={items}
+      layoutId="edition-subnav-active"
+      className="flex justify-center"
+    />
+    </div>
+  )
 }

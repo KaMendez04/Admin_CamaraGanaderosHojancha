@@ -97,29 +97,30 @@ export function getActionLabel(action: AuditActionType) {
 export function getActionBadgeClass(action: AuditActionType) {
   switch (action) {
     case "CREATE":
-      return "bg-[#E6EDC8] text-[#5B732E]"
-    case "UPDATE":
-      return "bg-[#FFF3D6] text-[#A3853D]"
-    case "DELETE":
-      return "bg-[#F6D8D2] text-[#B85C4C]"
-    case "ALLOCATE":
-    case "ASSIGN_TO_INCOME":
-      return "bg-[#E8DCF8] text-[#6E4AA3]"
-    default:
-      return "bg-[#ECECEC] text-[#5A5A5A]"
     case "USER_CREATED":
     case "USER_ACTIVATED":
-      return "bg-[#E6EDC8] text-[#5B732E]"
+      return "border border-[#D9E6B8] bg-[#F4F8EA] text-[#5F7728]"
+
+    case "UPDATE":
     case "USER_UPDATED":
-      return "bg-[#FFF3D6] text-[#A3853D]"
+      return "border border-[#F3E7A4] bg-[#FFF8D8] text-[#9A7B00]"
+
+    case "DELETE":
     case "USER_DELETED":
-      return "bg-[#F6D8D2] text-[#B85C4C]"
-    case "USER_DEACTIVATED":
-      return "bg-[#ECECEC] text-[#5A5A5A]"
+      return "border border-[#F0D0CB] bg-[#FCF1EF] text-[#A14B43]"
+
+    case "ALLOCATE":
+    case "ASSIGN_TO_INCOME":
     case "USER_PASSWORD_CHANGED":
     case "USER_EMAIL_CHANGE_REQUESTED":
     case "USER_EMAIL_CHANGE_CONFIRMED":
-      return "bg-[#E8DCF8] text-[#6E4AA3]"
+      return "border border-[#BFE3DD] bg-[#EAF7F3] text-[#2F7D71]"
+
+    case "USER_DEACTIVATED":
+      return "border border-[#D8DDD2] bg-[#F3F5EF] text-[#5F6B53]"
+
+    default:
+      return "border border-[#D8DDD2] bg-[#F8F9F6] text-[#5F6B53]"
   }
 }
 

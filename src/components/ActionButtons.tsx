@@ -1,9 +1,9 @@
-import { 
-  Eye, 
-  CheckCircle, 
-  XCircle, 
-  Pencil, 
-  Trash2, 
+import {
+  Eye,
+  CheckCircle,
+  XCircle,
+  Pencil,
+  Trash2,
   ArrowLeft,
   Download,
   Upload,
@@ -13,19 +13,19 @@ import {
   Send,
   X,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { Loader2 } from "lucide-react";
 
+type ActionButtonSize = "sm" | "md" | "lg";
+
 type ActionButtonsProps = {
-  // Acciones existentes
   onView?: () => void;
   onEdit?: () => void;
   onApprove?: () => void;
   onReject?: () => void;
-  
-  // Acciones
+
   onDelete?: () => void;
   onBack?: () => void;
   onDownload?: () => void;
@@ -37,8 +37,7 @@ type ActionButtonsProps = {
   onCancel?: () => void;
   onPrevious?: () => void;
   onNext?: () => void;
-  
-  // Visibilidad
+
   showEdit?: boolean;
   showApproveReject?: boolean;
   showDelete?: boolean;
@@ -53,32 +52,26 @@ type ActionButtonsProps = {
   showPrevious?: boolean;
   showNext?: boolean;
   disabled?: boolean;
-  
-  // Estados de carga
+
   isApproving?: boolean;
   isDeleting?: boolean;
   isSaving?: boolean;
   isUploading?: boolean;
   isLoading?: boolean;
-  
-  // Configuración
+
   isReadOnly?: boolean;
-  
-  // Estados de deshabilitación para navegación
+
   disablePrevious?: boolean;
   disableNext?: boolean;
-  
-  // ✨ Tipo de botón para guardar
+
   saveButtonType?: "button" | "submit";
-  
-  // Confirmaciones opcionales
+
   requireConfirmApprove?: boolean;
   requireConfirmReject?: boolean;
   requireConfirmDelete?: boolean;
   requireConfirmCancel?: boolean;
   requireConfirmSave?: boolean;
-  
-  // Textos personalizables
+
   approveConfirmTitle?: string;
   approveConfirmText?: string;
   rejectConfirmTitle?: string;
@@ -89,9 +82,10 @@ type ActionButtonsProps = {
   cancelConfirmText?: string;
   saveConfirmTitle?: string;
   saveConfirmText?: string;
-  
-  // Textos de botones
+
   showText?: boolean;
+  size?: ActionButtonSize;
+
   saveText?: string;
   cancelText?: string;
   backText?: string;
@@ -102,23 +96,28 @@ type ActionButtonsProps = {
   rejectText?: string;
   previousText?: string;
   nextText?: string;
+  downloadText?: string;
+  uploadText?: string;
+  refreshText?: string;
+  sendText?: string;
+  viewText?: string;
 
-onCreateAlt?: () => void;
-onCancelAlt?: () => void;
+  onCreateAlt?: () => void;
+  onCancelAlt?: () => void;
 
-showCreateAlt?: boolean;
-showCancelAlt?: boolean;
+  showCreateAlt?: boolean;
+  showCancelAlt?: boolean;
 
-requireConfirmCreateAlt?: boolean;
-requireConfirmCancelAlt?: boolean;
+  requireConfirmCreateAlt?: boolean;
+  requireConfirmCancelAlt?: boolean;
 
-createAltText?: string;
-cancelAltText?: string;
+  createAltText?: string;
+  cancelAltText?: string;
 
-createAltConfirmTitle?: string;
-createAltConfirmText?: string;
-cancelAltConfirmTitle?: string;
-cancelAltConfirmText?: string;
+  createAltConfirmTitle?: string;
+  createAltConfirmText?: string;
+  cancelAltConfirmTitle?: string;
+  cancelAltConfirmText?: string;
 };
 
 export function ActionButtons({
@@ -152,26 +151,26 @@ export function ActionButtons({
   showCancel = false,
   showPrevious = false,
   showNext = false,
-  
+
   isApproving = false,
   isDeleting = false,
   isSaving = false,
   isUploading = false,
   isLoading = false,
-  
+
   isReadOnly = false,
-  
+
   disablePrevious = false,
   disableNext = false,
-  
+
   saveButtonType = "button",
-  
+
   requireConfirmApprove = false,
   requireConfirmReject = true,
   requireConfirmDelete = true,
   requireConfirmCancel = false,
   requireConfirmSave = false,
-  
+
   approveConfirmTitle = "¿Aprobar?",
   approveConfirmText = "¿Desea aprobar esta solicitud?",
   rejectConfirmTitle = "¿Rechazar?",
@@ -182,8 +181,10 @@ export function ActionButtons({
   cancelConfirmText = "Los cambios no guardados se perderán.",
   saveConfirmTitle = "¿Guardar cambios?",
   saveConfirmText = "¿Está seguro que desea guardar los cambios?",
-  
+
   showText = false,
+  size = "md",
+
   saveText = "Guardar",
   cancelText = "Cancelar",
   backText = "Regresar",
@@ -194,8 +195,13 @@ export function ActionButtons({
   rejectText = "Rechazar",
   previousText = "Anterior",
   nextText = "Siguiente",
+  downloadText = "Descargar",
+  uploadText = "Subir",
+  refreshText = "Actualizar",
+  sendText = "Enviar",
+  viewText = "Ver",
 
-    onCreateAlt,
+  onCreateAlt,
   onCancelAlt,
 
   showCreateAlt = false,
@@ -212,25 +218,65 @@ export function ActionButtons({
   cancelAltConfirmTitle = "¿Cancelar?",
   cancelAltConfirmText = "¿Desea continuar?",
 }: ActionButtonsProps) {
-  
-
   const swalBase = {
-  background: "#FAF9F5",
-  scrollbarPadding: false,
-  heightAuto: false,
-  focusConfirm: false,
-  focusCancel: true,
-  returnFocus: false,
-  customClass: {
-    popup: "rounded-2xl",
-    confirmButton: "rounded-xl px-6 py-3 font-semibold",
-    cancelButton: "rounded-xl px-6 py-3 font-semibold",
-  },
-};
-  // Handler para aprobar con confirmación
+    background: "#FAF9F5",
+    scrollbarPadding: false,
+    heightAuto: false,
+    focusConfirm: false,
+    focusCancel: true,
+    returnFocus: false,
+    customClass: {
+      popup: "rounded-2xl",
+      confirmButton: "rounded-xl px-6 py-3 font-semibold",
+      cancelButton: "rounded-xl px-6 py-3 font-semibold",
+    },
+  };
+
+  const sizeMap = {
+    sm: {
+      icon: "h-4 w-4",
+      iconOnly: "h-9 w-9",
+      withText: "h-9 px-3 text-xs font-semibold",
+      gap: "gap-1.5",
+      wrapperGap: "gap-1.5",
+    },
+    md: {
+      icon: "h-4.5 w-4.5",
+      iconOnly: "h-10 w-10",
+      withText: "h-10 px-3.5 text-sm font-semibold",
+      gap: "gap-1.5",
+      wrapperGap: "gap-2",
+    },
+    lg: {
+      icon: "h-5 w-5",
+      iconOnly: "h-11 w-11",
+      withText: "h-11 px-4 text-sm font-semibold",
+      gap: "gap-2",
+      wrapperGap: "gap-2",
+    },
+  } as const;
+
+  const current = sizeMap[size];
+  const buttonSize = showText ? current.withText : current.iconOnly;
+  const iconSize = current.icon;
+
+  const baseGhost =
+    "inline-flex items-center justify-center rounded-xl border border-[#DCE4CA] bg-[#FDFEF9] text-[#586174] transition hover:bg-[#F5F8EE] disabled:opacity-50 disabled:cursor-not-allowed";
+  const basePrimary =
+    "inline-flex items-center justify-center rounded-xl bg-[#5B732E] text-white transition hover:bg-[#51682A] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm";
+  const baseDanger =
+    "inline-flex items-center justify-center rounded-xl border border-[#E7C8C3] bg-[#FFFDFC] text-[#A14B43] transition hover:bg-[#FCF1EF] disabled:opacity-50 disabled:cursor-not-allowed";
+  const baseWarn =
+    "inline-flex items-center justify-center rounded-xl border border-[#E6D8A8] bg-[#FFFDF7] text-[#9B7A29] transition hover:bg-[#FFF7E8] disabled:opacity-50 disabled:cursor-not-allowed";
+  const baseSuccessSoft =
+    "inline-flex items-center justify-center rounded-xl border border-[#D6E3B2] bg-[#FBFDF7] text-[#5F7728] transition hover:bg-[#F2F7E7] disabled:opacity-50 disabled:cursor-not-allowed";
+const baseBack =
+    "inline-flex items-center justify-center rounded-3xl bg-[#5B732E] text-white transition hover:bg-[#51682A] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm";
+  
   const handleApprove = async () => {
     if (requireConfirmApprove) {
       const result = await Swal.fire({
+        ...swalBase,
         title: approveConfirmTitle,
         text: approveConfirmText,
         icon: "question",
@@ -239,75 +285,39 @@ export function ActionButtons({
         cancelButtonColor: "#d33",
         confirmButtonText: "Sí, aprobar",
         cancelButtonText: "Cancelar",
-        reverseButtons: false,
-        background: "#FAF9F5",
-        scrollbarPadding: false,
-        heightAuto: false,
-        focusConfirm: false,
-        focusCancel: true,
-        returnFocus: false,
-        customClass: {
-          popup: "rounded-2xl",
-          confirmButton: "rounded-xl px-6 py-3 font-semibold",
-          cancelButton: "rounded-xl px-6 py-3 font-semibold",
-        },
       });
-
-      if (result.isConfirmed) {
-        onApprove?.();
-      }
+      if (result.isConfirmed) onApprove?.();
     } else {
       onApprove?.();
     }
   };
 
-  // Handler para rechazar con confirmación
   const handleReject = async () => {
-  if (requireConfirmReject) {
-    const result = await Swal.fire({
-      title: rejectConfirmTitle,
-      text: rejectConfirmText,
-      icon: "warning",
-      showCancelButton: true,
-
-      // Colores
-      confirmButtonColor: "#d33",     // rojo para "Sí, rechazar"
-      cancelButtonColor: "#5B732E",   // verde para "Cancelar"
-
-      confirmButtonText: "Sí, rechazar",
-      cancelButtonText: "Cancelar",
-
-      reverseButtons: false,
-      background: "#FAF9F5",
-
-      // Ayuda a evitar el comportamiento raro de foco / doble click
-      focusConfirm: false,
-      focusCancel: true,
-      allowOutsideClick: false,
-      allowEscapeKey: true,
-      stopKeydownPropagation: false,
-      returnFocus: false,
-      scrollbarPadding: false,
-      heightAuto: false,
-      customClass: {
-        popup: "rounded-2xl",
-        confirmButton: "rounded-xl px-6 py-3 font-semibold",
-        cancelButton: "rounded-xl px-6 py-3 font-semibold",
-      },
-    });
-
-    if (result.isConfirmed) {
+    if (requireConfirmReject) {
+      const result = await Swal.fire({
+        ...swalBase,
+        title: rejectConfirmTitle,
+        text: rejectConfirmText,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#5B732E",
+        confirmButtonText: "Sí, rechazar",
+        cancelButtonText: "Cancelar",
+        allowOutsideClick: false,
+        allowEscapeKey: true,
+        stopKeydownPropagation: false,
+      });
+      if (result.isConfirmed) onReject?.();
+    } else {
       onReject?.();
     }
-  } else {
-    onReject?.();
-  }
-};
+  };
 
-  // Handler para eliminar con confirmación
   const handleDelete = async () => {
     if (requireConfirmDelete) {
       const result = await Swal.fire({
+        ...swalBase,
         title: deleteConfirmTitle,
         text: deleteConfirmText,
         icon: "warning",
@@ -316,32 +326,17 @@ export function ActionButtons({
         cancelButtonColor: "#d33",
         confirmButtonText: "Sí, eliminar",
         cancelButtonText: "Cancelar",
-        reverseButtons: false,
-        background: "#FAF9F5",
-        scrollbarPadding: false,
-        heightAuto: false,
-        focusConfirm: false,
-        focusCancel: true,
-        returnFocus: false,
-        customClass: {
-          popup: "rounded-2xl",
-          confirmButton: "rounded-xl px-6 py-3 font-semibold",
-          cancelButton: "rounded-xl px-6 py-3 font-semibold",
-        },
       });
-
-      if (result.isConfirmed) {
-        onDelete?.();
-      }
+      if (result.isConfirmed) onDelete?.();
     } else {
       onDelete?.();
     }
   };
 
-  // Handler para cancelar con confirmación
   const handleCancel = async () => {
     if (requireConfirmCancel) {
       const result = await Swal.fire({
+        ...swalBase,
         title: cancelConfirmTitle,
         text: cancelConfirmText,
         icon: "warning",
@@ -350,32 +345,17 @@ export function ActionButtons({
         cancelButtonColor: "#5B732E",
         confirmButtonText: "Sí, cancelar",
         cancelButtonText: "No, continuar",
-        reverseButtons: false,
-        background: "#FAF9F5",
-        scrollbarPadding: false,
-        heightAuto: false,
-        focusConfirm: false,
-        focusCancel: true,
-        returnFocus: false,
-        customClass: {
-          popup: "rounded-2xl",
-          confirmButton: "rounded-xl px-6 py-3 font-semibold",
-          cancelButton: "rounded-xl px-6 py-3 font-semibold",
-        },
       });
-
-      if (result.isConfirmed) {
-        onCancel?.();
-      }
+      if (result.isConfirmed) onCancel?.();
     } else {
       onCancel?.();
     }
   };
 
-  // ✨ Handler para guardar con confirmación
   const handleSave = async () => {
     if (requireConfirmSave) {
       const result = await Swal.fire({
+        ...swalBase,
         title: saveConfirmTitle,
         text: saveConfirmText,
         icon: "question",
@@ -384,33 +364,17 @@ export function ActionButtons({
         cancelButtonColor: "#d33",
         confirmButtonText: "Sí, guardar",
         cancelButtonText: "Cancelar",
-        reverseButtons: false,
-        background: "#FAF9F5",
-
-        scrollbarPadding: false,
-        heightAuto: false,
-        focusConfirm: false,
-        focusCancel: true,
-        returnFocus: false,
-
-        customClass: {
-          popup: "rounded-2xl",
-          confirmButton: "rounded-xl px-6 py-3 font-semibold",
-          cancelButton: "rounded-xl px-6 py-3 font-semibold",
-        },
       });
-
-      if (result.isConfirmed) {
-        onSave?.();
-      }
+      if (result.isConfirmed) onSave?.();
     } else {
       onSave?.();
     }
   };
-const handleCreateAlt = async () => {
-  if (requireConfirmCreateAlt) {
-    const result = await Swal.fire({
-      ...swalBase,
+
+  const handleCreateAlt = async () => {
+    if (requireConfirmCreateAlt) {
+      const result = await Swal.fire({
+        ...swalBase,
         title: createAltConfirmTitle,
         text: createAltConfirmText,
         icon: "question",
@@ -420,200 +384,172 @@ const handleCreateAlt = async () => {
         cancelButtonColor: "#d33",
         confirmButtonText: "Sí, crear",
         cancelButtonText: "Cancelar",
-        reverseButtons: false,
-    });
-
-    if (result.isConfirmed) {
+      });
+      if (result.isConfirmed) onCreateAlt?.();
+    } else {
       onCreateAlt?.();
     }
-  } else {
-    onCreateAlt?.();
-  }
-};
+  };
 
-const handleCancelAlt = async () => {
-  if (requireConfirmCancelAlt) {
-    const result = await Swal.fire({
-      ...swalBase,
-      title: cancelAltConfirmTitle,
-      text: cancelAltConfirmText,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#5B732E",
-      confirmButtonText: "Sí, cerrar",
-      cancelButtonText: "No, continuar",
-      reverseButtons: false,
-    });
-
-    if (result.isConfirmed) {
+  const handleCancelAlt = async () => {
+    if (requireConfirmCancelAlt) {
+      const result = await Swal.fire({
+        ...swalBase,
+        title: cancelAltConfirmTitle,
+        text: cancelAltConfirmText,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#5B732E",
+        confirmButtonText: "Sí, cerrar",
+        cancelButtonText: "No, continuar",
+      });
+      if (result.isConfirmed) onCancelAlt?.();
+    } else {
       onCancelAlt?.();
     }
-  } else {
-    onCancelAlt?.();
-  }
-};
+  };
 
   return (
-    <div className="flex gap-2 justify-center items-center">
-      {/* Botón Anterior */}
+    <div className={`flex flex-wrap items-center justify-center ${current.wrapperGap}`}>
       {showPrevious && onPrevious && (
         <button
           type="button"
           onClick={onPrevious}
           disabled={disablePrevious || disabled}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border-2 border-[#708C3E] text-[#708C3E] text-sm font-semibold hover:bg-[#E6EDC8] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400 disabled:hover:bg-white"
+          className={`${baseGhost} ${buttonSize} ${current.gap}`}
           title="Anterior"
           aria-label="Anterior"
         >
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronLeft className={iconSize} />
           {showText && <span>{previousText}</span>}
         </button>
       )}
 
-      {/* Botón Siguiente */}
       {showNext && onNext && (
         <button
           type="button"
           onClick={onNext}
           disabled={disableNext || disabled}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#708C3E] text-white text-sm font-semibold hover:bg-[#5B732E] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:hover:bg-gray-300 shadow-sm"
+          className={`${basePrimary} ${buttonSize} ${current.gap}`}
           title="Siguiente"
           aria-label="Siguiente"
         >
           {showText && <span>{nextText}</span>}
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className={iconSize} />
         </button>
       )}
 
-      {/* Botón Ver */}
       {onView && (
         <button
           type="button"
           onClick={onView}
-          className="inline-flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-white border border-[#6B6B6B] text-[#6B6B6B] text-sm font-medium hover:bg-[#ECECEC] hover:text-[#4F4F4F] transition-colors"
+          className={`${baseGhost} ${buttonSize} ${current.gap}`}
           title="Ver detalles"
           aria-label="Ver detalles"
         >
-          <Eye className="w-5 h-5" />
-          {showText && <span>Ver</span>}
+          <Eye className={iconSize} />
+          {showText && <span>{viewText}</span>}
         </button>
       )}
 
-      {/* Botón Editar */}
       {showEdit && onEdit && !isReadOnly && (
         <button
           type="button"
           onClick={onEdit}
-          className="inline-flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-white border border-[#A3853D] text-[#A3853D] text-sm font-medium hover:bg-[#F5E6C5] hover:text-[#8B6C2E] transition-colors"
+          className={`${baseWarn} ${buttonSize} ${current.gap}`}
           title="Editar"
           aria-label="Editar"
         >
-          <Pencil className="w-5 h-5" />
+          <Pencil className={iconSize} />
           {showText && <span>{editText}</span>}
         </button>
       )}
 
-      {/* Botón Guardar */}
       {showSave && onSave && !isReadOnly && (
         <button
           type={saveButtonType}
           onClick={saveButtonType === "button" ? handleSave : undefined}
           disabled={isSaving || disabled}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#5B732E] text-white text-sm font-semibold hover:bg-[#556B2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+          className={`${basePrimary} ${buttonSize} ${current.gap}`}
           title="Guardar"
           aria-label="Guardar"
         >
-          {isSaving ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              {showText && <span>Guardando...</span>}
-            </>
-          ) : (
-            <>
-              <Save className="w-4 h-4" />
-              {showText && <span>{saveText}</span>}
-            </>
-          )}
+          {isSaving ? <Loader2 className={`${iconSize} animate-spin`} /> : <Save className={iconSize} />}
+          {showText && <span>{isSaving ? "Guardando..." : saveText}</span>}
         </button>
       )}
 
-      {/* Botón Cancelar */}
       {showCancel && onCancel && (
         <button
           type="button"
           onClick={handleCancel}
           disabled={isSaving}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border-2 border-[#5B732E] text-[#5B732E] text-sm font-semibold hover:bg-[#EAEFE0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`${baseGhost} ${buttonSize} ${current.gap}`}
           title="Cancelar"
           aria-label="Cancelar"
         >
-          <X className="w-4 h-4" />
+          <X className={iconSize} />
           {showText && <span>{cancelText}</span>}
         </button>
       )}
 
-      {/* Botón Crear */}
       {showCreate && onCreate && !isReadOnly && (
         <button
           type="button"
           onClick={onCreate}
           disabled={isSaving || disabled}
-          className="inline-flex items-center gap-1.5 px-2 py-1.5 rounded-full bg-[#5B732E] text-white text-sm font-medium hover:bg-[#556B2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`${basePrimary} ${buttonSize} ${current.gap}`}
           title="Crear"
           aria-label="Crear"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className={iconSize} />
           {showText && <span>{createText}</span>}
         </button>
       )}
 
-      {/* Botón Cancelar alternativo */}
       {showCancelAlt && onCancelAlt && (
         <button
           type="button"
           onClick={handleCancelAlt}
           disabled={isSaving}
-          className="inline-flex w-full items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white border-2 border-[#C19A3D] text-[#C19A3D] text-sm font-semibold hover:bg-[#FEF6E0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed sm:w-auto"
+          className={`${baseWarn} ${showText ? `${current.withText} w-full sm:w-auto` : current.iconOnly} ${current.gap}`}
           title={cancelAltText}
           aria-label={cancelAltText}
         >
-          <XCircle className="w-4 h-4" />
+          <XCircle className={iconSize} />
           {showText && <span>{cancelAltText}</span>}
         </button>
       )}
 
-      {/* Botón Crear alternativo */}
       {showCreateAlt && onCreateAlt && !isReadOnly && (
         <button
           type="button"
           onClick={handleCreateAlt}
           disabled={isSaving || disabled}
-          className="inline-flex w-full items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#5B732E] text-white text-sm font-semibold hover:bg-[#556B2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm sm:w-auto"
+          className={`${basePrimary} ${showText ? `${current.withText} w-full sm:w-auto` : current.iconOnly} ${current.gap}`}
           title={createAltText}
           aria-label={createAltText}
         >
-          <Plus className="w-4 h-4" />
+          <Plus className={iconSize} />
           {showText && <span>{createAltText}</span>}
         </button>
       )}
 
-      {/* Botón Enviar */}
       {showSend && onSend && !isReadOnly && (
         <button
           type="button"
           onClick={onSend}
           disabled={isSaving || disabled}
-          className="inline-flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-[#5B732E] text-white text-sm font-medium hover:bg-[#556B2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`${basePrimary} ${buttonSize} ${current.gap}`}
           title="Enviar"
           aria-label="Enviar"
         >
-          <Send className="w-5 h-5" />
-          {showText && <span>Enviar</span>}
+          <Send className={iconSize} />
+          {showText && <span>{sendText}</span>}
         </button>
       )}
 
-      {/* Botones Aprobar/Rechazar */}
       {showApproveReject && !isReadOnly && (
         <>
           {onApprove && (
@@ -621,120 +557,96 @@ const handleCancelAlt = async () => {
               type="button"
               onClick={handleApprove}
               disabled={isApproving}
-              className="inline-flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-white border border-[#6F8C1F] text-[#6F8C1F] text-sm font-medium hover:bg-[#E6EDC8] hover:text-[#5A7018] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`${baseSuccessSoft} ${buttonSize} ${current.gap}`}
               title="Aprobar"
               aria-label="Aprobar"
             >
-              {isApproving ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <CheckCircle className="w-5 h-5" />
-              )}
+              {isApproving ? <Loader2 className={`${iconSize} animate-spin`} /> : <CheckCircle className={iconSize} />}
               {showText && <span>{approveText}</span>}
             </button>
           )}
+
           {onReject && (
             <button
               type="button"
               onClick={handleReject}
-              className="inline-flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-white border border-[#B85C4C] text-[#B85C4C] text-sm font-medium hover:bg-[#E6C3B4] hover:text-[#8C3A33] transition-colors"
+              className={`${baseDanger} ${buttonSize} ${current.gap}`}
               title="Rechazar"
               aria-label="Rechazar"
             >
-              <XCircle className="w-5 h-5" />
+              <XCircle className={iconSize} />
               {showText && <span>{rejectText}</span>}
             </button>
           )}
         </>
       )}
 
-      {/* Botón Eliminar */}
       {showDelete && onDelete && !isReadOnly && (
         <button
           type="button"
           onClick={handleDelete}
           disabled={isDeleting || disabled}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-[#B85C4C] text-[#B85C4C] text-sm font-medium hover:bg-[#E6C3B4] hover:text-[#8C3A33] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`${baseDanger} ${buttonSize} ${current.gap}`}
           title="Eliminar"
           aria-label="Eliminar"
         >
-          {isDeleting ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <Trash2 className="w-5 h-5" />
-          )}
+          {isDeleting ? <Loader2 className={`${iconSize} animate-spin`} /> : <Trash2 className={iconSize} />}
           {showText && <span>{deleteText}</span>}
         </button>
       )}
 
-      {/* Botón Descargar */}
       {showDownload && onDownload && (
         <button
           type="button"
           onClick={onDownload}
           disabled={isLoading || disabled}
-          className="inline-flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-white border border-[#6B6B6B] text-[#6B6B6B] text-sm font-medium hover:bg-[#ECECEC] hover:text-[#4F4F4F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`${baseGhost} ${buttonSize} ${current.gap}`}
           title="Descargar"
           aria-label="Descargar"
         >
-          {isLoading ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <Download className="w-5 h-5" />
-          )}
-          {showText && <span>Descargar</span>}
+          {isLoading ? <Loader2 className={`${iconSize} animate-spin`} /> : <Download className={iconSize} />}
+          {showText && <span>{downloadText}</span>}
         </button>
       )}
 
-      {/* Botón Subir */}
       {showUpload && onUpload && !isReadOnly && (
         <button
           type="button"
           onClick={onUpload}
           disabled={isUploading || disabled}
-          className="inline-flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-white border border-[#6B6B6B] text-[#6B6B6B] text-sm font-medium hover:bg-[#ECECEC] hover:text-[#4F4F4F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`${baseGhost} ${buttonSize} ${current.gap}`}
           title="Subir"
           aria-label="Subir"
         >
-          {isUploading ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <Upload className="w-5 h-5" />
-          )}
-          {showText && <span>Subir</span>}
+          {isUploading ? <Loader2 className={`${iconSize} animate-spin`} /> : <Upload className={iconSize} />}
+          {showText && <span>{uploadText}</span>}
         </button>
       )}
 
-      {/* Botón Actualizar */}
       {showRefresh && onRefresh && (
         <button
           type="button"
           onClick={onRefresh}
           disabled={isLoading || disabled}
-          className="inline-flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-white border border-[#6B6B6B] text-[#6B6B6B] text-sm font-medium hover:bg-[#ECECEC] hover:text-[#4F4F4F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`${baseGhost} ${buttonSize} ${current.gap}`}
           title="Actualizar"
           aria-label="Actualizar"
         >
-          {isLoading ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <RefreshCw className="w-5 h-5" />
-          )}
-          {showText && <span>Actualizar</span>}
+          {isLoading ? <Loader2 className={`${iconSize} animate-spin`} /> : <RefreshCw className={iconSize} />}
+          {showText && <span>{refreshText}</span>}
         </button>
       )}
 
-      {/* Botón Regresar */}
       {showBack && onBack && (
         <button
           type="button"
           onClick={onBack}
           disabled={disabled}
-          className="inline-flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-white border border-[#6B6B6B] text-[#6B6B6B] text-sm font-medium hover:bg-[#ECECEC] hover:text-[#4F4F4F] transition-colors"
+          className={`${baseBack} ${buttonSize} ${current.gap}`}
           title="Regresar"
           aria-label="Regresar"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className={iconSize} />
           {showText && <span>{backText}</span>}
         </button>
       )}

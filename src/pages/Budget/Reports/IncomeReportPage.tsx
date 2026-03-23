@@ -211,6 +211,8 @@ export default function IncomeReportPage() {
                   placeholder="Todos"
                   disabled={false}
                   zIndex={40}
+                  searchable={true}
+                  searchPlaceholder="Buscar tipo..."
                 />
               </div>
               <div className="md:col-span-2">
@@ -222,6 +224,8 @@ export default function IncomeReportPage() {
                   placeholder="Todos"
                   disabled={false}
                   zIndex={30}
+                  searchable={true}
+                  searchPlaceholder="Buscar subtipo..."
                 />
               </div>
               <div>

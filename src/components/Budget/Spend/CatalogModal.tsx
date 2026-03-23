@@ -374,6 +374,8 @@ export default function CatalogModalSpend({
                     placeholder={!departmentId ? "Seleccione un departamento…" : "Seleccione…"}
                     disabled={!departmentId}
                     zIndex={60 as any}
+                    searchable={true}
+                    searchPlaceholder="Buscar tipo..."
                   />
                 </div>
 
@@ -496,6 +498,7 @@ export default function CatalogModalSpend({
                     options={departmentOptions}
                     placeholder="Departamento…"
                     zIndex={60 as any}
+
                   />
                 </div>
 
@@ -507,6 +510,8 @@ export default function CatalogModalSpend({
                     placeholder={!editTypeDepartmentId ? "Seleccione depto…" : "Tipo…"}
                     disabled={!editTypeDepartmentId}
                     zIndex={60 as any}
+                    searchable={true}
+                    searchPlaceholder="Buscar tipo..."  
                   />
                 </div>
 
@@ -560,6 +565,8 @@ export default function CatalogModalSpend({
                     placeholder={!editSubTypeDepartmentId ? "Seleccione depto…" : "Tipo…"}
                     disabled={!editSubTypeDepartmentId}
                     zIndex={60 as any}
+                    searchable={true}
+                    searchPlaceholder="Buscar tipo..."
                   />
                 </div>
 
@@ -571,6 +578,8 @@ export default function CatalogModalSpend({
                     placeholder={!editSubTypeTypeId ? "Seleccione tipo…" : "Subtipo…"}
                     disabled={!editSubTypeTypeId}
                     zIndex={60 as any}
+                    searchable={true}
+                    searchPlaceholder="Buscar subtipo..."
                   />
                 </div>
               </div>

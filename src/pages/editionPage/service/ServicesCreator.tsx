@@ -3,8 +3,6 @@ import { showSuccessAlert } from "../../../utils/alerts"
 import { ActionButtons } from "../../../components/ActionButtons"
 import { useCloudinaryUpload } from "../../../hooks/Cloudinary/useCloudinaryUpload"
 import { Loader2, Upload } from "lucide-react"
-
-// ✅ usa el utils que te di antes (ajustá la ruta si tu archivo está en otra carpeta)
 import { cropToBlob, blobToFile } from "../../../utils/mediaBuildTransformed"
 
 const CROP_W = 1200
@@ -19,13 +17,11 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
   const [isSaving, setIsSaving] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
 
-  // ✅ file pendiente (NO se sube hasta agregar)
   const upload = useCloudinaryUpload()
   const fileRef = useRef<HTMLInputElement>(null)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [localPreview, setLocalPreview] = useState<string>("")
 
-  // drag/crop
   const [offset, setOffset] = useState({ x: 0, y: 0 })
   const dragRef = useRef<HTMLDivElement>(null)
   const imageRef = useRef<HTMLImageElement>(null)
@@ -39,7 +35,6 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
     pointerId: -1,
   })
 
-  // Detectar cambios
   useEffect(() => {
     const changed =
       title.trim() !== "" ||
@@ -51,25 +46,21 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
     setHasChanges(changed)
   }, [title, cardDescription, modalDescription, imageUrlDraft, images.length, pendingFile])
 
-  // reset offset cuando cambia preview
   useEffect(() => {
     setOffset({ x: 0, y: 0 })
   }, [localPreview, imageUrlDraft])
 
-  // liberar objectURL
   useEffect(() => {
     return () => {
       if (localPreview) URL.revokeObjectURL(localPreview)
     }
   }, [localPreview])
 
-  // src para preview (archivo seleccionado tiene prioridad; si no, muestra la URL draft)
   const previewSrc = useMemo(() => {
     if (pendingFile && localPreview) return localPreview
     return imageUrlDraft || ""
   }, [pendingFile, localPreview, imageUrlDraft])
 
-  // convertir offset -> percent para recorte
   const positionAsPercent = useMemo(() => {
     if (!dragRef.current || !imageRef.current) return { x: 50, y: 50 }
 
@@ -106,7 +97,6 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
 
   const handlePick = () => fileRef.current?.click()
 
-  // ✅ NO sube todavía: solo guarda file + preview local
   const onPickFile = (file: File | null) => {
     if (!file) return
 
@@ -115,8 +105,6 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
 
     setPendingFile(file)
     setLocalPreview(obj)
-
-    // si escoge archivo, vaciamos el input de URL para evitar confusión
     setImageUrlDraft("")
     setOffset({ x: 0, y: 0 })
 
@@ -124,8 +112,7 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
   }
 
   const onPointerDown = (e: React.PointerEvent) => {
-    if (!dragRef.current) return
-    if (!previewSrc) return
+    if (!dragRef.current || !previewSrc) return
 
     dragState.current = {
       dragging: true,
@@ -202,7 +189,6 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
     }
   }
 
-  // wrapper para esperar upload.mutate
   const uploadAsync = (file: File) =>
     new Promise<any>((resolve, reject) => {
       upload.mutate(file, {
@@ -211,7 +197,6 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
       })
     })
 
-  // ✅ Agregar imagen por URL
   const addFromUrl = () => {
     const url = imageUrlDraft.trim()
     if (!url) return
@@ -220,7 +205,6 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
     setOffset({ x: 0, y: 0 })
   }
 
-  // ✅ Agregar imagen desde archivo (recorta + sube y guarda URL)
   const addFromFile = async () => {
     if (!pendingFile || !localPreview) return
     try {
@@ -249,32 +233,27 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
 
     setIsSaving(true)
     try {
-      let finalImages = [...images];
+      let finalImages = [...images]
 
-      // ¡NUEVA LÓGICA AQUÍ!
-      // Si el usuario seleccionó un archivo pero no le dio a "Agregar imagen"
       if (pendingFile && localPreview) {
         const blob = await cropToBlob(localPreview, positionAsPercent, CROP_W, CROP_H)
         const croppedFile = blobToFile(blob, `service_${Date.now()}.jpg`)
         const asset = await uploadAsync(croppedFile)
         const url = asset?.url ?? asset?.secure_url
         if (url) {
-          finalImages.push(url);
+          finalImages.push(url)
         }
-      } 
-      // O si el usuario pegó una URL pero no le dio a "Agregar imagen"
-      else if (imageUrlDraft.trim() !== "") {
-        finalImages.push(imageUrlDraft.trim());
+      } else if (imageUrlDraft.trim() !== "") {
+        finalImages.push(imageUrlDraft.trim())
       }
 
       await onSubmit({
         title,
         cardDescription,
         modalDescription,
-        images: finalImages, // ✅ Ahora mandamos el arreglo asegurado
+        images: finalImages,
       })
 
-      // limpiar
       setTitle("")
       setCardDescription("")
       setModalDescription("")
@@ -305,71 +284,88 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
     setOffset({ x: 0, y: 0 })
   }
 
-  const canSave = title.trim() !== "" && cardDescription.trim() !== "" && modalDescription.trim() !== ""
+  const canSave =
+    title.trim() !== "" &&
+    cardDescription.trim() !== "" &&
+    modalDescription.trim() !== ""
 
   const canAdd = (!!pendingFile && !!localPreview) || imageUrlDraft.trim() !== ""
 
   return (
-    <div className="space-y-4 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
-      <h3 className="text-xl font-semibold text-[#2E321B] mb-4">Crear Nuevo Servicio</h3>
+    <div className="space-y-3 rounded-[24px] border border-[#E6E0D2] bg-[#FCFDF9] p-4 md:p-5">
+      <div className="mb-1">
+        <h3 className="text-lg font-semibold text-[#243018] md:text-xl">
+          Crear nuevo servicio
+        </h3>
+        <p className="mt-1 text-sm text-slate-500">
+          Completa la información básica y agrega imágenes si lo necesitás.
+        </p>
+      </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="mb-1 block text-sm font-medium text-[#2F3C22]">
           Título <span className="text-red-500">*</span>
         </label>
         <input
-          className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
+          className="w-full rounded-xl border border-[#D8DCCF] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#A8B77A] focus:ring-2 focus:ring-[#DDE7C2]"
           placeholder="Título del servicio"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           maxLength={75}
           disabled={isSaving || upload.isPending}
         />
-        <div className="text-sm text-gray-500 mt-1">Quedan {75 - title.length} de 75 caracteres</div>
+        <div className="mt-1 text-xs text-slate-500">
+          Quedan {75 - title.length} de 75 caracteres
+        </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="mb-1 block text-sm font-medium text-[#2F3C22]">
           Descripción de la tarjeta <span className="text-red-500">*</span>
         </label>
         <textarea
-          className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E] resize-none"
-          rows={3}
+          className="w-full resize-none rounded-xl border border-[#D8DCCF] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#A8B77A] focus:ring-2 focus:ring-[#DDE7C2]"
+          rows={2}
           placeholder="Descripción breve que aparecerá en la tarjeta"
           value={cardDescription}
           onChange={(e) => setCardDescription(e.target.value)}
           maxLength={250}
           disabled={isSaving || upload.isPending}
         />
-        <div className="text-sm text-gray-500 mt-1">Quedan {250 - cardDescription.length} de 250 caracteres</div>
+        <div className="mt-1 text-xs text-slate-500">
+          Quedan {250 - cardDescription.length} de 250 caracteres
+        </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="mb-1 block text-sm font-medium text-[#2F3C22]">
           Descripción del modal <span className="text-red-500">*</span>
         </label>
         <textarea
-          className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E] resize-none"
-          rows={5}
+          className="w-full resize-none rounded-xl border border-[#D8DCCF] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#A8B77A] focus:ring-2 focus:ring-[#DDE7C2]"
+          rows={4}
           placeholder="Descripción detallada que aparecerá en el modal"
           value={modalDescription}
           onChange={(e) => setModalDescription(e.target.value)}
           maxLength={250}
           disabled={isSaving || upload.isPending}
         />
-        <div className="text-sm text-gray-500 mt-1">Quedan {250 - modalDescription.length} de 250 caracteres</div>
+        <div className="mt-1 text-xs text-slate-500">
+          Quedan {250 - modalDescription.length} de 250 caracteres
+        </div>
       </div>
 
-      {/* ✅ Imagen: archivo (no sube) + URL opcional */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700 mb-1">Imagen (opcional)</label>
+        <label className="block text-sm font-medium text-[#2F3C22]">
+          Imagen (opcional)
+        </label>
 
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <button
             type="button"
             onClick={handlePick}
             disabled={isSaving || upload.isPending}
-            className="inline-flex items-center justify-center gap-2 border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-50 disabled:opacity-60"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#D8DCCF] bg-white px-4 py-2.5 text-sm hover:bg-[#F7F8F3] disabled:opacity-60"
           >
             {isSaving || upload.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -388,12 +384,11 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
           />
 
           <input
-            className="flex-1 w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
+            className="w-full flex-1 rounded-xl border border-[#D8DCCF] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#A8B77A] focus:ring-2 focus:ring-[#DDE7C2]"
             placeholder="...o pega una URL (https://...)"
             value={imageUrlDraft}
             onChange={(e) => {
               setImageUrlDraft(e.target.value)
-              // si escribe URL, cancelamos archivo local
               if (pendingFile) setPendingFile(null)
               if (localPreview) {
                 URL.revokeObjectURL(localPreview)
@@ -406,12 +401,14 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
         </div>
 
         {previewSrc && (
-          <div className="mt-3">
-            <p className="text-sm font-medium text-gray-700 mb-2">Vista previa (arrastrá para acomodar):</p>
+          <div className="pt-1">
+            <p className="mb-2 text-sm font-medium text-[#2F3C22]">
+              Vista previa
+            </p>
 
             <div
               ref={dragRef}
-              className="relative w-full aspect-[1200/630] rounded-lg border-2 border-[#DCD6C9] overflow-hidden bg-[#F8F9F3] cursor-grab active:cursor-grabbing"
+              className="relative w-full aspect-[1200/630] overflow-hidden rounded-xl border border-[#DCD6C9] bg-[#F8F9F3] cursor-grab active:cursor-grabbing"
               style={{ touchAction: "none", WebkitUserSelect: "none", userSelect: "none" }}
               onPointerDown={onPointerDown}
               onPointerMove={onPointerMove}
@@ -422,7 +419,7 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
                 ref={imageRef}
                 src={previewSrc}
                 alt="Vista previa"
-                className="w-full h-full object-cover select-none pointer-events-none"
+                className="h-full w-full object-cover select-none pointer-events-none"
                 draggable={false}
                 style={{
                   objectPosition: `${positionAsPercent.x}% ${positionAsPercent.y}%`,
@@ -436,39 +433,50 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
           </div>
         )}
 
-        {/* ✅ Agregar a lista */}
-        <div className="flex items-center gap-2 pt-2">
-          <button
-            type="button"
-            onClick={pendingFile ? addFromFile : addFromUrl}
+        <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center sm:justify-between">
+          <span className="text-xs text-slate-500">
+            La primera imagen será la portada.
+          </span>
+
+          <ActionButtons
+            size="sm"
+            showCreate={true}
+            createText="Agregar imagen"
+            onCreate={pendingFile ? addFromFile : addFromUrl}
             disabled={!canAdd || isSaving || upload.isPending}
-            className="border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-50 disabled:opacity-60"
-          >
-            Agregar imagen
-          </button>
-          <span className="text-sm text-gray-500">La primera imagen será la portada.</span>
+            showText={true}
+            isSaving={upload.isPending}
+          />
         </div>
 
-        {/* ✅ Lista (sin flechas): ★ portada y ✕ quitar */}
         {images.length > 0 && (
-          <div className="mt-4 space-y-2">
-            <p className="text-sm font-medium text-gray-700">Imágenes del servicio (la primera es portada)</p>
+          <div className="space-y-2 pt-1">
+            <p className="text-sm font-medium text-[#2F3C22]">
+              Imágenes del servicio
+            </p>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {images.map((url, idx) => (
                 <div
                   key={`${url}-${idx}`}
-                  className="w-full rounded-xl border border-[#E7E2D7] bg-white p-2 overflow-hidden"
+                  className="overflow-hidden rounded-2xl border border-[#E7E2D7] bg-white p-2"
                 >
-                  <img src={url} className="w-full h-24 object-cover rounded-md" alt={`Imagen ${idx + 1}`} />
+                  <img
+                    src={url}
+                    className="h-20 w-full rounded-lg object-cover"
+                    alt={`Imagen ${idx + 1}`}
+                  />
 
-                  <div className="mt-3 flex flex-col gap-2">
-                    <span className={`text-xs ${idx === 0 ? "text-[#5B732E] font-semibold" : "text-gray-500"}`}>
-                      {idx === 0 ? "Portada" : "\u00A0"}
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                    <span
+                      className={`text-xs ${
+                        idx === 0 ? "font-semibold text-[#5B732E]" : "text-slate-400"
+                      }`}
+                    >
+                      {idx === 0 ? "Portada" : "—"}
                     </span>
 
-                    <div className="flex items-center justify-end gap-3">
-                      {/* ★ Poner como portada (mueve a la posición 0) */}
+                    <div className="flex items-center gap-2">
                       <button
                         type="button"
                         onClick={() =>
@@ -481,24 +489,21 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
                           })
                         }
                         disabled={idx === 0}
-                        className={`w-8 h-8 rounded-lg border flex items-center justify-center text-sm leading-none
-                          ${
-                            idx === 0
-                              ? "bg-[#5B732E] text-white border-[#5B732E]"
-                              : "bg-white text-[#5B732E] border-[#5B732E] hover:bg-[#EAEFE0]"
-                          }
-                          disabled:opacity-60 disabled:cursor-not-allowed`}
+                        className={`flex h-8 w-8 items-center justify-center rounded-lg border text-sm leading-none ${
+                          idx === 0
+                            ? "border-[#5B732E] bg-[#5B732E] text-white"
+                            : "border-[#5B732E] bg-white text-[#5B732E] hover:bg-[#EAEFE0]"
+                        } disabled:cursor-not-allowed disabled:opacity-60`}
                         title={idx === 0 ? "Portada" : "Poner como portada"}
                         aria-label="Poner como portada"
                       >
                         ★
                       </button>
 
-                      {/* ✕ Quitar */}
                       <button
                         type="button"
                         onClick={() => removeAt(idx)}
-                        className="w-8 h-8 rounded-lg border border-[#B85C4C] text-[#B85C4C] bg-white hover:bg-[#E6C3B4] flex items-center justify-center text-sm leading-none"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#B85C4C] bg-white text-[#B85C4C] hover:bg-[#F8E3DE]"
                         title="Quitar"
                         aria-label="Quitar"
                       >
@@ -510,13 +515,16 @@ export default function ServicesInformativeCreator({ onSubmit }: any) {
               ))}
             </div>
 
-            <p className="text-xs text-gray-500">★ = poner como portada (la mueve a la primera posición).</p>
+            <p className="text-xs text-slate-500">
+              ★ = poner como portada.
+            </p>
           </div>
         )}
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end pt-1">
         <ActionButtons
+          size="sm"
           onSave={handleSave}
           onCancel={handleCancel}
           showCancel={true}

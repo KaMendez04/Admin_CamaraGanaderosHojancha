@@ -40,16 +40,13 @@ import Reports from "../pages/Budget/Reports/index";
 import IncomeReportPage from "../pages/Budget/Reports/IncomeReportPage";
 import SpendReportPage from "../pages/Budget/Reports/SpendReportPage";
 
-// ✅ nombres reales
 import PSpendProjectionsPage from "../pages/Budget/Reports/PSpends";
 import PIncomeProjectionsPage from "../pages/Budget/Reports/PIncome";
 import ExtraReportPage from "../pages/Budget/Reports/extraReportPage";
 
-import AssociatesSubnav from "../pages/associates/AssociatesSubnav";
 import AdminRequestsPage from "../pages/associates/AdminRequestPage";
 import AssociatesApprovedPage from "../pages/associates/AssociatesApprovedPage";
 
-import VolunteersSubnav from "../pages/volunteers/VolunteersSubnav";
 import VolunteersRequestPage from "../pages/volunteers/VolunteersRequestPage";
 import VolunteersApprovedPage from "../pages/volunteers/VolunteersApprovedPage";
 
@@ -60,9 +57,9 @@ import ConfirmEmailChangePage from "@/pages/ConfirmEmailChangePage";
 import SettingsAccountPage from "@/pages/settings/SettingsAccountPage";
 import SettingsUsersPage from "@/pages/settings/SettingsUsersPage";
 import SettingsLayoutPage from "@/pages/settings/SettingsLayoutPage";
-import LogsLayoutPage from "@/pages/logsPage/LogsLayoutPage";
 import LogsBudgetPage from "@/pages/logsPage/LogsBudgetPage";
 import LogsUsersPage from "@/pages/logsPage/LogsUsersPage";
+import LogsSubnav from "@/pages/logsPage/LogsSubnav";
 
 // ================================
 // Root
@@ -79,7 +76,6 @@ const loginRoute = new Route({
   getParentRoute: () => rootRoute,
   path: "/login",
   component: LoginPage,
-  // ✅ FIXED: Validar el search params
   validateSearch: (search: Record<string, unknown>): { from?: string } => {
     return {
       from: typeof search.from === 'string' ? search.from : undefined,
@@ -198,11 +194,17 @@ const settingsUsersRoute = new Route({
 const logsLayoutRoute = new Route({
   getParentRoute: () => appLayoutRoute,
   path: "/logs",
-  beforeLoad: ({ context, location }) => {
-    const locationHref = getLocationHref(location)
-    return requireRole(context, ["ADMIN"], locationHref)
-  },
-  component: LogsLayoutPage,
+  component: () => (
+    <div className="min-h-[calc(100vh-64px)] bg-[#F2F6EC]">
+      <div className="mx-auto w-full max-w-[1400px] px-4 py-4 md:px-6 md:py-5">
+        <div className="mb-4 flex justify-center">
+          <LogsSubnav />
+        </div>
+ 
+        <Outlet />
+      </div>
+    </div>
+  ),
 })
 
 const logsIndexRoute = new Route({
@@ -316,8 +318,10 @@ const budgetLayoutRoute = new Route({
   path: "/budget",
   component: () => (
     <>
+    <div className="flex justify-center pt-4 bg-[#f3f8ef]">
       <BudgetSubnav />
-      <Outlet />
+    </div>
+    <Outlet />
     </>
   ),
 });
@@ -457,7 +461,6 @@ const associatesLayoutRoute = new Route({
   },
   component: () => (
     <>
-      <AssociatesSubnav />
       <Outlet />
     </>
   ),
@@ -496,7 +499,6 @@ const volunteersLayoutRoute = new Route({
   },
   component: () => (
     <>
-      <VolunteersSubnav />
       <Outlet />
     </>
   ),

@@ -19,13 +19,16 @@ function buildApiFilters(filters: LogsUsersFiltersValue) {
 
 function buildUserChangeSummary(row: AuditUsersLog): string {
   if (!row.snapshotBefore || !row.snapshotAfter) return row.description ?? "Sin detalle"
+
   const changes: string[] = []
   const b = row.snapshotBefore
   const a = row.snapshotAfter
+
   if (b.username !== a.username) changes.push(`Nombre: ${b.username ?? "—"} → ${a.username ?? "—"}`)
   if (b.email !== a.email) changes.push(`Correo: ${b.email ?? "—"} → ${a.email ?? "—"}`)
   if (b.isActive !== a.isActive) changes.push(`Estado: ${b.isActive ? "Activo" : "Inactivo"} → ${a.isActive ? "Activo" : "Inactivo"}`)
   if (b.roleId !== a.roleId) changes.push(`Rol: ${b.roleId ?? "—"} → ${a.roleId ?? "—"}`)
+
   return changes.length > 0 ? changes.join(" | ") : row.description ?? "Sin detalle adicional"
 }
 
@@ -59,7 +62,7 @@ export default function LogsUsersPage() {
 
   const { page, setPage, totalPages, pagedItems, pageItems } = usePagination(
     visibleRows,
-    8,
+    10,
     [filters.search, filters.actionType, filters.from, filters.to],
   )
 
@@ -68,8 +71,9 @@ export default function LogsUsersPage() {
       {
         accessorKey: "createdAt",
         header: "Fecha",
+        size: 160,
         cell: ({ row }) => (
-          <span className="font-medium text-[#2E321B]">
+          <span className="whitespace-nowrap text-xs text-slate-500">
             {formatDateTime(row.original.createdAt)}
           </span>
         ),
@@ -77,28 +81,41 @@ export default function LogsUsersPage() {
       {
         id: "actor",
         header: "Realizado por",
+        size: 180,
         cell: ({ row }) => (
           <div>
-            <div className="font-medium text-[#2E321B]">{row.original.actorUser?.username ?? "Sistema"}</div>
-            <div className="text-xs text-gray-500">{row.original.actorUser?.email ?? "—"}</div>
+            <div className="text-sm font-medium text-slate-800 leading-tight">
+              {row.original.actorUser?.username ?? "Sistema"}
+            </div>
+            <div className="text-xs text-slate-400 leading-tight mt-0.5">
+              {row.original.actorUser?.email ?? "—"}
+            </div>
           </div>
         ),
       },
       {
         id: "target",
         header: "Usuario afectado",
+        size: 180,
         cell: ({ row }) => (
           <div>
-            <div className="font-medium text-[#2E321B]">{row.original.targetUser?.username ?? "—"}</div>
-            <div className="text-xs text-gray-500">{row.original.targetUser?.email ?? "—"}</div>
+            <div className="text-sm font-medium text-slate-800 leading-tight">
+              {row.original.targetUser?.username ?? "—"}
+            </div>
+            <div className="text-xs text-slate-400 leading-tight mt-0.5">
+              {row.original.targetUser?.email ?? "—"}
+            </div>
           </div>
         ),
       },
       {
         accessorKey: "actionType",
         header: "Acción",
+        size: 130,
         cell: ({ row }) => (
-          <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getActionBadgeClass(row.original.actionType)}`}>
+          <span
+            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${getActionBadgeClass(row.original.actionType)}`}
+          >
             {getActionLabel(row.original.actionType)}
           </span>
         ),
@@ -107,51 +124,80 @@ export default function LogsUsersPage() {
         id: "summary",
         header: "Descripción",
         cell: ({ row }) => (
-          <div className="text-[#2E321B] text-sm">{buildUserChangeSummary(row.original)}</div>
+          <span
+            className="block max-w-[280px] truncate text-sm text-slate-500"
+            title={buildUserChangeSummary(row.original)}
+          >
+            {buildUserChangeSummary(row.original)}
+          </span>
         ),
       },
       {
-        id: "detail",
-        header: "Detalle",
+        id: "acciones",
+        header: () => <div className="text-center">Acciones</div>,
+        size: 80,
         cell: ({ row }) => (
-          <ActionButtons onView={() => setSelectedLog(row.original)} showText={false} />
+          <div className="flex justify-center">
+            <ActionButtons
+              size="sm"
+              onView={() => setSelectedLog(row.original)}
+              showText={false}
+            />
+          </div>
         ),
       },
     ],
-    [],
+    []
   )
 
   const clearFilters = () => {
     setFilters({ search: "", actionType: "ALL", from: "", to: "" })
+    setPage(1)
   }
 
   return (
     <>
-      <div className="space-y-6">
-        <LogsUsersFilters value={filters} onChange={setFilters} onClear={clearFilters} />
-
-        <div className="rounded-3xl border border-[#E6E1D6] bg-[#FAF9F5] shadow-sm overflow-hidden">
-          <div className="border-b border-[#E6E1D6] bg-white/60 px-5 py-4">
-            <h3 className="text-base font-bold text-[#374321]">Registros</h3>
-            <p className="text-sm text-[#556B2F] mt-1">
-              {visibleRows.length} resultado(s) encontrado(s)
-            </p>
+      <div className="space-y-4">
+         <section className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <div>
+              <h2 className="text-lg font-bold text-[#2E321B]">Registros de Usuarios</h2>
+              <p className="text-xs text-[#7A8C5A] mt-0.5">
+                {visibleRows.length} resultado{visibleRows.length !== 1 ? "s" : ""} encontrado{visibleRows.length !== 1 ? "s" : ""}
+              </p>
+            </div>
           </div>
-          <div className="p-4 sm:p-5">
+        <LogsUsersFilters
+          value={filters}
+          onChange={(value) => {
+            setFilters(value)
+            setPage(1)
+          }}
+          onClear={clearFilters}
+        />
+
+       
+
+          <div className="overflow-hidden rounded-2xl border border-[#E2DDD4] bg-white shadow-sm">
             <GenericTable<AuditUsersLog>
               data={pagedItems}
               columns={columns}
               isLoading={isLoading}
             />
-            <PaginationBar
-              page={page}
-              totalPages={totalPages}
-              onPageChange={setPage}
-              pageItems={pageItems}
-              className="mt-5"
-            />
+
+            {!isLoading && totalPages > 1 && (
+              <div className="border-t border-[#EDE9E2] px-5 py-3">
+                <PaginationBar
+                  page={page}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                  pageItems={pageItems}
+                  className="justify-center"
+                />
+              </div>
+            )}
           </div>
-        </div>
+        </section>
       </div>
 
       <AuditUsersLogDetailModal

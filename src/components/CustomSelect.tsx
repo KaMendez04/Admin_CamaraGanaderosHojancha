@@ -1,5 +1,21 @@
-import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from "@headlessui/react"
+import * as React from "react"
 import { Check, ChevronDown } from "lucide-react"
+
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
 
 type Option = { value: string | number; label: string }
 type Size = "sm" | "md"
@@ -12,29 +28,29 @@ type CustomSelectProps = {
   disabled?: boolean
   zIndex?: number
   buttonClassName?: string
-  lockScroll?: boolean
   optionsClassName?: string
   size?: Size
+  searchable?: boolean
+  searchPlaceholder?: string
+  emptyText?: string
 }
 
 const STYLES = {
   sm: {
-    button: "py-1.5 pl-3 pr-7 rounded-md",
-    text: "text-xs",
-    iconWrap: "pr-2.5",
+    trigger: "h-9 rounded-md px-3 text-xs",
     icon: "h-3.5 w-3.5",
-    optionsPanel: "mt-1.5 py-1.5 rounded-md",
-    optionRow: "py-1.5 px-3 mx-1 text-xs rounded-md",
-    checkIcon: "h-3.5 w-3.5",
+    content: "rounded-md p-1",
+    input: "h-8 text-xs",
+    item: "min-h-8 rounded-md px-3 text-xs",
+    check: "h-3.5 w-3.5",
   },
   md: {
-    button: "py-2 pl-3.5 pr-10 rounded-md",
-    text: "text-sm",
-    iconWrap: "pr-3",
+    trigger: "h-11 rounded-md px-3.5 text-sm",
     icon: "h-4 w-4",
-    optionsPanel: "mt-2 py-2 rounded-lg",
-    optionRow: "py-2.5 px-4 mx-2 text-sm rounded-lg",
-    checkIcon: "h-4 w-4",
+    content: "rounded-lg p-1.5",
+    input: "h-9 text-sm",
+    item: "min-h-10 rounded-md px-4 text-sm",
+    check: "h-4 w-4",
   },
 } as const
 
@@ -47,68 +63,129 @@ export function CustomSelect({
   zIndex = 1000,
   buttonClassName = "",
   optionsClassName = "",
-  size = "md", 
+  size = "md",
+  searchable = false,
+  searchPlaceholder = "Buscar...",
+  emptyText = "No se encontraron opciones.",
 }: CustomSelectProps) {
   const s = STYLES[size]
+  const [open, setOpen] = React.useState(false)
+
   const selected = options.find((opt) => opt.value === value)
 
-  const baseBtn =
-    "relative w-full cursor-pointer bg-white text-left border shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-
-  const defaultBtn =
-    `border-[#E6E1D6] hover:border-[#5B732E] focus:outline-none focus:ring-2 focus:ring-[#5B732E]/20 focus:border-[#5B732E] ${s.button}`
-
   return (
-    <div className="relative">
-      <Listbox value={value} onChange={onChange} disabled={disabled}>
-        {({ open }) => (
-          <>
-            <ListboxButton className={`${baseBtn} ${defaultBtn} ${buttonClassName}`}>
-              <span
-                className={`block truncate ${s.text} ${
-                  !selected ? "text-gray-400" : "text-[#2E321B] font-medium"
-                }`}
-              >
-                {selected ? selected.label : placeholder}
-              </span>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild disabled={disabled}>
+        <Button
+          type="button"
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          disabled={disabled}
+          className={cn(
+            "w-full justify-between border-[#E6E1D6] bg-white font-normal text-left shadow-sm transition-all duration-200",
+            "hover:border-[#5B732E] hover:bg-white",
+            "focus-visible:ring-2 focus-visible:ring-[#5B732E]/20",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+            s.trigger,
+            buttonClassName
+          )}
+        >
+          <span
+            className={cn(
+              "block flex-1 truncate text-left",
+              !selected ? "text-gray-400" : "font-medium text-[#2E321B]"
+            )}
+          >
+            {selected ? selected.label : placeholder}
+          </span>
 
-              <span className={`pointer-events-none absolute inset-y-0 right-0 flex items-center ${s.iconWrap}`}>
-                <ChevronDown
-                  className={`${s.icon} text-[#708C3E] transition-transform duration-200 ${
-                    open ? "rotate-180" : ""
-                  }`}
-                  aria-hidden="true"
-                />
-              </span>
-            </ListboxButton>
+          <ChevronDown
+            className={cn(
+              "ml-2 shrink-0 text-[#708C3E] transition-transform duration-200",
+              s.icon,
+              open && "rotate-180"
+            )}
+          />
+        </Button>
+      </PopoverTrigger>
 
-            <ListboxOptions
-              modal={false}
-              className={`absolute w-full select-panel bg-white shadow-xl border border-[#E6E1D6] focus:outline-none overscroll-contain max-h-60 overflow-y-auto scrollbar-none ${s.optionsPanel} ${optionsClassName}`}
-              style={{ zIndex }}
-            >
-              {options.map((option) => (
-                <ListboxOption
-                  key={option.value}
-                  value={option.value}
-                  className={`relative cursor-pointer select-none transition-all duration-150 data-[focus]:bg-[#E6EDC8] text-[#2E321B] ${s.optionRow}`}
-                >
-                  {({ selected }) => (
-                    <div className="flex items-center justify-between">
-                      <span className={`block truncate ${selected ? "font-semibold text-[#5B732E]" : "font-normal"}`}>
-                        {option.label}
-                      </span>
-                      {selected && (
-                        <Check className={`${s.checkIcon} text-[#6F8C1F] flex-shrink-0 ml-3`} aria-hidden="true" />
-                      )}
-                    </div>
-                  )}
-                </ListboxOption>
-              ))}
-            </ListboxOptions>
-          </>
+      <PopoverContent
+        align="start"
+        side="bottom"
+        sideOffset={8}
+        avoidCollisions={true}
+        collisionPadding={12}
+        className={cn(
+          "w-[var(--radix-popover-trigger-width)] border border-[#E6E1D6] bg-white p-0 shadow-xl",
+          "data-[state=open]:animate-in data-[state=closed]:animate-out",
+          "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+          "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+          "data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2",
+          s.content,
+          optionsClassName
         )}
-      </Listbox>
-    </div>
+        style={{ zIndex }}
+      >
+        <Command className="bg-transparent">
+          {searchable && (
+            <div className="px-1 pb-1">
+              <CommandInput
+                placeholder={searchPlaceholder}
+                className={cn(
+                  "border-[#E6E1D6] focus-visible:ring-[#5B732E]/20",
+                  s.input
+                )}
+              />
+            </div>
+          )}
+
+          <CommandList className="max-h-60 overflow-y-auto scrollbar-none">
+            <CommandEmpty>{emptyText}</CommandEmpty>
+
+            <CommandGroup className="p-0">
+              {options.map((option) => {
+                const isSelected = option.value === value
+
+                return (
+                  <CommandItem
+                    key={option.value}
+                    value={String(option.label)}
+                    onSelect={() => {
+                      onChange(option.value)
+                      setOpen(false)
+                    }}
+                    className={cn(
+                      "mx-1 cursor-pointer select-none text-[#2E321B]",
+                      "aria-selected:bg-[#E6EDC8] aria-selected:text-[#2E321B]",
+                      s.item
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "flex-1 truncate",
+                        isSelected
+                          ? "font-semibold text-[#5B732E]"
+                          : "font-normal"
+                      )}
+                    >
+                      {option.label}
+                    </span>
+
+                    <Check
+                      className={cn(
+                        "ml-3 shrink-0 text-[#6F8C1F]",
+                        s.check,
+                        isSelected ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                  </CommandItem>
+                )
+              })}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   )
 }

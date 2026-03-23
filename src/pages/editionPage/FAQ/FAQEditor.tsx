@@ -11,12 +11,12 @@ export default function FAQEditor({
   onDelete,
 }: any) {
   const selectedFaq = faqs.find((faq: { id: any }) => faq.id === selectedFaqId) || null
+
   const [question, setQuestion] = useState("")
   const [answer, setAnswer] = useState("")
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  // Estados iniciales para detectar cambios
   const [initialQuestion, setInitialQuestion] = useState("")
   const [initialAnswer, setInitialAnswer] = useState("")
   const [hasChanges, setHasChanges] = useState(false)
@@ -28,8 +28,6 @@ export default function FAQEditor({
     if (selectedFaq) {
       setQuestion(selectedFaq.question)
       setAnswer(selectedFaq.answer)
-      
-      // Guardar valores iniciales
       setInitialQuestion(selectedFaq.question)
       setInitialAnswer(selectedFaq.answer)
     } else {
@@ -40,10 +38,9 @@ export default function FAQEditor({
     }
   }, [selectedFaq])
 
-  // Detectar cambios
   useEffect(() => {
     if (selectedFaq) {
-      const changed = 
+      const changed =
         question !== initialQuestion ||
         answer !== initialAnswer
       setHasChanges(changed)
@@ -52,6 +49,7 @@ export default function FAQEditor({
 
   const handleSave = async () => {
     if (!selectedFaq) return
+
     setIsSaving(true)
     try {
       await onUpdate({
@@ -59,9 +57,8 @@ export default function FAQEditor({
         question,
         answer,
       })
+
       showSuccessAlert("Actualización completada")
-      
-      // Actualizar valores iniciales después de guardar
       setInitialQuestion(question)
       setInitialAnswer(answer)
     } catch (err) {
@@ -73,10 +70,11 @@ export default function FAQEditor({
 
   const handleDelete = async () => {
     if (!selectedFaq) return
+
     setIsDeleting(true)
     try {
       await onDelete(selectedFaq.id)
-      showSuccessDeleteAlert('Eliminación completada')
+      showSuccessDeleteAlert("Eliminación completada")
       setSelectedFaqId(null)
     } catch (err) {
       console.error("Error al eliminar:", err)
@@ -86,75 +84,79 @@ export default function FAQEditor({
   }
 
   const handleCancel = () => {
-    // Restaurar valores originales
     setQuestion(initialQuestion)
     setAnswer(initialAnswer)
     setSelectedFaqId(null)
   }
 
-  // Transformar FAQs a opciones para el CustomSelect
   const faqOptions = faqs.map((faq: any) => ({
     value: faq.id,
-    label: faq.question
+    label: faq.question,
   }))
 
-  // Validar si los campos requeridos están llenos
   const canSave = question.trim() !== "" && answer.trim() !== ""
 
   return (
-    <div className="space-y-6 bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-8 shadow">
-      <h2 className="text-2xl font-semibold">Editar Pregunta Frecuente</h2>
+    <section className="space-y-3 rounded-[24px] border border-[#E6E0D2] bg-[#FCFDF9] p-4 md:p-5">
+      <div>
+        <h2 className="text-lg font-semibold text-[#243018] md:text-xl">
+          Editar pregunta frecuente
+        </h2>
+        <p className="mt-1 text-sm text-slate-500">
+          Selecciona una pregunta para actualizarla o eliminarla.
+        </p>
+      </div>
 
-      {/* Selector */}
       <CustomSelect
         value={selectedFaqId ?? ""}
         onChange={(value) => setSelectedFaqId(value ? Number(value) : null)}
         options={faqOptions}
         placeholder="Selecciona una pregunta para editar"
+        searchable={true}
+        searchPlaceholder="Buscar pregunta..."
       />
 
-      {/* Formulario */}
       {selectedFaq && (
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="mb-1 block text-sm font-medium text-[#2F3C22]">
               Pregunta <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E]"
+              className="w-full rounded-xl border border-[#D8DCCF] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#A8B77A] focus:ring-2 focus:ring-[#DDE7C2]"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="Pregunta"
               maxLength={MAX_Q}
               disabled={isSaving || isDeleting}
             />
-            <div className="text-sm text-gray-500 mt-1">
+            <div className="mt-1 text-xs text-slate-500">
               Quedan {Math.max(0, MAX_Q - question.length)} de {MAX_Q} caracteres
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="mb-1 block text-sm font-medium text-[#2F3C22]">
               Respuesta <span className="text-red-500">*</span>
             </label>
             <textarea
-              rows={4}
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#708C3E] resize-none"
+              rows={3}
+              className="w-full resize-none rounded-xl border border-[#D8DCCF] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#A8B77A] focus:ring-2 focus:ring-[#DDE7C2]"
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               placeholder="Respuesta"
               maxLength={MAX_A}
               disabled={isSaving || isDeleting}
             />
-            <div className="text-sm text-gray-500 mt-1">
+            <div className="mt-1 text-xs text-slate-500">
               Quedan {Math.max(0, MAX_A - answer.length)} de {MAX_A} caracteres
             </div>
           </div>
 
-          {/* Botones usando ActionButtons */}
-          <div className="flex justify-end">
+          <div className="flex justify-end pt-1">
             <ActionButtons
+              size="sm"
               onCancel={handleCancel}
               onSave={handleSave}
               onDelete={handleDelete}
@@ -177,6 +179,6 @@ export default function FAQEditor({
           </div>
         </div>
       )}
-    </div>
+    </section>
   )
 }

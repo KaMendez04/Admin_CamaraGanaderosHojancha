@@ -8,13 +8,6 @@ import type {
 } from "../../models/Budget/PSpendType";
 import apiConfig from "../../apiConfig/apiConfig";
 
-const CURRENT_FY_KEY = "cg_currentFYId";
-
-const getFiscalYearId = () =>
-  typeof window === "undefined"
-    ? undefined
-    : Number(localStorage.getItem(CURRENT_FY_KEY) || 0) || undefined;
-
 /** ============= Departamentos ============= */
 export async function listDepartments(): Promise<ApiList<Department>> {
   const { data } = await apiConfig.get<Department[]>("/department");
@@ -124,19 +117,18 @@ export async function updatePSpendSubType(
   };
 }
 
-/** ============= Crear Proyección de Egreso ============= */
 export async function createPSpend(payload: CreatePSpendDTO): Promise<PSpend> {
   const body = {
-  subTypeId: payload.pSpendSubTypeId,
-  amount: Number(payload.amount),
-  fiscalYearId: getFiscalYearId(),
-};
+    subTypeId: payload.pSpendSubTypeId,
+    amount: Number(payload.amount),
+    fiscalYearId: payload.fiscalYearId,
+  };
+
   const { data } = await apiConfig.post<any>("/p-spend", body);
 
   return {
     id: data.id,
     amount: data.amount,
-    // el backend responde con `subType`, no `pSpendSubType`
     pSpendSubType: {
       id: data?.subType?.id ?? payload.pSpendSubTypeId,
       name: data?.subType?.name ?? "",
@@ -144,7 +136,6 @@ export async function createPSpend(payload: CreatePSpendDTO): Promise<PSpend> {
     },
   };
 }
-
 
 export async function listPSpends(subTypeId?: number, fiscalYearId?: number) {
   const params: Record<string, number> = {};
@@ -158,16 +149,17 @@ export async function listPSpends(subTypeId?: number, fiscalYearId?: number) {
   return data;
 }
 
-export async function updatePSpend(
+  export async function updatePSpend(
   id: number,
-  payload: { amount?: number; subTypeId?: number; date?: string }
+  payload: { amount?: number; subTypeId?: number; fiscalYearId: number }
 ) {
-  const body: any = {}
+  const body: any = {};
 
-  if (payload.amount !== undefined) body.amount = Number(payload.amount)
-  if (payload.subTypeId !== undefined) body.subTypeId = payload.subTypeId
-  if (payload.date !== undefined) body.date = payload.date
+  if (payload.amount !== undefined) body.amount = Number(payload.amount);
+  if (payload.subTypeId !== undefined) body.subTypeId = payload.subTypeId;
 
-  const { data } = await apiConfig.patch<any>(`/p-spend/${id}`, body)
-  return data
+  body.fiscalYearId = payload.fiscalYearId;
+
+  const { data } = await apiConfig.patch<any>(`/p-spend/${id}`, body);
+  return data;
 }

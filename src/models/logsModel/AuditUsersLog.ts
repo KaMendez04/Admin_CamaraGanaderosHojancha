@@ -8,6 +8,7 @@ export interface AuditUserActorUser {
 }
 
 export interface AuditUsersLog {
+  targetUserId: any
   id: number
   actorUser?: AuditUserActorUser | null
   targetUser?: AuditUserActorUser | null

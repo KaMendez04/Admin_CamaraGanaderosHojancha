@@ -10,11 +10,13 @@ import { parseCR, useMoneyInput } from "../../../hooks/Budget/useMoneyInput";
 import { CustomSelect } from "../../CustomSelect";
 import { ActionButtons } from "../../ActionButtons";
 import { showSuccessAlert } from "@/utils/alerts";
-
+import { useFiscalYear } from "@/hooks/Budget/useFiscalYear";
 
 type Props = { onSuccess?: (createdId: number) => void; disabled?: boolean };
 
 export default function PSpendForm({ onSuccess, disabled }: Props) {
+  const { current } = useFiscalYear();
+
   const [departmentId, setDepartmentId] = useState<number | "">("");
   const [typeId, setTypeId] = useState<number | "">("");
   const [subTypeId, setSubTypeId] = useState<number | "">("");
@@ -27,9 +29,13 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
 
   const dept = useDepartments();
   const types = usePSpendTypes(
-    typeof departmentId === "number" ? departmentId : undefined
+    typeof departmentId === "number" ? departmentId : undefined,
+    current?.id
   );
-  const subTypes = usePSpendSubTypes(typeof typeId === "number" ? typeId : undefined);
+  const subTypes = usePSpendSubTypes(
+    typeof typeId === "number" ? typeId : undefined,
+    current?.id
+  );
 
   const departmentOptions = useMemo(
     () => (dept.data ?? []).map((d) => ({ label: d.name, value: d.id })),
@@ -66,6 +72,7 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
     setDepartmentId("");
     setTypeId("");
     setSubTypeId("");
+
     if ("setValue" in money && typeof (money as any).setValue === "function") {
       (money as any).setValue("");
     }
@@ -73,12 +80,29 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
 
   async function onSubmit() {
     setErrors({});
+
+    if (!current?.id) {
+      return setErrors((e) => ({ ...e, api: "Selecciona un año fiscal" }));
+    }
+
+    if (!current.is_active) {
+      return setErrors((e) => ({ ...e, api: "El año fiscal seleccionado no está activo" }));
+    }
+
+    if (current.state !== "OPEN") {
+      return setErrors((e) => ({ ...e, api: "El año fiscal seleccionado está cerrado" }));
+    }
+
     if (!departmentId) return setErrors((e) => ({ ...e, departmentId: "Selecciona un departamento" }));
     if (!typeId) return setErrors((e) => ({ ...e, typeId: "Selecciona un tipo" }));
     if (!subTypeId) return setErrors((e) => ({ ...e, subTypeId: "Selecciona un sub-tipo" }));
     if (!amountStr || amount <= 0) return setErrors((e) => ({ ...e, amount: "Monto requerido" }));
 
-    const payload: CreatePSpendDTO = { pSpendSubTypeId: Number(subTypeId), amount };
+    const payload: CreatePSpendDTO = {
+      pSpendSubTypeId: Number(subTypeId),
+      amount,
+      fiscalYearId: current.id,
+    };
 
     try {
       const res = await create.mutate(payload);
@@ -86,13 +110,17 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
       await showSuccessAlert("La proyección se registró correctamente.");
       onSuccess?.(res.id);
     } catch (err: any) {
-      setErrors((e) => ({ ...e, api: err?.message ?? "No se pudo registrar la proyección" }));
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "No se pudo registrar la proyección";
+
+      setErrors((e) => ({ ...e, api: msg }));
     }
   }
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
-      {/* Departamento */}
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-[#33361D]">Departamento</label>
         <CustomSelect
@@ -105,7 +133,6 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
         {errors.departmentId && <p className="text-xs text-red-600">{errors.departmentId}</p>}
       </div>
 
-      {/* Tipo */}
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-[#33361D]">Tipo</label>
         <CustomSelect
@@ -114,11 +141,12 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
           options={typeOptions}
           placeholder={!departmentId ? "Seleccione un departamento…" : "Seleccione…"}
           disabled={!departmentId || disabled}
+          searchable={true}
+          searchPlaceholder="Buscar tipo..."
         />
         {errors.typeId && <p className="text-xs text-red-600">{errors.typeId}</p>}
       </div>
 
-      {/* Subtipo */}
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-[#33361D]">Subtipo</label>
         <CustomSelect
@@ -127,11 +155,12 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
           options={subTypeOptions}
           placeholder={!typeId ? "Seleccione un tipo…" : "Seleccione…"}
           disabled={!typeId || disabled}
+          searchable={true}
+          searchPlaceholder="Buscar subtipo..."
         />
         {errors.subTypeId && <p className="text-xs text-red-600">{errors.subTypeId}</p>}
       </div>
 
-      {/* Monto */}
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-[#33361D]">Monto</label>
         <input
@@ -144,7 +173,6 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
         {errors.amount && <p className="text-xs text-red-600">{errors.amount}</p>}
       </div>
 
-      {/* Separador y Botones */}
       <div className="pt-4 border-t border-gray-100">
         <div className="flex justify-end">
           <ActionButtons
@@ -155,7 +183,17 @@ export default function PSpendForm({ onSuccess, disabled }: Props) {
             showText
             saveText="Registrar proyección de egreso"
             cancelText="Cancelar"
-            disabled={disabled || !departmentId || !typeId || !subTypeId || !amountStr || amount <= 0}
+            disabled={
+              disabled ||
+              !current?.id ||
+              !current.is_active ||
+              current.state !== "OPEN" ||
+              !departmentId ||
+              !typeId ||
+              !subTypeId ||
+              !amountStr ||
+              amount <= 0
+            }
             isSaving={isSubmitting}
             requireConfirmCancel={false}
             requireConfirmSave={false}

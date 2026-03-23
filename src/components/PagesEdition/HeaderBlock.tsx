@@ -22,38 +22,52 @@ export function HeaderBlock({
   saving: boolean;
 }) {
   return (
-    <div className="bg-[#FFFFFF] border border-[#DCD6C9] rounded-xl p-6 shadow space-y-4">
-      <h2 className="text-2xl font-semibold">Editar Encabezado</h2>
+    <section className="space-y-3 rounded-[24px] border border-[#E6E0D2] bg-[#FCFDF9] p-4 md:p-5">
+      <div>
+        <h2 className="text-lg font-semibold text-[#243018] md:text-xl">
+          Editar encabezado
+        </h2>
+        <p className="mt-1 text-sm text-slate-500">
+          Modifica el título y la descripción principal de la sección.
+        </p>
+      </div>
 
       <div>
+        <label className="mb-1 block text-sm font-medium text-[#2F3C22]">
+          Título
+        </label>
         <input
           value={title}
           onChange={(e) => onTitle(e.target.value)}
           maxLength={limits.title}
           placeholder="Título"
-          className="w-full border border-gray-300 rounded-md px-4 py-2"
+          className="w-full rounded-xl border border-[#D8DCCF] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#A8B77A] focus:ring-2 focus:ring-[#DDE7C2]"
         />
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="mt-1 text-xs text-slate-500">
           Quedan {limits.title - (title?.length ?? 0)} de {limits.title} caracteres
         </p>
       </div>
 
       <div>
+        <label className="mb-1 block text-sm font-medium text-[#2F3C22]">
+          Descripción
+        </label>
         <textarea
-          rows={4}
+          rows={3}
           value={desc}
           onChange={(e) => onDesc(e.target.value)}
           maxLength={limits.desc}
           placeholder="Descripción"
-          className="w-full border border-gray-300 rounded-md px-4 py-2 resize-none"
+          className="w-full resize-none rounded-xl border border-[#D8DCCF] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#A8B77A] focus:ring-2 focus:ring-[#DDE7C2]"
         />
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="mt-1 text-xs text-slate-500">
           Quedan {limits.desc - (desc?.length ?? 0)} de {limits.desc} caracteres
         </p>
       </div>
 
-      <div className="flex justify-end pt-2">
+      <div className="flex justify-end pt-1">
         <ActionButtons
+          size="sm"
           showSave
           showCancel
           showText
@@ -68,6 +82,6 @@ export function HeaderBlock({
           cancelText="Cancelar"
         />
       </div>
-    </div>
+    </section>
   );
 }

@@ -1,9 +1,11 @@
-import type { VoluntarioIndividual, Organizacion } from "../../schemas/volunteerSchemas";
+import type {
+  VoluntarioIndividual,
+  Organizacion,
+} from "../../schemas/volunteerSchemas";
 import { createColumnHelper, type ColumnDef } from "@tanstack/react-table";
 import { ActionButtons } from "../ActionButtons";
 import { GenericTable } from "../GenericTable";
 
-// Tipo unificado para la tabla
 export type UnifiedVolunteerRow = {
   id: number;
   tipo: "INDIVIDUAL" | "ORGANIZACION";
@@ -23,6 +25,18 @@ type UnifiedVolunteersTableProps = {
   onEdit: (id: number, tipo: "INDIVIDUAL" | "ORGANIZACION") => void;
 };
 
+function tipoClass(tipo: "INDIVIDUAL" | "ORGANIZACION") {
+  return tipo === "INDIVIDUAL"
+    ? "border border-[#CFE3DA] bg-[#F3FAF7] text-[#2D5F4F]"
+    : "border border-[#EADAB0] bg-[#FFF9EC] text-[#8B6C2E]";
+}
+
+function estadoClass(estado: boolean) {
+  return estado
+    ? "border border-[#D9E6B8] bg-[#F4F8EA] text-[#5F7728]"
+    : "border border-[#F0D0CB] bg-[#FCF1EF] text-[#A14B43]";
+}
+
 export function UnifiedVolunteersTable({
   data,
   isLoading,
@@ -33,78 +47,91 @@ export function UnifiedVolunteersTable({
   const columnHelper = createColumnHelper<UnifiedVolunteerRow>();
 
   const columns: ColumnDef<UnifiedVolunteerRow, any>[] = [
-    columnHelper.accessor("tipo", {
-      header: "Tipo",
-      size: 110,
-      cell: (info) => (
-        <span
-            className={`justify-center items-center flex px-2 py-1 rounded-lg text-xs font-bold uppercase ${
-            info.getValue() === "INDIVIDUAL"
-              ? "bg-[#D4E8E0] text-[#2D5F4F]"
-              : "bg-[#F5E6C5] text-[#8B6C2E]"
-          }`}
-        >
-          {info.getValue() === "INDIVIDUAL" ? "Individual" : "Organización"}
-        </span>
-      ),
-    }),
     columnHelper.accessor("identificacion", {
       header: "Identificación",
-      size: 120,
+      size: 130,
       cell: (info) => (
-        <div className="font-medium text-[#33361D]">{info.getValue()}</div>
-      ),
-    }),
-    columnHelper.accessor("nombreCompleto", {
-      header: "Nombre",
-      size: 220,
-      cell: (info) => (
-        <div
-          className="font-medium text-[#33361D] truncate"
-          title={String(info.getValue())}
-        >
+        <div className="text-sm font-medium text-slate-700">
           {info.getValue()}
         </div>
       ),
     }),
-    columnHelper.accessor("telefono", {
-      header: "Teléfono",
-      size: 100,
-      cell: (info) => <div className="text-[#33361D]">{info.getValue()}</div>,
-    }),
-    columnHelper.accessor("email", {
-      header: "Email",
+
+    columnHelper.accessor("nombreCompleto", {
+      header: "Nombre",
       size: 180,
       cell: (info) => (
         <div
-          className="text-[#33361D] truncate"
+          className="max-w-[180px] truncate text-sm font-semibold text-slate-900"
           title={String(info.getValue())}
         >
           {info.getValue()}
         </div>
       ),
     }),
-    columnHelper.accessor("estado", {
-      header: "Estado",
-      size: 90,
+    columnHelper.accessor("tipo", {
+          header: "Tipo",
+          size: 120,
+          cell: (info) => {
+            const tipo = info.getValue();
+            return (
+              <div className="flex justify-center md:justify-center">
+                <span
+                  className={`inline-flex min-w-[110px] items-center justify-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.02em] ${tipoClass(
+                    tipo
+                  )}`}
+                >
+                  {tipo === "INDIVIDUAL" ? "Individual" : "Organización"}
+                </span>
+              </div>
+            );
+          },
+        }),
+
+    columnHelper.accessor("telefono", {
+      header: "Teléfono",
+      size: 120,
       cell: (info) => (
-        <span
-          className={`justify-center items-center flex px-2 py-1 rounded-lg text-xs font-bold ${
-            info.getValue()
-              ? "bg-[#E6EDC8] text-[#5A7018]"
-              : "bg-[#F7E9E6] text-[#8C3A33]"
-          }`}
-        >
-          {info.getValue() ? "Activo" : "Inactivo"}
-        </span>
+        <div className="text-sm text-slate-600">{info.getValue()}</div>
       ),
     }),
+
+    columnHelper.accessor("email", {
+      header: "Email",
+      size: 220,
+      cell: (info) => (
+        <div
+          className="max-w-[240px] truncate text-sm text-slate-600"
+          title={String(info.getValue())}
+        >
+          {info.getValue()}
+        </div>
+      ),
+    }),
+
+    columnHelper.accessor("estado", {
+      header: "Estado",
+      size: 110,
+      cell: (info) => (
+        <div className="flex justify-center md:justify-center">
+          <span
+            className={`inline-flex min-w-[96px] items-center justify-center rounded-full px-3 py-1 text-[11px] font-semibold tracking-[0.02em] ${estadoClass(
+              info.getValue()
+            )}`}
+          >
+            {info.getValue() ? "Activo" : "Inactivo"}
+          </span>
+        </div>
+      ),
+    }),
+
     columnHelper.display({
       id: "acciones",
       header: () => <div className="text-center">Acciones</div>,
-      size: 150,
+      size: 130,
       cell: (info) => (
         <ActionButtons
+          size="sm"
           onView={() => onView(info.row.original.id, info.row.original.tipo)}
           onEdit={() => onEdit(info.row.original.id, info.row.original.tipo)}
           showEdit={true}
@@ -114,5 +141,12 @@ export function UnifiedVolunteersTable({
     }),
   ];
 
-  return <GenericTable data={data} columns={columns} isLoading={isLoading} />;
+  return (
+    <GenericTable
+      data={data}
+      columns={columns}
+      isLoading={isLoading}
+      emptyMessage="No hay voluntarios disponibles."
+    />
+  );
 }

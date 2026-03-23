@@ -24,7 +24,7 @@ export interface PSpend {
 export type CreatePSpendDTO = {
   pSpendSubTypeId: number;
   amount: number; // se serializa a string con 2 decimales en el service
-  // fiscalYearId?: number; // agrega si tu back lo pide
+  fiscalYearId: number;
 };
 
 export type ApiList<T> = { data: T[]; total?: number };
