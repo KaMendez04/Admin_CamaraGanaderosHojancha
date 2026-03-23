@@ -48,7 +48,7 @@ export function GenericSubnav({
       {(title || description) && (
         <div className="mb-3">
           {title && (
-            <h1 className="text-[20px] font-semibold tracking-[-0.02em] text-slate-900 md:text-[22px]">
+            <h1 className="text-[26px] font-bold tracking-[-0.02em] text-slate-900 md:text-[26px]">
               {title}
             </h1>
           )}
@@ -81,7 +81,7 @@ export function GenericSubnav({
 
       {/* Mobile: 2 o menos items */}
       {!hasManyItems && (
-        <div className="inline-flex flex-wrap rounded-full border border-[#E8ECDD] bg-[#FAFBF8] p-1 sm:hidden">
+        <div className="inline-flex flex-wrap justify-center rounded-full border border-[#E8ECDD] bg-[#FAFBF8] sm:hidden">
           {visibleItems.map((item) => {
             const active = isActive(item.to, item.exact);
 

@@ -43,6 +43,7 @@ export function StatusFilters({
 
           {!hideDownloadButton && onDownload && (
             <ActionButtons
+              size="sm"
               onDownload={onDownload}
               showDownload={true}
               isLoading={isDownloading}

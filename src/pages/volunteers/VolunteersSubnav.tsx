@@ -15,10 +15,12 @@ const items: NavItem[] = [
 
 export default function VolunteersSubnav() {
   return (
+    <div className="p-2">
     <GenericSubnav
       items={items}
-      title="Voluntarios"
+      title="Gestión de Voluntarios"
       description="Gestiona solicitudes pendientes y voluntarios aprobados."
     />
+    </div>
   )
 }

@@ -1,20 +1,21 @@
-import React from "react"
-import type { PersonalPageType } from "../../models/PersonalPageType"
-import { personalApi } from "../../services/personalPageService"
-import { useEditPersonalPageModal } from "../../hooks/Personal/useEditPersonalPageModal"
-import { showSuccessAlertRegister, showErrorAlertRegister } from "../../utils/alerts"
-import { ActionButtons } from "../../components/ActionButtons"
-import { BirthDatePicker } from "../ui/birthDayPicker"
-import { CharCounter } from "../CharCounter"
-import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll"
-import { CustomSelect } from "../CustomSelect"
+import React from "react";
+import type { PersonalPageType } from "../../models/PersonalPageType";
+import { personalApi } from "../../services/personalPageService";
+import { useEditPersonalPageModal } from "../../hooks/Personal/useEditPersonalPageModal";
+import { showSuccessAlertRegister, showErrorAlertRegister } from "../../utils/alerts";
+import { ActionButtons } from "../../components/ActionButtons";
+import { BirthDatePicker } from "../ui/birthDayPicker";
+import { CharCounter } from "../CharCounter";
+import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll";
+import { CustomSelect } from "../CustomSelect";
+import { usePersonalPersonaLookup } from "../../hooks/Personal/usePersonalPersonaLookup";
+import { personalSchema } from "@/schemas/PersonalSchema";
 
 interface EditPersonalPageModalProps {
-  personalPage: PersonalPageType
-  setPersonalPage: React.Dispatch<React.SetStateAction<PersonalPageType | null>>
-  isNew?: boolean
-  onSaved?: () => void
-  lookup: (id: string) => Promise<any>
+  personalPage: PersonalPageType;
+  setPersonalPage: React.Dispatch<React.SetStateAction<PersonalPageType | null>>;
+  isNew?: boolean;
+  onSaved?: () => void;
 }
 
 export function EditPersonalPageModal({
@@ -22,44 +23,63 @@ export function EditPersonalPageModal({
   setPersonalPage,
   isNew = false,
   onSaved,
-  lookup,
 }: EditPersonalPageModalProps) {
-  const [isSaving, setIsSaving] = React.useState(false)
+  const [isSaving, setIsSaving] = React.useState(false);
   useLockBodyScroll(true);
+
   const inputClass =
-    "w-full rounded-lg border border-[#E6E1D6] bg-white/90 px-4 py-2.5 text-sm outline-none transition focus:border-[#A3853D] focus:bg-white"
+    "w-full rounded-lg border border-[#E6E1D6] bg-white/90 px-4 py-2.5 text-sm outline-none transition focus:border-[#A3853D] focus:bg-white";
   const label =
-    "block text-[11px] font-semibold text-[#708C3E] uppercase tracking-wide mb-1"
+    "block text-[11px] font-semibold text-[#708C3E] uppercase tracking-wide mb-1";
   const readOnlyStyle =
-    "bg-gray-100 text-gray-500 border-dashed border-gray-300 cursor-not-allowed opacity-80 select-none"
+    "bg-gray-100 text-gray-500 border-dashed border-gray-300 cursor-not-allowed opacity-80 select-none";
 
   const selectButtonClass =
-    "w-full rounded-lg border border-[#E6E1D6] bg-white/90 text-sm outline-none transition focus:border-[#A3853D] focus:bg-white"
+    "w-full rounded-lg border border-[#E6E1D6] bg-white/90 text-sm outline-none transition focus:border-[#A3853D] focus:bg-white";
 
-  const IDE_MAX = 20
-  const NAME_MAX = 50
-  const LASTNAME_MAX = 50
-  const EMAIL_MAX = 75
-  const PHONE_MAX = 8
-  const DIRECTION_MAX = 100
-  const OCCUPATION_MAX = 75
+  const IDE_MAX = 20;
+  const NAME_MAX = 50;
+  const LASTNAME_MAX = 50;
+  const EMAIL_MAX = 75;
+  const PHONE_MAX = 8;
+  const DIRECTION_MAX = 100;
+  const OCCUPATION_MAX = 75;
 
-  const todayISO = () => new Date().toISOString().slice(0, 10)
+  const todayISO = () => new Date().toISOString().slice(0, 10);
 
   const statusOptions = [
     { value: "activo", label: "Activo" },
     { value: "inactivo", label: "Inactivo" },
-  ]
+  ];
 
-  const { form, validators } = useEditPersonalPageModal(personalPage)
+  const { form, validators } = useEditPersonalPageModal(personalPage);
 
-  const pad = (n: number) => String(n).padStart(2, "0")
-  const formatYMD = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
-  const todayStr = formatYMD(new Date())
+  const {
+    isLookingUp,
+    personaFromDB,
+    lookupError,
+    applyLookup,
+    clearLookupError,
+  } = usePersonalPersonaLookup({
+    personalPage,
+    setPersonalPage,
+    form,
+    isNew,
+    isSaving,
+  });
 
-  const cutoff = new Date()
-  cutoff.setFullYear(cutoff.getFullYear() - 18)
-  const cutoffStr = cutoff.toISOString().split("T")[0]
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const formatYMD = (d: Date) =>
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const todayStr = formatYMD(new Date());
+
+  const today = new Date();
+  today.setDate(today.getDate() - 1); // ayer
+  const maxStartDate = today.toISOString().split("T")[0];
+
+  const cutoff = new Date();
+  cutoff.setFullYear(cutoff.getFullYear() - 18);
+  const cutoffStr = cutoff.toISOString().split("T")[0];
 
   const normalizePayload = (formData: PersonalPageType, base: any) => ({
     ...base,
@@ -70,55 +90,73 @@ export function EditPersonalPageModal({
     endWorkDate: formData.isActive
       ? null
       : formData.endWorkDate && formData.endWorkDate.trim() !== ""
-        ? formData.endWorkDate
-        : todayISO(),
-  })
+      ? formData.endWorkDate
+      : todayISO(),
+  });
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    await form.handleSubmit()
+const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
-    setIsSaving(true)
-    const { id, IdUser, ...rest } = personalPage as any
-    let payload: any = { ...rest }
+  await form.handleSubmit();
 
-    payload = normalizePayload(personalPage, payload)
+  const parsed = personalSchema.safeParse({
+    IDE: personalPage.IDE ?? "",
+    name: personalPage.name ?? "",
+    lastname1: personalPage.lastname1 ?? "",
+    lastname2: personalPage.lastname2 ?? "",
+    birthDate: personalPage.birthDate ?? "",
+    email: personalPage.email ?? "",
+    phone: personalPage.phone ?? "",
+    direction: personalPage.direction ?? "",
+    occupation: personalPage.occupation ?? "",
+    isActive: !!personalPage.isActive,
+    startWorkDate: personalPage.startWorkDate ?? "",
+    endWorkDate: personalPage.endWorkDate ?? null,
+  });
 
-    try {
-      if (isNew) {
-        await personalApi.create(payload)
-        await showSuccessAlertRegister("Registrado correctamente")
-      } else {
-        const realId = id ?? IdUser
-        if (!realId) {
-          console.error("No hay id para actualizar")
-          return
-        }
-        delete payload.IDE
-        delete payload.name
-        delete payload.lastname1
-        delete payload.lastname2
+  if (!parsed.success) {
+    return;
+  }
 
-        await personalApi.update(realId, payload)
-        await showSuccessAlertRegister("Cambios guardados correctamente")
+  setIsSaving(true);
+  const { id, IdUser, ...rest } = personalPage as any;
+  let payload: any = { ...rest };
+
+  payload = normalizePayload(personalPage, payload);
+
+  try {
+    if (isNew) {
+      await personalApi.create(payload);
+      await showSuccessAlertRegister("Registrado correctamente");
+    } else {
+      const realId = id ?? IdUser;
+      if (!realId) {
+        console.error("No hay id para actualizar");
+        return;
       }
 
-      onSaved?.()
-      setPersonalPage(null)
-    } catch (err: any) {
-      const msg =
-        err?.response?.data?.message ||
-        err?.message ||
-        (isNew ? "No se pudo registrar." : "No se pudieron guardar los cambios.")
-      await showErrorAlertRegister(msg)
-    } finally {
-      setIsSaving(false)
+      await personalApi.update(realId, payload);
+      await showSuccessAlertRegister("Cambios guardados correctamente");
     }
+
+    onSaved?.();
+    setPersonalPage(null);
+  } catch (err: any) {
+    const msg =
+      err?.response?.data?.message ||
+      err?.message ||
+      (isNew ? "No se pudo registrar." : "No se pudieron guardar los cambios.");
+    await showErrorAlertRegister(msg);
+  } finally {
+    setIsSaving(false);
   }
+};
 
   const handleCancel = () => {
-    setPersonalPage(null)
-  }
+    setPersonalPage(null);
+  };
+
+  const blockPersonaFields = !isNew || isSaving || isLookingUp || personaFromDB;
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -155,27 +193,26 @@ export function EditPersonalPageModal({
                       disabled={!isNew || isSaving}
                       readOnly={!isNew}
                       title={!isNew ? "Este campo no se puede modificar al editar" : undefined}
-                      onChange={async (e) => {
-                        if (!isNew) return
-                        const IDE = e.target.value.replace(/[-\s]/g, "").slice(0, IDE_MAX)
-                        fieldApi.handleChange(IDE)
-                        let next = { ...personalPage, IDE }
-                        if (IDE.length >= 9) {
-                          const r = await lookup(IDE).catch(() => null)
-                          if (r) {
-                            next = {
-                              ...next,
-                              name: r.firstname ?? next.name ?? "",
-                              lastname1: r.lastname1 ?? next.lastname1 ?? "",
-                              lastname2: r.lastname2 ?? next.lastname2 ?? "",
-                            }
-                          }
-                        }
-                        setPersonalPage(next)
+                      onChange={(e) => {
+                        if (!isNew) return;
+                        const IDE = e.target.value.replace(/[-\s]/g, "").slice(0, IDE_MAX);
+                        fieldApi.handleChange(IDE);
+                        clearLookupError();
+                        setPersonalPage({ ...personalPage, IDE });
+                      }}
+                      onBlur={() => {
+                        if (!isNew) return;
+                        void applyLookup(personalPage.IDE ?? "");
                       }}
                       className={`${inputClass} ${!isNew ? readOnlyStyle : ""}`}
                     />
                     {isNew && <CharCounter value={personalPage.IDE ?? ""} max={IDE_MAX} />}
+                    {lookupError && <p className="mt-1 text-xs text-red-500">{lookupError}</p>}
+                    {personaFromDB && !lookupError && (
+                      <p className="mt-1 text-xs text-[#556B2F]">
+                        Persona encontrada en base de datos. Los datos personales se autocompletaron.
+                      </p>
+                    )}
                     {!isNew && (
                       <p className="mt-1 text-xs text-gray-500">
                         La cédula es un identificador y no puede modificarse al editar.
@@ -187,7 +224,7 @@ export function EditPersonalPageModal({
 
               <form.Field name="name" validators={validators.name}>
                 {(fieldApi) => {
-                  const err = fieldApi.state.meta.errors[0]
+                  const err = fieldApi.state.meta.errors[0];
                   return (
                     <div>
                       <label className={label} htmlFor="name">
@@ -198,27 +235,21 @@ export function EditPersonalPageModal({
                         type="text"
                         maxLength={NAME_MAX}
                         value={personalPage.name ?? ""}
-                        disabled={!isNew || isSaving}
-                        readOnly={!isNew}
-                        aria-disabled={!isNew}
+                        disabled={blockPersonaFields}
+                        readOnly={blockPersonaFields}
                         onChange={(e) => {
-                          const value = e.target.value.slice(0, NAME_MAX)
-                          setPersonalPage({ ...personalPage, name: value })
-                          fieldApi.handleChange(value)
+                          const value = e.target.value.slice(0, NAME_MAX);
+                          setPersonalPage({ ...personalPage, name: value });
+                          fieldApi.handleChange(value);
                         }}
                         placeholder="Nombre"
-                        className={`${inputClass} ${!isNew ? readOnlyStyle : ""}`}
+                        className={`${inputClass} ${blockPersonaFields ? readOnlyStyle : ""}`}
                         required
                       />
                       {isNew && <CharCounter value={personalPage.name ?? ""} max={NAME_MAX} />}
                       {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
-                      {!isNew && (
-                        <p className="mt-1 text-xs text-gray-500">
-                          El nombre no se puede modificar en edición.
-                        </p>
-                      )}
                     </div>
-                  )
+                  );
                 }}
               </form.Field>
             </div>
@@ -226,7 +257,7 @@ export function EditPersonalPageModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <form.Field name="lastname1" validators={validators.lastname1}>
                 {(fieldApi) => {
-                  const err = fieldApi.state.meta.errors[0]
+                  const err = fieldApi.state.meta.errors[0];
                   return (
                     <div>
                       <label className={label} htmlFor="lastname1">
@@ -236,34 +267,30 @@ export function EditPersonalPageModal({
                         id="lastname1"
                         type="text"
                         maxLength={LASTNAME_MAX}
-                        disabled={!isNew || isSaving}
-                        readOnly={!isNew}
-                        aria-disabled={!isNew}
+                        disabled={blockPersonaFields}
+                        readOnly={blockPersonaFields}
                         value={personalPage.lastname1 ?? ""}
                         onChange={(e) => {
-                          const value = e.target.value.slice(0, LASTNAME_MAX)
-                          setPersonalPage({ ...personalPage, lastname1: value })
-                          fieldApi.handleChange(value)
+                          const value = e.target.value.slice(0, LASTNAME_MAX);
+                          setPersonalPage({ ...personalPage, lastname1: value });
+                          fieldApi.handleChange(value);
                         }}
                         placeholder="Primer apellido"
-                        className={`${inputClass} ${!isNew ? readOnlyStyle : ""}`}
+                        className={`${inputClass} ${blockPersonaFields ? readOnlyStyle : ""}`}
                         required
                       />
-                      {isNew && <CharCounter value={personalPage.lastname1 ?? ""} max={LASTNAME_MAX} />}
-                      {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
-                      {!isNew && (
-                        <p className="mt-1 text-xs text-gray-500">
-                          El primer apellido no se puede modificar en edición.
-                        </p>
+                      {isNew && (
+                        <CharCounter value={personalPage.lastname1 ?? ""} max={LASTNAME_MAX} />
                       )}
+                      {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
                     </div>
-                  )
+                  );
                 }}
               </form.Field>
 
               <form.Field name="lastname2" validators={validators.lastname2}>
                 {(fieldApi) => {
-                  const err = fieldApi.state.meta.errors[0]
+                  const err = fieldApi.state.meta.errors[0];
                   return (
                     <div>
                       <label className={label} htmlFor="lastname2">
@@ -273,28 +300,24 @@ export function EditPersonalPageModal({
                         id="lastname2"
                         type="text"
                         maxLength={LASTNAME_MAX}
-                        disabled={!isNew || isSaving}
-                        readOnly={!isNew}
-                        aria-disabled={!isNew}
+                        disabled={blockPersonaFields}
+                        readOnly={blockPersonaFields}
                         value={personalPage.lastname2 ?? ""}
                         onChange={(e) => {
-                          const value = e.target.value.slice(0, LASTNAME_MAX)
-                          setPersonalPage({ ...personalPage, lastname2: value })
-                          fieldApi.handleChange(value)
+                          const value = e.target.value.slice(0, LASTNAME_MAX);
+                          setPersonalPage({ ...personalPage, lastname2: value });
+                          fieldApi.handleChange(value);
                         }}
                         placeholder="Segundo apellido"
-                        className={`${inputClass} ${!isNew ? readOnlyStyle : ""}`}
+                        className={`${inputClass} ${blockPersonaFields ? readOnlyStyle : ""}`}
                         required
                       />
-                      {isNew && <CharCounter value={personalPage.lastname2 ?? ""} max={LASTNAME_MAX} />}
-                      {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
-                      {!isNew && (
-                        <p className="mt-1 text-xs text-gray-500">
-                          El segundo apellido no se puede modificar en edición.
-                        </p>
+                      {isNew && (
+                        <CharCounter value={personalPage.lastname2 ?? ""} max={LASTNAME_MAX} />
                       )}
+                      {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
                     </div>
-                  )
+                  );
                 }}
               </form.Field>
             </div>
@@ -302,8 +325,7 @@ export function EditPersonalPageModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <form.Field name="birthDate" validators={validators.birthDate}>
                 {(fieldApi) => {
-                  const err = fieldApi.state.meta.errors[0]
-
+                  const err = fieldApi.state.meta.errors[0];
                   return (
                     <div>
                       <label className={label} htmlFor="birthdate">
@@ -312,25 +334,21 @@ export function EditPersonalPageModal({
 
                       <BirthDatePicker
                         value={personalPage.birthDate ?? ""}
-                        disabled={isSaving}
+                        disabled={blockPersonaFields}
                         minAge={18}
                         placeholder="Seleccione una fecha"
                         error={err}
                         onChange={(v) => {
-                          if (v && (v < "1900-01-01" || v > cutoffStr)) return
-                          setPersonalPage({ ...personalPage, birthDate: v })
-                          fieldApi.handleChange(v)
+                          if (v && (v < "1900-01-01" || v > cutoffStr)) return;
+                          setPersonalPage({ ...personalPage, birthDate: v });
+                          fieldApi.handleChange(v);
                         }}
                         className="w-full"
                       />
 
                       {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
-
-                      <p className="mt-1 text-xs text-gray-500">
-                        Debe tener al menos 18 años cumplidos.
-                      </p>
                     </div>
-                  )
+                  );
                 }}
               </form.Field>
 
@@ -345,7 +363,7 @@ export function EditPersonalPageModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <form.Field name="email" validators={validators.email}>
                 {(fieldApi) => {
-                  const err = fieldApi.state.meta.errors[0]
+                  const err = fieldApi.state.meta.errors[0];
                   return (
                     <div>
                       <label className={label} htmlFor="email">
@@ -356,25 +374,26 @@ export function EditPersonalPageModal({
                         type="email"
                         maxLength={EMAIL_MAX}
                         value={personalPage.email ?? ""}
-                        disabled={isSaving}
+                        disabled={blockPersonaFields}
+                        readOnly={blockPersonaFields}
                         onChange={(e) => {
-                          const value = e.target.value.slice(0, EMAIL_MAX)
-                          setPersonalPage({ ...personalPage, email: value })
-                          fieldApi.handleChange(value)
+                          const value = e.target.value.slice(0, EMAIL_MAX);
+                          setPersonalPage({ ...personalPage, email: value });
+                          fieldApi.handleChange(value);
                         }}
                         placeholder="correo@dominio.com"
-                        className={inputClass}
+                        className={`${inputClass} ${blockPersonaFields ? readOnlyStyle : ""}`}
                       />
                       <CharCounter value={personalPage.email ?? ""} max={EMAIL_MAX} />
                       {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
                     </div>
-                  )
+                  );
                 }}
               </form.Field>
 
               <form.Field name="phone" validators={validators.phone}>
                 {(fieldApi) => {
-                  const err = fieldApi.state.meta.errors[0]
+                  const err = fieldApi.state.meta.errors[0];
                   return (
                     <div>
                       <label className={label} htmlFor="phone">
@@ -387,27 +406,28 @@ export function EditPersonalPageModal({
                         maxLength={PHONE_MAX}
                         pattern="\d{8}"
                         value={personalPage.phone ?? ""}
-                        disabled={isSaving}
+                        disabled={blockPersonaFields}
+                        readOnly={blockPersonaFields}
                         onChange={(e) => {
-                          const onlyDigits = e.target.value.replace(/\D/g, "").slice(0, PHONE_MAX)
-                          setPersonalPage({ ...personalPage, phone: onlyDigits })
-                          fieldApi.handleChange(onlyDigits)
+                          const onlyDigits = e.target.value.replace(/\D/g, "").slice(0, PHONE_MAX);
+                          setPersonalPage({ ...personalPage, phone: onlyDigits });
+                          fieldApi.handleChange(onlyDigits);
                         }}
-                        placeholder="Ej. 8888-8888"
-                        className={inputClass}
+                        placeholder="Ej. 88888888"
+                        className={`${inputClass} ${blockPersonaFields ? readOnlyStyle : ""}`}
                         required
                       />
-                      <CharCounter value={personalPage.phone ?? ""} max={PHONE_MAX} />
+                      
                       {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
                     </div>
-                  )
+                  );
                 }}
               </form.Field>
 
               <form.Field name="direction" validators={validators.direction}>
                 {(fieldApi) => {
-                  const err = fieldApi.state.meta.errors[0]
-                  const directionValue = personalPage.direction ?? ""
+                  const err = fieldApi.state.meta.errors[0];
+                  const directionValue = personalPage.direction ?? "";
 
                   return (
                     <div className="md:col-span-2">
@@ -420,22 +440,22 @@ export function EditPersonalPageModal({
                         type="text"
                         maxLength={DIRECTION_MAX}
                         value={directionValue}
-                        disabled={isSaving}
+                        disabled={blockPersonaFields}
+                        readOnly={blockPersonaFields}
                         onChange={(e) => {
-                          const value = e.target.value.slice(0, DIRECTION_MAX)
-                          setPersonalPage({ ...personalPage, direction: value })
-                          fieldApi.handleChange(value)
+                          const value = e.target.value.slice(0, DIRECTION_MAX);
+                          setPersonalPage({ ...personalPage, direction: value });
+                          fieldApi.handleChange(value);
                         }}
                         placeholder="Distrito, cantón, provincia…"
-                        className={inputClass}
+                        className={`${inputClass} ${blockPersonaFields ? readOnlyStyle : ""}`}
                         required
                       />
 
                       <CharCounter value={directionValue} max={DIRECTION_MAX} />
-
                       {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
                     </div>
-                  )
+                  );
                 }}
               </form.Field>
             </div>
@@ -448,8 +468,8 @@ export function EditPersonalPageModal({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <form.Field name="occupation" validators={validators.occupation}>
                 {(fieldApi) => {
-                  const err = fieldApi.state.meta.errors[0]
-                  const occupationValue = personalPage.occupation ?? ""
+                  const err = fieldApi.state.meta.errors[0];
+                  const occupationValue = personalPage.occupation ?? "";
 
                   return (
                     <div className="md:col-span-2">
@@ -464,9 +484,9 @@ export function EditPersonalPageModal({
                         value={occupationValue}
                         disabled={isSaving}
                         onChange={(e) => {
-                          const value = e.target.value.slice(0, OCCUPATION_MAX)
-                          setPersonalPage({ ...personalPage, occupation: value })
-                          fieldApi.handleChange(value)
+                          const value = e.target.value.slice(0, OCCUPATION_MAX);
+                          setPersonalPage({ ...personalPage, occupation: value });
+                          fieldApi.handleChange(value);
                         }}
                         placeholder="Puesto / rol"
                         className={inputClass}
@@ -474,10 +494,9 @@ export function EditPersonalPageModal({
                       />
 
                       <CharCounter value={occupationValue} max={OCCUPATION_MAX} />
-
                       {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
                     </div>
-                  )
+                  );
                 }}
               </form.Field>
 
@@ -495,7 +514,7 @@ export function EditPersonalPageModal({
                       size="md"
                       buttonClassName={selectButtonClass}
                       onChange={(value) => {
-                        const v = value === "activo"
+                        const v = value === "activo";
 
                         setPersonalPage({
                           ...personalPage,
@@ -504,11 +523,11 @@ export function EditPersonalPageModal({
                             v
                               ? null
                               : personalPage.endWorkDate && personalPage.endWorkDate.trim() !== ""
-                                ? personalPage.endWorkDate
-                                : todayISO(),
-                        })
+                              ? personalPage.endWorkDate
+                              : todayISO(),
+                        });
 
-                        fieldApi.handleChange(v)
+                        fieldApi.handleChange(v);
                       }}
                     />
                   </div>
@@ -519,7 +538,7 @@ export function EditPersonalPageModal({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               <form.Field name="startWorkDate" validators={validators.startWorkDate}>
                 {(fieldApi) => {
-                  const err = fieldApi.state.meta.errors[0]
+                  const err = fieldApi.state.meta.errors[0];
 
                   return (
                     <div>
@@ -533,46 +552,44 @@ export function EditPersonalPageModal({
                         placeholder="Seleccione una fecha"
                         error={err}
                         minDate="1925-01-01"
+                        maxDate={maxStartDate}
                         helperText="Debe ser anterior a hoy."
                         triggerClassName={inputClass}
                         onChange={(v) => {
-                          if (v && v >= todayStr) return
+                          if (v && v >= todayStr) return;
 
-                          let nextEnd = personalPage.endWorkDate ?? ""
+                          let nextEnd = personalPage.endWorkDate ?? "";
                           if (nextEnd && v) {
-                            const startDate = new Date(v)
-                            const endDate = new Date(nextEnd)
-
-                            if (endDate <= startDate) {
-                              nextEnd = ""
-                            }
+                            const startDate = new Date(v);
+                            const endDate = new Date(nextEnd);
+                            if (endDate <= startDate) nextEnd = "";
                           }
 
                           setPersonalPage({
                             ...personalPage,
                             startWorkDate: v,
                             endWorkDate: nextEnd,
-                          })
-                          fieldApi.handleChange(v)
+                          });
+                          fieldApi.handleChange(v);
                         }}
                       />
 
                       {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
                     </div>
-                  )
+                  );
                 }}
               </form.Field>
 
               <form.Field name="endWorkDate" validators={validators.endWorkDate}>
                 {(fieldApi) => {
-                  const err = fieldApi.state.meta.errors[0]
-                  const start = personalPage.startWorkDate ?? ""
+                  const err = fieldApi.state.meta.errors[0];
+                  const start = personalPage.startWorkDate ?? "";
 
-                  let minEndDate = "1925-01-01"
+                  let minEndDate = "1925-01-01";
                   if (start) {
-                    const startDate = new Date(start)
-                    startDate.setDate(startDate.getDate() + 1)
-                    minEndDate = formatYMD(startDate)
+                    const startDate = new Date(start);
+                    startDate.setDate(startDate.getDate() + 1);
+                    minEndDate = formatYMD(startDate);
                   }
 
                   return (
@@ -592,24 +609,26 @@ export function EditPersonalPageModal({
                             ? "Debe ser al menos 1 día después de la fecha de inicio."
                             : undefined
                         }
-                        triggerClassName={`${inputClass} ${personalPage.isActive ? readOnlyStyle : ""}`}
+                        triggerClassName={`${inputClass} ${
+                          personalPage.isActive ? readOnlyStyle : ""
+                        }`}
                         onChange={(v) => {
-                          if (personalPage.isActive) return
+                          if (personalPage.isActive) return;
 
                           if (start && v) {
-                            const startDate = new Date(start)
-                            const endDate = new Date(v)
-                            if (endDate <= startDate) return
+                            const startDate = new Date(start);
+                            const endDate = new Date(v);
+                            if (endDate <= startDate) return;
                           }
 
-                          setPersonalPage({ ...personalPage, endWorkDate: v })
-                          fieldApi.handleChange(v)
+                          setPersonalPage({ ...personalPage, endWorkDate: v });
+                          fieldApi.handleChange(v);
                         }}
                       />
 
                       {err && <p className="mt-1 text-xs text-red-500">{err}</p>}
                     </div>
-                  )
+                  );
                 }}
               </form.Field>
 
@@ -619,6 +638,7 @@ export function EditPersonalPageModal({
 
           <div className="flex justify-end pt-5 border-t border-[#E6E1D6]">
             <ActionButtons
+              size="sm"
               onCancel={handleCancel}
               onSave={() => {}}
               showCancel={true}
@@ -636,5 +656,5 @@ export function EditPersonalPageModal({
         </form>
       </div>
     </div>
-  )
+  );
 }

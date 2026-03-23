@@ -10,7 +10,7 @@ interface BirthDatePickerProps {
   value?: string
   onChange: (date: string) => void
 
-  // ✅ si lo pasas => modo "nacimiento" (limita fecha máxima)
+  // modo nacimiento
   minAge?: number
 
   placeholder?: string
@@ -18,25 +18,24 @@ interface BirthDatePickerProps {
   disabled?: boolean
   className?: string
 
-  // ✅ si lo pasas => modo "eventos" (limita fecha mínima)
+  // rangos explícitos
   minDate?: string // ISO YYYY-MM-DD
+  maxDate?: string // ISO YYYY-MM-DD
 
-  // ✅ si existe (aunque sea ""), NO se muestra el texto por defecto
   helperText?: string
-
-  // ✅ para estilos del botón trigger
   triggerClassName?: string
 }
 
 function _BirthDatePicker({
   value,
   onChange,
-  minAge, // <- SIN default
+  minAge,
   placeholder = "Seleccione una fecha",
   error,
   disabled = false,
   className = "",
   minDate,
+  maxDate,
   helperText,
   triggerClassName,
 }: BirthDatePickerProps) {
@@ -56,7 +55,6 @@ function _BirthDatePicker({
     return `${yyyy}-${mm}-${dd}`
   }
 
-  // ✅ solo existe si minAge viene definido
   const maxBirthDateObj = useMemo(() => {
     if (typeof minAge !== "number") return undefined
     const t = new Date()
@@ -70,11 +68,20 @@ function _BirthDatePicker({
     return parseISOToDate(minDate)
   }, [minDate])
 
+  const maxDateObj = useMemo(() => {
+    if (!maxDate) return undefined
+    return parseISOToDate(maxDate)
+  }, [maxDate])
+
   const selectedDate = useMemo(() => parseISOToDate(value), [value])
 
-  // Mes mostrado (controlado)
+  const effectiveMaxDate = useMemo(() => {
+    return maxDateObj ?? maxBirthDateObj
+  }, [maxDateObj, maxBirthDateObj])
+
   const [displayMonth, setDisplayMonth] = useState<Date>(() => {
     if (selectedDate) return selectedDate
+    if (maxDateObj) return maxDateObj
     if (minDateObj) return minDateObj
     if (maxBirthDateObj) return maxBirthDateObj
     return new Date()
@@ -82,38 +89,34 @@ function _BirthDatePicker({
 
   useEffect(() => {
     if (selectedDate) setDisplayMonth(selectedDate)
+    else if (maxDateObj) setDisplayMonth(maxDateObj)
     else if (minDateObj) setDisplayMonth(minDateObj)
     else if (maxBirthDateObj) setDisplayMonth(maxBirthDateObj)
     else setDisplayMonth(new Date())
-  }, [value, minDate, maxBirthDateObj, selectedDate, minDateObj])
+  }, [value, minDate, maxDate, maxBirthDateObj, selectedDate, minDateObj, maxDateObj])
 
-  // ✅ Deshabilitar fechas según modo:
-  // - minDate => bloquea antes de minDate
-  // - minAge  => bloquea después de maxBirthDate
-  // - ninguno => no bloquea nada
   const disabledDate = (date: Date) => {
     const dt = new Date(date)
     dt.setHours(0, 0, 0, 0)
 
-    if (minDateObj) return dt < minDateObj
-    if (maxBirthDateObj) return dt > maxBirthDateObj
+    if (minDateObj && dt < minDateObj) return true
+    if (effectiveMaxDate && dt > effectiveMaxDate) return true
     return false
   }
 
-  // Rango años
   const fromYear = useMemo(() => {
     if (minDateObj) return minDateObj.getFullYear()
     return 1950
   }, [minDateObj])
 
   const toYear = useMemo(() => {
+    if (effectiveMaxDate) return effectiveMaxDate.getFullYear()
     if (minDateObj) {
       const base = new Date().getFullYear()
       return Math.max(base + 10, minDateObj.getFullYear() + 10)
     }
-    if (maxBirthDateObj) return maxBirthDateObj.getFullYear()
     return new Date().getFullYear() + 10
-  }, [minDateObj, maxBirthDateObj])
+  }, [minDateObj, effectiveMaxDate])
 
   const monthNames = useMemo(
     () => [
@@ -133,7 +136,10 @@ function _BirthDatePicker({
     []
   )
 
-  const monthOptions = useMemo(() => monthNames.map((label, idx) => ({ value: idx, label })), [monthNames])
+  const monthOptions = useMemo(
+    () => monthNames.map((label, idx) => ({ value: idx, label })),
+    [monthNames]
+  )
 
   const years = useMemo(() => {
     const arr: number[] = []
@@ -141,7 +147,10 @@ function _BirthDatePicker({
     return arr
   }, [fromYear, toYear])
 
-  const yearOptions = useMemo(() => years.map((y) => ({ value: y, label: String(y) })), [years])
+  const yearOptions = useMemo(
+    () => years.map((y) => ({ value: y, label: String(y) })),
+    [years]
+  )
 
   const [open, setOpen] = useState(false)
   const triggerRef = useRef<HTMLButtonElement | null>(null)
@@ -149,25 +158,56 @@ function _BirthDatePicker({
   const handleMonthChange = (monthValue: string | number) => {
     const newMonth = typeof monthValue === "string" ? parseInt(monthValue, 10) : monthValue
     if (Number.isNaN(newMonth)) return
+
     const next = new Date(displayMonth)
     next.setMonth(newMonth as number)
+
+    if (minDateObj && next.getFullYear() === minDateObj.getFullYear() && next.getMonth() < minDateObj.getMonth()) {
+      next.setMonth(minDateObj.getMonth())
+    }
+
+    if (
+      effectiveMaxDate &&
+      next.getFullYear() === effectiveMaxDate.getFullYear() &&
+      next.getMonth() > effectiveMaxDate.getMonth()
+    ) {
+      next.setMonth(effectiveMaxDate.getMonth())
+    }
+
     setDisplayMonth(next)
   }
 
   const handleYearChange = (yearValue: string | number) => {
     const newYear = typeof yearValue === "string" ? parseInt(yearValue, 10) : yearValue
     if (Number.isNaN(newYear)) return
+
     const next = new Date(displayMonth)
     next.setFullYear(newYear as number)
+
+    if (minDateObj && next.getFullYear() === minDateObj.getFullYear() && next.getMonth() < minDateObj.getMonth()) {
+      next.setMonth(minDateObj.getMonth())
+    }
+
+    if (
+      effectiveMaxDate &&
+      next.getFullYear() === effectiveMaxDate.getFullYear() &&
+      next.getMonth() > effectiveMaxDate.getMonth()
+    ) {
+      next.setMonth(effectiveMaxDate.getMonth())
+    }
+
     setDisplayMonth(next)
   }
 
   const displayText = useMemo(() => {
     if (!selectedDate) return placeholder
-    return selectedDate.toLocaleDateString("es-CR", { day: "2-digit", month: "long", year: "numeric" })
+    return selectedDate.toLocaleDateString("es-CR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    })
   }, [placeholder, selectedDate])
 
-  // ✅ CLAVE: si helperText existe (aunque sea ""), NO usamos el texto por defecto
   const helperTextIsProvided = helperText !== undefined
 
   return (
@@ -232,14 +272,15 @@ function _BirthDatePicker({
             fromYear={fromYear}
             toYear={toYear}
             disabled={disabledDate}
-            defaultMonth={selectedDate ?? (minDateObj ?? maxBirthDateObj ?? new Date())}
+            defaultMonth={selectedDate ?? maxDateObj ?? minDateObj ?? maxBirthDateObj ?? new Date()}
             className="rounded-lg [--cell:28px]"
             classNames={{
               months: "flex flex-col",
               month: "space-y-2",
               caption: "hidden",
               head_row: "flex",
-              head_cell: "text-[#708C3E] w-[var(--cell)] h-6 grid place-items-center font-semibold text-[11px]",
+              head_cell:
+                "text-[#708C3E] w-[var(--cell)] h-6 grid place-items-center font-semibold text-[11px]",
               row: "flex gap-[2px]",
               table: "w-full border-collapse",
               day: "h-[var(--cell)] w-[var(--cell)] p-0 text-[12px]",

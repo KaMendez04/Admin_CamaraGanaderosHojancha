@@ -600,7 +600,7 @@ const baseBack =
           type="button"
           onClick={onDownload}
           disabled={isLoading || disabled}
-          className={`${baseGhost} ${buttonSize} ${current.gap}`}
+          className={`${basePrimary} ${buttonSize} ${current.gap}`}
           title="Descargar"
           aria-label="Descargar"
         >

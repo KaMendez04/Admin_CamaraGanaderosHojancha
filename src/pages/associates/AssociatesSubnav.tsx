@@ -15,10 +15,12 @@ const items: NavItem[] = [
 
 export default function AssociatesSubnav() {
   return (
-    <GenericSubnav
-      items={items}
-      title="Asociados"
-      description="Gestiona solicitudes pendientes y asociados aprobados."
-    />
+    <div className="p-2">
+      <GenericSubnav
+        items={items}
+        title="Gestión de Asociados"
+        description="Gestiona solicitudes pendientes y asociados aprobados."
+      />
+    </div>
   )
 }
