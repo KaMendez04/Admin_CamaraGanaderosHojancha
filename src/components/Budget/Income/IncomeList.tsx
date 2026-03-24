@@ -1,4 +1,4 @@
-import { Pencil, Save, X } from "lucide-react";
+import { Calendar as CalendarIcon, Pencil, Save, X } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 
@@ -75,6 +75,7 @@ export default function IncomeList({ subTypeId, fiscalYearId }: Props) {
   const mUpdate = useUpdateIncome();
 
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingField, setEditingField] = useState<"date" | "amount" | null>(null);
   const [draftAmount, setDraftAmount] = useState<string>("");
   const [draftDate, setDraftDate] = useState<string>("");
 
@@ -83,15 +84,21 @@ export default function IncomeList({ subTypeId, fiscalYearId }: Props) {
 
   const MAX_AMOUNT_LENGTH = 20;
 
+  const DATE_COL = "w-[180px]";
+  const SUBTYPE_COL = "w-[180px]";
+  const AMOUNT_COL = "w-[220px]";
+  const ACTIONS_COL = "w-[104px]";
+
   const rows = useMemo(() => {
     return (q.data ?? []) as Row[];
   }, [q.data]);
 
-  function startEdit(row: Row) {
+  function startEdit(row: Row, field: "date" | "amount") {
     const initialAmount = String(row.amount ?? "");
     const initialDate = normalizeToDateInput(row.date);
 
     setEditingId(row.id);
+    setEditingField(field);
 
     setDraftAmount(initialAmount);
     amountRef.current = initialAmount;
@@ -106,13 +113,21 @@ export default function IncomeList({ subTypeId, fiscalYearId }: Props) {
     amountRef.current = "";
     setDraftDate("");
     dateRef.current = "";
+    setEditingField(null);
   }
 
   async function saveEdit(row: Row) {
-    if (!selectedFiscalYearId) return;
+    if (!selectedFiscalYearId || !editingField) return;
 
-    const amountNumber = parseCRCToNumber(amountRef.current);
-    const dateValue = (dateRef.current ?? "").trim();
+    const amountNumber =
+      editingField === "amount"
+        ? parseCRCToNumber(amountRef.current)
+        : Number(row.amount ?? 0);
+
+    const dateValue =
+      editingField === "date"
+        ? (dateRef.current ?? "").trim()
+        : normalizeToDateInput(row.date);
 
     try {
       await mUpdate.mutate({
@@ -129,55 +144,63 @@ export default function IncomeList({ subTypeId, fiscalYearId }: Props) {
     () => [
       {
         id: "fecha",
-        header: "Fecha",
+        header: () => <div className={`${DATE_COL} text-left`}>Fecha</div>,
         cell: ({ row }) => {
           const r = row.original;
-          const isEditing = editingId === r.id;
+          const isEditing = editingId === r.id && editingField === "date";
 
-          if (!isEditing) return formatDateCR(r?.date);
+          if (!isEditing) {
+            return <div className={DATE_COL}>{formatDateCR(r?.date)}</div>;
+          }
 
           return (
-  <div
-    className="w-[190px] max-w-full"
-    onKeyDown={(e) => {
-      if (e.key === "Escape") cancelEdit();
-      if (e.key === "Enter") saveEdit(r);
-    }}
-  >
-    <BirthDatePicker
-      value={draftDate}
-      onChange={(v) => {
-        setDraftDate(v);
-        dateRef.current = v;
-      }}
-      placeholder="Seleccione una fecha"
-      disabled={mUpdate.loading}
-      className="w-full"
-      helperText=""
-      triggerClassName="w-full min-w-0 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#708C3E]"
-    />
-  </div>
-);
+            <div
+              className={`${DATE_COL} max-w-full`}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") cancelEdit();
+                if (e.key === "Enter") saveEdit(r);
+              }}
+            >
+              <BirthDatePicker
+                value={draftDate}
+                onChange={(v) => {
+                  setDraftDate(v);
+                  dateRef.current = v;
+                }}
+                placeholder="Seleccione una fecha"
+                disabled={mUpdate.loading}
+                className="w-full"
+                helperText=""
+                triggerClassName="w-full min-w-0 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#708C3E]"
+              />
+            </div>
+          );
         },
       },
       {
         id: "subtipo",
-        header: "Subtipo",
-        cell: ({ row }) => row.original?.incomeSubType?.name ?? "-",
+        header: () => <div className={`${SUBTYPE_COL} text-left`}>Subtipo</div>,
+        cell: ({ row }) => (
+          <div className={SUBTYPE_COL}>
+            {row.original?.incomeSubType?.name ?? "-"}
+          </div>
+        ),
       },
       {
         id: "monto",
-        header: "Monto",
+        header: () => <div className={`${AMOUNT_COL} text-left`}>Monto</div>,
         cell: ({ row }) => {
           const r = row.original;
-          const isEditing = editingId === r.id;
+          const isEditing = editingId === r.id && editingField === "amount";
 
-          if (!isEditing) return formatMoneyCR(r.amount);
+          if (!isEditing) {
+            return <div className={AMOUNT_COL}>{formatMoneyCR(r.amount)}</div>;
+          }
 
           return (
-            <div className="w-full max-w-[220px]">
+            <div className={AMOUNT_COL}>
               <input
-                className="w-full max-w-[220px] rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#708C3E]"
+                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#708C3E]"
                 value={draftAmount}
                 maxLength={MAX_AMOUNT_LENGTH}
                 onChange={(e) => {
@@ -200,16 +223,16 @@ export default function IncomeList({ subTypeId, fiscalYearId }: Props) {
       },
       {
         id: "acciones",
-        header: "Acciones",
+        header: () => <div className={`${ACTIONS_COL} mx-auto text-center`}>Acciones</div>,
         cell: ({ row }) => {
           const r = row.original;
-          const isEditing = editingId === r.id;
+          const isEditing = editingId === r.id && editingField !== null;
 
           if (isEditing) {
             return (
-              <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-center">
+              <div className={`${ACTIONS_COL} mx-auto flex items-center justify-center gap-2`}>
                 <button
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#6B7A3A] px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-50 sm:w-auto"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#6B7A3A] text-white shadow hover:opacity-90 disabled:opacity-50"
                   onClick={() => saveEdit(r)}
                   disabled={mUpdate.loading || !selectedFiscalYearId}
                   title="Guardar"
@@ -218,7 +241,7 @@ export default function IncomeList({ subTypeId, fiscalYearId }: Props) {
                 </button>
 
                 <button
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-700 shadow-sm hover:bg-gray-50 disabled:opacity-50 sm:w-auto"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 shadow-sm hover:bg-gray-50 disabled:opacity-50"
                   onClick={cancelEdit}
                   disabled={mUpdate.loading}
                   title="Cancelar"
@@ -230,18 +253,30 @@ export default function IncomeList({ subTypeId, fiscalYearId }: Props) {
           }
 
           return (
-            <button
-              className="inline-flex items-center justify-center rounded-lg border border-[#6B7A3A] bg-[#F8F9F3] p-2 text-[#6B7A3A] shadow-sm transition-colors hover:bg-[#EAEFE0]"
-              onClick={() => startEdit(r)}
-              title="Editar"
-            >
-              <Pencil className="h-4 w-4" />
-            </button>
+            <div className={`${ACTIONS_COL} mx-auto flex items-center justify-center gap-2`}>
+              <button
+                type="button"
+                onClick={() => startEdit(r, "date")}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#6B7A3A] bg-[#F8F9F3] p-2 text-[#6B7A3A] shadow-sm transition-colors hover:bg-[#EAEFE0]"
+                title="Editar fecha"
+              >
+                <CalendarIcon className="h-4 w-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => startEdit(r, "amount")}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#6B7A3A] bg-[#F8F9F3] p-2 text-[#6B7A3A] shadow-sm transition-colors hover:bg-[#EAEFE0]"
+                title="Editar monto"
+              >
+                <Pencil className="h-4 w-4" />
+              </button>
+            </div>
           );
         },
       },
     ],
-    [editingId, draftAmount, draftDate, mUpdate.loading, selectedFiscalYearId]
+    [editingId, editingField, draftAmount, draftDate, mUpdate.loading, selectedFiscalYearId]
   );
 
   if (q.error) return <p className="text-sm text-red-600">{q.error}</p>;
