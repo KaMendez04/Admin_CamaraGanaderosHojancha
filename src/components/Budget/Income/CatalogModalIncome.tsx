@@ -336,7 +336,7 @@ const { current } = useFiscalYear();
                     onChange={(value: any) => setDepartmentId(value ? Number(value) : "")}
                     options={departmentOptions}
                     placeholder="Seleccione…"
-                    zIndex={60 as any}
+                    zIndex={2000}
                   />
                 </div>
 
@@ -380,7 +380,9 @@ const { current } = useFiscalYear();
                     options={typeOptionsCreate}
                     placeholder={!departmentId ? "Seleccione un departamento…" : "Seleccione…"}
                     disabled={!departmentId}
-                    zIndex={60 as any}
+                    zIndex={2000}
+                    searchable={true}
+                    searchPlaceholder="Buscar tipo..."
                   />
                 </div>
 
@@ -460,7 +462,7 @@ const { current } = useFiscalYear();
                     onChange={(value: any) => setEditDepartmentId(value ? Number(value) : "")}
                     options={departmentOptions}
                     placeholder="Seleccione…"
-                    zIndex={60 as any}
+                    zIndex={2000}
                   />
                 </div>
 
@@ -502,7 +504,7 @@ const { current } = useFiscalYear();
                     onChange={(value: any) => setEditTypeDepartmentId(value ? Number(value) : "")}
                     options={departmentOptions}
                     placeholder="Departamento…"
-                    zIndex={60 as any}
+                    zIndex={2000}
                   />
                 </div>
 
@@ -513,7 +515,9 @@ const { current } = useFiscalYear();
                     options={typeOptionsEdit}
                     placeholder={!editTypeDepartmentId ? "Seleccione depto…" : "Tipo…"}
                     disabled={!editTypeDepartmentId}
-                    zIndex={60 as any}
+                    zIndex={2000}
+                    searchable={true}
+                    searchPlaceholder="Buscar tipo..."
                   />
                 </div>
 
@@ -555,7 +559,7 @@ const { current } = useFiscalYear();
                     onChange={(value: any) => setEditSubTypeDepartmentId(value ? Number(value) : "")}
                     options={departmentOptions}
                     placeholder="Departamento…"
-                    zIndex={60 as any}
+                    zIndex={2000}
                   />
                 </div>
 
@@ -566,7 +570,7 @@ const { current } = useFiscalYear();
                     options={typeOptionsEditForSub}
                     placeholder={!editSubTypeDepartmentId ? "Seleccione depto…" : "Tipo…"}
                     disabled={!editSubTypeDepartmentId}
-                    zIndex={60 as any}
+                    zIndex={2000}
                     searchable={true}
                     searchPlaceholder="Buscar tipo..."
                   />
@@ -579,7 +583,7 @@ const { current } = useFiscalYear();
                     options={subTypeOptionsEdit}
                     placeholder={!editSubTypeTypeId ? "Seleccione tipo…" : "Subtipo…"}
                     disabled={!editSubTypeTypeId}
-                    zIndex={60 as any}
+                    zIndex={2000}
                     searchable={true}
                     searchPlaceholder="Buscar subtipo..."
                   />
