@@ -2,6 +2,7 @@ import { useForm } from "@tanstack/react-form";
 import { RejectSchema, type RejectValues } from "../../schemas/adminSolicitudes";
 import { ActionButtons } from "../ActionButtons";
 import { useState } from "react";
+import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll";
 
 function validateWithZod(v: any) {
   const r = RejectSchema.safeParse(v);
@@ -22,6 +23,7 @@ type Props = {
 
 export function RejectDialog({ open, onClose, onConfirm }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  useLockBodyScroll(open);
 
   const form = useForm({
     defaultValues: { motivo: "" },
