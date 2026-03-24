@@ -62,7 +62,7 @@ export const sidebarItems: SidebarItem[] = [
     title: "Bitácora",
     href: "/logs",
     icon: Logs,
-    roles: ["ADMIN", "JUNTA"],
+    roles: ["ADMIN"],
   },
   {
     title: "Configuración",
