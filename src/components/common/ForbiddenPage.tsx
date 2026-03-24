@@ -1,48 +1,37 @@
-import { ShieldAlert } from "lucide-react";
-import { useRouter } from "@tanstack/react-router";
+import { ShieldAlert} from "lucide-react"
 
 export default function ForbiddenPage() {
-  const router = useRouter();
 
   return (
-    <div className="flex min-h-[70vh] items-center justify-center px-6">
-      <div className="w-full max-w-md rounded-2xl border bg-background p-8 shadow-sm">
-        <div className="flex flex-col items-center text-center">
-          {/* Icono */}
-          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600">
-            <ShieldAlert className="h-7 w-7" />
+    <div className="min-h-screen w-full bg-[#FAF9F5] px-6 py-10 pt-20">
+      <div className="max-w-xl w-full text-center mx-auto">
+        <div className="mb-6 flex justify-center">
+          <div className="relative">
+            <div className="w-20 h-20 rounded-full bg-[#FAF1DF] flex items-center justify-center border-2 border-[#A3853D]">
+              <ShieldAlert className="w-10 h-10 text-[#A3853D]" strokeWidth={1.5} />
+            </div>
+            <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-[#fff9ec] border-2 border-[#A3853D] flex items-center justify-center shadow-lg">
+              <span className="text-sm font-bold text-[#A3853D]">!</span>
+            </div>
           </div>
+        </div>
 
-          {/* Título */}
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Acceso denegado
-          </h1>
+        <h2 className="text-3xl md:text-4xl font-bold text-[#2E321B] mb-3">
+          Acceso denegado
+        </h2>
 
-          {/* Descripción */}
-          <p className="mt-2 text-sm text-muted-foreground">
-            No tienes permisos para ver esta sección.
-            <br />
-            Si crees que esto es un error, contacta al administrador.
-          </p>
+        <h3 className="text-xl md:text-2xl font-semibold text-[#A3853D] mb-4">
+          No tienes permisos para ver esta sección. 
+        </h3>
 
-          {/* Acciones */}
-          <div className="mt-6 flex w-full gap-3">
-            <button
-              onClick={() => router.history.back()}
-              className="flex-1 rounded-lg border px-4 py-2 text-sm font-medium hover:bg-muted transition"
-            >
-              Volver atrás
-            </button>
-
-            <button
-              onClick={() => router.navigate({ to: "/Principal" })}
-              className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition"
-            >
-              Ir al inicio
-            </button>
-          </div>
+        <div className="mb-6 flex justify-center">
+          <img
+            src="https://res.cloudinary.com/dyigmavwq/image/upload/v1770422997/pg9tvoxhldxnobr5ruaj.png"
+            alt="Acceso denegado"
+            className="h-36 w-36 object-contain md:h-40 md:w-40"
+          />
         </div>
       </div>
     </div>
-  );
+  )
 }

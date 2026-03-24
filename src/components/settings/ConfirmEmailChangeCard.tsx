@@ -5,7 +5,6 @@ import {
   adminCardBody,
   adminTitle,
   adminDescription,
-  adminPrimaryBtn,
 } from "@/utils/adminStyles"
 
 type Props = {
@@ -14,7 +13,11 @@ type Props = {
   onConfirm: () => void
 }
 
-export default function ConfirmEmailChangeCard({ token, loading, onConfirm }: Props) {
+export default function ConfirmEmailChangeCard({
+  token,
+  loading,
+  onConfirm,
+}: Props) {
   const hasToken = !!token
 
   return (
@@ -31,7 +34,7 @@ export default function ConfirmEmailChangeCard({ token, loading, onConfirm }: Pr
 
         <div className={adminCardBody}>
           <Button
-            className={`${adminPrimaryBtn} w-full`}
+            className="w-full rounded-full bg-[#708C3E] px-6 py-3 font-semibold text-white transition hover:bg-[#5f7934] disabled:cursor-not-allowed disabled:opacity-50"
             disabled={!hasToken || loading}
             onClick={onConfirm}
           >

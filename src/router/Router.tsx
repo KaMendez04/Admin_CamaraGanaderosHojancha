@@ -100,7 +100,7 @@ const resetPasswordRoute = new Route({
 });
 
 const forbiddenRoute = new Route({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => appLayoutRoute,
   path: "/403",
   component: ForbiddenPage,
 });
