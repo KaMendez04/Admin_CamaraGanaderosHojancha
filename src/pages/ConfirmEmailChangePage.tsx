@@ -32,11 +32,45 @@ export default function ConfirmEmailChangePage() {
           title: "Correo confirmado",
           text: "Tu correo fue actualizado correctamente.",
           confirmButtonText: "Ir al login",
+          buttonsStyling: false,
+          background: "#FFFCE6",
+          color: "#33361D",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          heightAuto: false,
+          scrollbarPadding: false,
+          customClass: {
+            popup: "rounded-[28px] px-8 py-10",
+            title: "!text-[#33361D] !text-3xl !font-extrabold",
+            htmlContainer: "!text-[#4B5563] !text-lg !leading-relaxed",
+            actions: "!mt-8 !flex !justify-center",
+            confirmButton:
+              "!bg-[#708C3E] !text-white !font-bold !rounded-full !px-8 !py-3 !shadow-[0_10px_25px_rgba(112,140,62,0.22)] hover:!bg-[#5f7934] transition",
+          },
         })
 
         navigate({ to: "/login" })
       } catch (e: any) {
-        await Swal.fire({ icon: "error", title: "No se pudo confirmar", text: e?.message ?? "Error" })
+        await Swal.fire({
+          icon: "error",
+          title: "No se pudo confirmar",
+          text: e?.message ?? "Error",
+          buttonsStyling: false,
+          background: "#FFFCE6",
+          color: "#33361D",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          heightAuto: false,
+          scrollbarPadding: false,
+          customClass: {
+            popup: "rounded-[28px] px-8 py-10",
+            title: "!text-[#33361D] !text-3xl !font-extrabold",
+            htmlContainer: "!text-[#4B5563] !text-base !leading-relaxed",
+            actions: "!mt-8 !flex !justify-center",
+            confirmButton:
+              "!bg-[#708C3E] !text-white !font-bold !rounded-full !px-8 !py-3 !shadow-[0_10px_25px_rgba(112,140,62,0.22)] hover:!bg-[#5f7934] transition",
+          },
+        })
       }
     },
   })
@@ -55,7 +89,26 @@ export default function ConfirmEmailChangePage() {
       onConfirm={() => {
         const err = zodMsg(schema.shape.token, token ?? "")
         if (err) {
-          Swal.fire({ icon: "error", title: "Token inválido", text: err })
+          Swal.fire({
+            icon: "error",
+            title: "Token inválido",
+            text: err,
+            buttonsStyling: false,
+            background: "#FFFCE6",
+            color: "#33361D",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            heightAuto: false,
+            scrollbarPadding: false,
+            customClass: {
+              popup: "rounded-[28px] px-8 py-10",
+              title: "!text-[#33361D] !text-3xl !font-extrabold",
+              htmlContainer: "!text-[#4B5563] !text-base !leading-relaxed",
+              actions: "!mt-8 !flex !justify-center",
+              confirmButton:
+                "!bg-[#708C3E] !text-white !font-bold !rounded-full !px-8 !py-3 !shadow-[0_10px_25px_rgba(112,140,62,0.22)] hover:!bg-[#5f7934] transition",
+            },
+          })
           return
         }
         form.handleSubmit()

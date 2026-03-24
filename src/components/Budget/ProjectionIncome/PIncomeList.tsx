@@ -133,7 +133,6 @@ export default function PIncomeList({ subTypeId, fiscalYearId }: Props) {
                   title="Guardar"
                 >
                   <Save className="h-4 w-4" />
-                  Guardar
                 </button>
 
                 <button
@@ -143,7 +142,6 @@ export default function PIncomeList({ subTypeId, fiscalYearId }: Props) {
                   title="Cancelar"
                 >
                   <X className="h-4 w-4" />
-                  Cancelar
                 </button>
               </div>
             );

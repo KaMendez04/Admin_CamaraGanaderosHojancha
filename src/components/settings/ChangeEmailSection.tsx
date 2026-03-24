@@ -31,10 +31,10 @@ export default function ChangeEmailSection() {
   const { user } = useAuth()
 
   const form = useForm({
-  defaultValues: { 
-    newEmail: "",
-    confirmEmail: "",
-  },
+    defaultValues: {
+      newEmail: "",
+      confirmEmail: "",
+    },
     onSubmit: async ({ value }) => {
       try {
         const parsed = schema.safeParse(value)
@@ -46,6 +46,10 @@ export default function ChangeEmailSection() {
           icon: "success",
           title: "Revisa tu correo",
           text: "Te enviamos un enlace de confirmación al nuevo correo.",
+          confirmButtonColor: "#708C3E",
+          background: "#FFFCE6",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
         })
 
         form.reset()
@@ -54,6 +58,10 @@ export default function ChangeEmailSection() {
           icon: "error",
           title: "No se pudo solicitar el cambio",
           text: e?.message ?? "Error",
+          confirmButtonColor: "#708C3E",
+          background: "#FFFCE6",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
         })
       }
     },
@@ -69,7 +77,7 @@ export default function ChangeEmailSection() {
       </header>
 
       <form
-        className="grid gap-4 "
+        className="grid gap-4"
         onSubmit={(e) => {
           e.preventDefault()
           form.handleSubmit()
@@ -84,41 +92,47 @@ export default function ChangeEmailSection() {
         >
           {(field) => (
             <div className="min-w-0">
-              <label className="text-sm font-medium text-[#2E321B]">Nuevo correo</label>
+              <label className="text-sm font-medium text-[#2E321B]">
+                Nuevo correo
+              </label>
               <Input
                 type="email"
                 maxLength={75}
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value.slice(0, 75))}
-                className="border-[#DCD6C9] focus-visible:ring-[#708C3E]/30 focus-visible:ring-2 focus-visible:ring-offset-0 rounded-md"
+                className="rounded-md border-[#DCD6C9] focus-visible:ring-2 focus-visible:ring-[#708C3E]/30 focus-visible:ring-offset-0"
               />
               <CharCounter value={field.state.value} max={75} />
-              <p className="mt-1 text-xs text-gray-500">Ejemplo: nuevocorreo@dominio.com</p>
+              <p className="mt-1 text-xs text-gray-500">
+                Ejemplo: nuevocorreo@dominio.com
+              </p>
               {!!field.state.meta.errors?.[0] && (
-                <p className="mt-2 text-xs text-red-600">{field.state.meta.errors[0]}</p>
+                <p className="mt-2 text-xs text-red-600">
+                  {field.state.meta.errors[0]}
+                </p>
               )}
             </div>
           )}
         </form.Field>
 
-        {/* Confirmar Email */}
         <form.Field
           name="confirmEmail"
           validators={{
             onChangeListenTo: ["newEmail"],
             onChange: ({ value, fieldApi }) => {
-              // 1) valida formato del confirmEmail
               const basic = zodMsg(schema.shape.confirmEmail, value)
               if (basic) return basic
 
-              // 2) valida match (refine) con el objeto completo
               const r = schema.safeParse({
                 newEmail: fieldApi.form.state.values.newEmail,
                 confirmEmail: value,
               })
+
               if (!r.success) {
-                const issue = r.error.issues.find((i) => i.path[0] === "confirmEmail")
+                const issue = r.error.issues.find(
+                  (i) => i.path[0] === "confirmEmail"
+                )
                 return issue?.message
               }
             },
@@ -130,8 +144,11 @@ export default function ChangeEmailSection() {
                 newEmail: fieldApi.form.state.values.newEmail,
                 confirmEmail: value,
               })
+
               if (!r.success) {
-                const issue = r.error.issues.find((i) => i.path[0] === "confirmEmail")
+                const issue = r.error.issues.find(
+                  (i) => i.path[0] === "confirmEmail"
+                )
                 return issue?.message
               }
             },
@@ -148,13 +165,17 @@ export default function ChangeEmailSection() {
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value.slice(0, 75))}
-                className="border-[#DCD6C9] focus-visible:ring-[#708C3E]/30 focus-visible:ring-2 focus-visible:ring-offset-0 rounded-md"
+                className="rounded-md border-[#DCD6C9] focus-visible:ring-2 focus-visible:ring-[#708C3E]/30 focus-visible:ring-offset-0"
               />
               <CharCounter value={field.state.value} max={75} />
-              <p className="mt-1 text-xs text-gray-500">Repite el nuevo correo</p>
+              <p className="mt-1 text-xs text-gray-500">
+                Repite el nuevo correo
+              </p>
 
               {!!field.state.meta.errors?.[0] && (
-                <p className="mt-2 text-xs text-red-600">{field.state.meta.errors[0]}</p>
+                <p className="mt-2 text-xs text-red-600">
+                  {field.state.meta.errors[0]}
+                </p>
               )}
             </div>
           )}
@@ -164,7 +185,7 @@ export default function ChangeEmailSection() {
           <Button
             type="submit"
             disabled={m.isPending || !user?.id}
-            className="bg-[#708C3E] text-white hover:brightness-110"
+            className="bg-[#708C3E] text-white hover:bg-[#5f7934]"
             size="sm"
           >
             {m.isPending ? "Enviando..." : "Enviar enlace"}

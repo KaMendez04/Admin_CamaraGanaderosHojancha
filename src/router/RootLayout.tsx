@@ -28,12 +28,6 @@ function createQueryClient() {
       if (path !== "/login") router?.navigate?.({ to: "/login" });
       return;
     }
-
-    if (e?.isForbidden) {
-      const path = router?.state?.location?.pathname;
-      if (path !== "/403") router?.navigate?.({ to: "/403" });
-      return;
-    }
   };
 
   return new QueryClient({
