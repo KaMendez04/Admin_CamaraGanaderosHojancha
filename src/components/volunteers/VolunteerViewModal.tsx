@@ -13,6 +13,7 @@ import {
 } from "@/hooks/Volunteers/useVolunteerDocsLink"
 import { toast } from "sonner"
 import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll"
+import { ActionButtons } from "../ActionButtons"
 
 interface VolunteerViewModalProps {
   open: boolean
@@ -308,12 +309,13 @@ export function VolunteerViewModal({
 
         {/* ── FOOTER ── */}
         <div className="px-6 py-3 border-t border-[#EAEFE0] bg-[#F8F9F3] flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-[#5B732E] text-white text-sm font-semibold hover:bg-[#556B2F] transition shadow-sm"
-          >
-            Cerrar
-          </button>
+          <ActionButtons
+            size="sm"
+            onCancel={onClose}
+            showText={true}
+            cancelText="Cerrar"
+            showCancel={true}
+          />
         </div>
       </div>
     </div>
