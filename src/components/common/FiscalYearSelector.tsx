@@ -106,15 +106,21 @@ export default function FiscalYearSelector() {
             )}
 
             <ActionButtons
-              size="sm"
-              showCreateAlt
-              onCreateAlt={handleCreateFiscalYear}
-              requireConfirmCreateAlt
-              createAltText={`Nuevo ${nextYear}`}
-              createAltConfirmTitle={`¿Crear ${nextYear} como activo?`}
-              createAltConfirmText={`Se creará el año fiscal ${nextYear} y quedará activo.`}
-              showText
-            />
+  size="sm"
+  showCreateAlt
+  onCreateAlt={handleCreateFiscalYear}
+  requireConfirmCreateAlt
+  createAltText={`Nuevo ${nextYear}`}
+  createAltConfirmTitle={`¿Crear ${nextYear} como activo?`}
+  createAltConfirmText={`Se creará el año fiscal ${nextYear} y quedará activo.`}
+  validateCreateAlt={() =>
+    list.some((fy) => fy.year === nextYear)
+      ? `El año fiscal ${nextYear} ya existe.`
+      : null
+  }
+  createAltBlockedTitle="No se puede crear el año fiscal"
+  showText
+/>
           </div>
         </div>
       )}

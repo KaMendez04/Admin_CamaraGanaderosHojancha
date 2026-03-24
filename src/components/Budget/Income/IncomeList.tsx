@@ -137,27 +137,27 @@ export default function IncomeList({ subTypeId, fiscalYearId }: Props) {
           if (!isEditing) return formatDateCR(r?.date);
 
           return (
-            <div
-              className="w-full"
-              onKeyDown={(e) => {
-                if (e.key === "Escape") cancelEdit();
-                if (e.key === "Enter") saveEdit(r);
-              }}
-            >
-              <BirthDatePicker
-                value={draftDate}
-                onChange={(v) => {
-                  setDraftDate(v);
-                  dateRef.current = v;
-                }}
-                placeholder="Seleccione una fecha"
-                disabled={mUpdate.loading}
-                className="w-full"
-                helperText=""
-                triggerClassName="min-w-[240px] w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#708C3E]"
-              />
-            </div>
-          );
+  <div
+    className="w-[190px] max-w-full"
+    onKeyDown={(e) => {
+      if (e.key === "Escape") cancelEdit();
+      if (e.key === "Enter") saveEdit(r);
+    }}
+  >
+    <BirthDatePicker
+      value={draftDate}
+      onChange={(v) => {
+        setDraftDate(v);
+        dateRef.current = v;
+      }}
+      placeholder="Seleccione una fecha"
+      disabled={mUpdate.loading}
+      className="w-full"
+      helperText=""
+      triggerClassName="w-full min-w-0 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#708C3E]"
+    />
+  </div>
+);
         },
       },
       {
@@ -215,7 +215,6 @@ export default function IncomeList({ subTypeId, fiscalYearId }: Props) {
                   title="Guardar"
                 >
                   <Save className="h-4 w-4" />
-                  Guardar
                 </button>
 
                 <button
@@ -225,7 +224,6 @@ export default function IncomeList({ subTypeId, fiscalYearId }: Props) {
                   title="Cancelar"
                 >
                   <X className="h-4 w-4" />
-                  Cancelar
                 </button>
               </div>
             );

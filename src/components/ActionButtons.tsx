@@ -118,8 +118,11 @@ type ActionButtonsProps = {
   createAltConfirmText?: string;
   cancelAltConfirmTitle?: string;
   cancelAltConfirmText?: string;
-};
 
+validateCreateAlt?: () => string | null | Promise<string | null>;
+createAltBlockedTitle?: string;
+
+};
 export function ActionButtons({
   onView,
   onEdit,
@@ -217,6 +220,9 @@ export function ActionButtons({
   createAltConfirmText = "¿Desea continuar?",
   cancelAltConfirmTitle = "¿Cancelar?",
   cancelAltConfirmText = "¿Desea continuar?",
+
+  validateCreateAlt,
+  createAltBlockedTitle = "No se puede crear",
 }: ActionButtonsProps) {
   const swalBase = {
     background: "#FAF9F5",
@@ -372,24 +378,41 @@ const baseBack =
   };
 
   const handleCreateAlt = async () => {
-    if (requireConfirmCreateAlt) {
-      const result = await Swal.fire({
-        ...swalBase,
-        title: createAltConfirmTitle,
-        text: createAltConfirmText,
-        icon: "question",
-        iconColor: "#C19A3D",
-        showCancelButton: true,
-        confirmButtonColor: "#5B732E",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Sí, crear",
-        cancelButtonText: "Cancelar",
-      });
-      if (result.isConfirmed) onCreateAlt?.();
-    } else {
-      onCreateAlt?.();
+  const blockedMessage = await validateCreateAlt?.();
+
+  if (blockedMessage) {
+    await Swal.fire({
+      ...swalBase,
+      title: createAltBlockedTitle,
+      text: blockedMessage,
+      icon: "warning",
+      confirmButtonColor: "#5B732E",
+      confirmButtonText: "Entendido",
+    });
+    return;
+  }
+
+  if (requireConfirmCreateAlt) {
+    const result = await Swal.fire({
+      ...swalBase,
+      title: createAltConfirmTitle,
+      text: createAltConfirmText,
+      icon: "question",
+      iconColor: "#C19A3D",
+      showCancelButton: true,
+      confirmButtonColor: "#5B732E",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, crear",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (result.isConfirmed) {
+      await onCreateAlt?.();
     }
-  };
+  } else {
+    await onCreateAlt?.();
+  }
+};
 
   const handleCancelAlt = async () => {
     if (requireConfirmCancelAlt) {

@@ -136,6 +136,7 @@ export default function SpendList({ subTypeId, fiscalYearId }: Props) {
           if (!isEditing) return formatDateCR(r?.date);
 
           return (
+          <div className="w-[190px] max-w-full">
             <BirthDatePicker
               value={draftDate}
               onChange={(v) => {
@@ -146,9 +147,10 @@ export default function SpendList({ subTypeId, fiscalYearId }: Props) {
               disabled={mUpdate.loading}
               className="w-full"
               helperText=""
-              triggerClassName="min-w-[240px] w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#708C3E]"
+              triggerClassName="w-full min-w-0 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#708C3E]"
             />
-          );
+          </div>
+        );
         },
       },
       {
@@ -206,7 +208,6 @@ export default function SpendList({ subTypeId, fiscalYearId }: Props) {
                   title="Guardar"
                 >
                   <Save className="h-4 w-4" />
-                  Guardar
                 </button>
 
                 <button
@@ -216,7 +217,6 @@ export default function SpendList({ subTypeId, fiscalYearId }: Props) {
                   title="Cancelar"
                 >
                   <X className="h-4 w-4" />
-                  Cancelar
                 </button>
               </div>
             );

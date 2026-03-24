@@ -132,7 +132,6 @@ async function saveEdit(row: Row) {
                   title="Guardar"
                 >
                   <Save className="h-4 w-4" />
-                  Guardar
                 </button>
 
                 <button
@@ -142,7 +141,6 @@ async function saveEdit(row: Row) {
                   title="Cancelar"
                 >
                   <X className="h-4 w-4" />
-                  Cancelar
                 </button>
               </div>
             );
