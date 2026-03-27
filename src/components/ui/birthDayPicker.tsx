@@ -24,6 +24,9 @@ interface BirthDatePickerProps {
 
   helperText?: string
   triggerClassName?: string
+  
+  // control de dirección del popover
+  side?: "top" | "bottom" | "left" | "right"
 }
 
 function _BirthDatePicker({
@@ -38,6 +41,7 @@ function _BirthDatePicker({
   maxDate,
   helperText,
   triggerClassName,
+  side = "top",
 }: BirthDatePickerProps) {
   const parseISOToDate = (iso?: string) => {
     if (!iso) return undefined
@@ -228,8 +232,13 @@ function _BirthDatePicker({
           </Button>
         </PopoverTrigger>
 
-        <PopoverContent className="w-[260px] p-2 rounded-xl border border-[#DCD6C9] shadow-md bg-white">
-          <div className="flex items-center gap-2 mb-2">
+        <PopoverContent 
+          side={side} 
+          align="center"
+          sideOffset={4}
+          className="w-[260px] p-2 rounded-xl border border-[#DCD6C9] shadow-md bg-white"
+        >
+          <div className="flex items-center gap-1 mb-1">
             <div className="w-[120px]">
               <CustomSelect
                 size="sm"

@@ -170,7 +170,7 @@ export default function VolunteersApprovedPage() {
           />
         </div>
 
-        <div className="overflow-hidden rounded-3xl border border-[#E8ECDD] bg-white shadow-sm">
+        <div>
           <UnifiedVolunteersTable
             data={paginatedData}
             isLoading={isLoading}

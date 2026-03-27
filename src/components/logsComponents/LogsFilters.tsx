@@ -21,9 +21,17 @@ interface LogsFiltersProps {
 
 const MODULE_OPTIONS = [
   { value: "ALL", label: "Todos los módulos" },
-  { value: "USERS", label: "Usuarios" },
   { value: "REAL", label: "Presupuesto real" },
   { value: "PROJECTED", label: "Presupuesto proyectado" },
+  { value: "EXTRAORDINARY", label: "Extraordinarios" },
+]
+
+const ENTITY_TYPE_OPTIONS = [
+  { value: "ALL", label: "Todas las entidades" },
+  { value: "INCOME", label: "Ingresos" },
+  { value: "SPEND", label: "Gastos" },
+  { value: "P_INCOME", label: "Proyección ingresos" },
+  { value: "P_SPEND", label: "Proyección gastos" },
   { value: "EXTRAORDINARY", label: "Extraordinarios" },
 ]
 
@@ -34,11 +42,6 @@ const ACTION_OPTIONS = [
   { value: "DELETE", label: "Eliminación" },
   { value: "ALLOCATE", label: "Asignación" },
   { value: "ASSIGN_TO_INCOME", label: "Asign. a ingreso" },
-  { value: "USER_ACTIVATED", label: "Activación" },
-  { value: "USER_DEACTIVATED", label: "Desactivación" },
-  { value: "USER_PASSWORD_CHANGED", label: "Cambio contraseña" },
-  { value: "USER_EMAIL_CHANGE_REQUESTED", label: "Solicitud correo" },
-  { value: "USER_EMAIL_CHANGE_CONFIRMED", label: "Confirmación correo" },
 ]
 
 const labelClass = "mb-1 block text-[10px] font-semibold uppercase tracking-wider text-[#7A8C5A]"
@@ -79,7 +82,7 @@ export function LogsFilters({ value, onChange, onClear }: LogsFiltersProps) {
       </div>
 
       <div className="px-4 py-3">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr_160px_160px]">
+        <div className="grid grid-rows-2 gap-3 sm:grid-cols-3 xl:grid-rows-[2fr_2fr]">
           {/* Buscar */}
           <div>
             <label className={labelClass}>Buscar</label>
@@ -105,6 +108,20 @@ export function LogsFilters({ value, onChange, onClear }: LogsFiltersProps) {
               buttonClassName="rounded-xl border-[#DDD8CE] bg-[#FAFAF8] h-9 text-sm"
               searchable
               searchPlaceholder="Buscar módulo..."
+            />
+          </div>
+
+         {/* Módulo */}
+          <div>
+            <label className={labelClass}>Entidad</label>
+            <CustomSelect
+              value={value.entityType}
+              onChange={(entityType) => onChange({ ...value, entityType })}
+              options={ENTITY_TYPE_OPTIONS}
+              placeholder="Todas"
+              buttonClassName="rounded-xl border-[#DDD8CE] bg-[#FAFAF8] h-9 text-sm"
+              searchable
+              searchPlaceholder="Buscar entidad..."
             />
           </div>
 
