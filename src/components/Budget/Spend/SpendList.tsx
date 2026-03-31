@@ -93,7 +93,7 @@ export default function SpendList({ subTypeId, fiscalYearId }: Props) {
   }, [q.data]);
 
   function startEdit(row: Row, field: "date" | "amount") {
-    const initialAmount = String(row.amount ?? "");
+    const initialAmount = Number(row.amount ?? 0).toString();
     const initialDate = normalizeToDateInput(row.date);
 
     setEditingId(row.id);

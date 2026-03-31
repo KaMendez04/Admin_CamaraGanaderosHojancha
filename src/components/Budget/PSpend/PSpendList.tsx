@@ -48,7 +48,7 @@ export default function PSpendList({ subTypeId, fiscalYearId }: Props) {
   }, [q.data]);
 
   function startEdit(row: Row) {
-    const initial = String(row.amount ?? "");
+    const initial = Number(row.amount ?? 0).toString();
     setEditingId(row.id);
     setDraftAmount(initial);
     draftRef.current = initial;
