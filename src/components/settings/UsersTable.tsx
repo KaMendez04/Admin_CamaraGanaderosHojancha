@@ -22,7 +22,7 @@ export default function UsersTable({
     return [
       {
         accessorKey: "username",
-        header: "Usuario",
+        header: "USUARIO",
         cell: (info) => (
           <span className="font-semibold text-[#2E321B]">
             {String(info.getValue() ?? "")}
@@ -31,35 +31,39 @@ export default function UsersTable({
       },
       {
         accessorKey: "email",
-        header: "Email",
+        header: () => <div className="text-center">Email</div>,
         cell: (info) => (
           <span className="text-[#2E321B]">{String(info.getValue() ?? "")}</span>
         ),
       },
       {
         id: "role",
-        header: "Rol",
+        header: () => <div className="text-center">Rol</div>,
         accessorFn: (row) => row.role?.name ?? "",
         cell: (info) => {
           const role = String(info.getValue() ?? "")
           if(role === "ADMIN") {
             return (
-              <span className="inline-flex items-center rounded-full border border-[#EAEFE0] bg-[#F8F9F3] px-3 py-1 text-xs font-bold text-[#5B732E]">
-                {role}
-              </span>
+              <div className="flex justify-center">
+                <span className="inline-flex items-center rounded-full border border-[#EAEFE0] bg-[#F8F9F3] px-3 py-1 text-xs font-bold text-[#5B732E]">
+                  {role}
+                </span>
+              </div>
             )
           }
           return (
-            <span className="inline-flex items-center rounded-full border border-[#faeece] 
-            bg-[#FEF6E0] px-3 py-1 text-xs font-bold text-[#A3853D]">
-              {role}
-            </span>
+            <div className="flex justify-center">
+              <span className="inline-flex items-center rounded-full border border-[#faeece] 
+              bg-[#FEF6E0] px-3 py-1 text-xs font-bold text-[#A3853D]">
+                {role}
+              </span>
+            </div>
           )
         },
       },
       {
         id: "actions",
-        header: "Acciones",
+        header: () => <div className="text-center">Acciones</div>,
         cell: ({ row }) => {
           const u = row.original
           const active = !!u.isActive

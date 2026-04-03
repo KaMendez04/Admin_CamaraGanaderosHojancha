@@ -47,7 +47,7 @@ export function GenericTable<TData>({
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[220px] items-center justify-center p-6">
+      <div className="flex min-h-[220px] items-center justify-center p-6 overflow-hidden rounded-2xl border border-[#E8ECDD] bg-white shadow-sm">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#5F7728] border-t-transparent" />
       </div>
     );
@@ -55,7 +55,7 @@ export function GenericTable<TData>({
 
   if (!hasData) {
     return (
-      <div className="flex min-h-[220px] items-center justify-center px-6 py-10 text-sm text-slate-500">
+      <div className="flex min-h-[220px] items-center justify-center px-6 py-10 text-sm text-slate-500 overflow-hidden rounded-2xl border border-[#E8ECDD] bg-white shadow-sm">
         {emptyMessage}
       </div>
     );
@@ -65,7 +65,7 @@ export function GenericTable<TData>({
     <>
       {/* Desktop / tablet */}
       <div className="hidden md:block">
-        <div className="w-full overflow-x-auto">
+        <div className="overflow-hidden rounded-2xl border border-[#E8ECDD] bg-white shadow-sm">
           <table className="w-full table-fixed border-separate border-spacing-0">
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -74,7 +74,7 @@ export function GenericTable<TData>({
                     <th
                       key={header.id}
                       style={{ width: header.getSize() }}
-                      className="bg-[#f2f5ec] px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.04em] text-slate-500"
+                      className="bg-[#f2f5ec] px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.04em] text-slate-500"
                     >
                       {header.isPlaceholder
                         ? null
