@@ -71,7 +71,7 @@ export default function CloudinaryUploadSheet({
   };
 
   return (
-    <div className="fixed inset-0 z-[120] overflow-hidden">
+    <div data-chatbot-modal="true" className="fixed inset-0 z-[120] overflow-hidden">
       <div
         style={{
           transition: isClosing

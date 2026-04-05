@@ -26,7 +26,7 @@ export async function listSolicitudes(params: AdminListParams): Promise<Solicitu
   return parsed.data;
 }
 
-// ✅ Detalle básico (ya no se usa para el modal)
+// ✅ Detalle básico
 export async function getSolicitud(id: number): Promise<Solicitud> {
   const response = await apiConfig.get(`/solicitudes/${id}`);
   
@@ -40,7 +40,7 @@ export async function getSolicitud(id: number): Promise<Solicitud> {
   return parsed.data;
 }
 
-// ✅ NUEVO: Detalle COMPLETO (para el modal - con TODA la info)
+// ✅ Detalle COMPLETO (para el modal - con TODA la info)
 export async function getSolicitudComplete(id: number): Promise<Solicitud> {
   const response = await apiConfig.get(`/solicitudes/${id}/complete`);
   
@@ -89,7 +89,7 @@ export async function getSolicitudesByStatus(status: string) {
 // ✅ PDF (Blob) — abre/descarga desde el front
 export async function getSolicitudPdfBlob(id: number): Promise<Blob> {
   const response = await apiConfig.get(`/solicitudes/${id}/pdf`, {
-    responseType: "blob", // ✅ IMPORTANTE
+    responseType: "blob",
   });
 
   return response.data as Blob;
@@ -102,14 +102,16 @@ export async function downloadSolicitudesPDF(params: PdfListParams): Promise<Blo
       search: params.search,
       sort: params.sort,
     },
-    responseType: "blob", // ✅ IMPORTANTÍSIMO para PDF
+    responseType: "blob",
   });
 
   return response.data as Blob;
 }
 
-export async function getDocsLinkByAsociado(idAsociado: number) {
-  const { data } = await apiConfig.get(`/solicitudes/by-asociado/${idAsociado}/documents-link`);
+// ✅ FIX: La ruta correcta es /solicitudes/:idSolicitud/documents-link
+// La ruta anterior /solicitudes/by-asociado/:id/documents-link no existe en el backend
+export async function getDocsLinkByAsociado(idSolicitud: number) {
+  const { data } = await apiConfig.get(`/solicitudes/${idSolicitud}/documents-link`);
   return data as { url: string; path: string };
 }
 

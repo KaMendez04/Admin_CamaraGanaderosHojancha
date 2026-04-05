@@ -24,7 +24,6 @@ interface VolunteerViewModalProps {
 
 type Tab = "info" | "areas" | "disponibilidad"
 
-// ─── Status config ─────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
   PENDIENTE: {
     label: "Pendiente",
@@ -69,13 +68,16 @@ export function VolunteerViewModal({
   const docsLinkMutation = useSolicitudVoluntariadoDocsLink()
 
   const idSolicitud = solicitud ? Number(solicitud.idSolicitudVoluntariado) : null
-  const { data: hasDocs, isLoading: checkingDocs } = useSolicitudHasDocs(idSolicitud)
+
+  // ✅ FIX: pasar `open` como segundo argumento para que el query solo se
+  // dispare cuando el modal está abierto, no para cada fila de la tabla.
+  const { data: hasDocs, isLoading: checkingDocs } = useSolicitudHasDocs(idSolicitud, open)
 
   const onOpenDocs = () => {
     if (!solicitud) return
     docsLinkMutation.mutate(Number(solicitud.idSolicitudVoluntariado), {
       onSuccess: (res: any) => {
-        const url = res?.url ?? res?.link ?? res
+        const url = res?.url ?? res?.link
         if (typeof url === "string" && url.length > 0) {
           window.open(url, "_blank", "noopener,noreferrer")
         } else {
@@ -95,15 +97,15 @@ export function VolunteerViewModal({
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "—"
+    const datePart = dateString.split("T")[0]
+    const [year, month, day] = datePart.split("-").map(Number)
+    const date = new Date(year, month - 1, day)
     return new Intl.DateTimeFormat("es-CR", {
       year: "numeric",
       month: "long",
       day: "numeric",
-      timeZone: "UTC",
-    }).format(new Date(dateString))
+    }).format(date)
   }
-
-  
 
   if (isLoading || !solicitud) {
     return (
@@ -147,7 +149,6 @@ export function VolunteerViewModal({
           {/* Row 1: icon + name + badges + close */}
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-3">
-              {/* Status icon */}
               <div className={`flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center ${status.iconBg}`}>
                 <StatusIcon className={`w-4 h-4 ${status.iconColor}`} />
               </div>
@@ -162,7 +163,6 @@ export function VolunteerViewModal({
               </div>
             </div>
 
-            {/* Right: status pill + tipo pill + close */}
             <div className="flex items-center gap-2 flex-shrink-0">
               <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold ${status.pill}`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
@@ -183,7 +183,7 @@ export function VolunteerViewModal({
             </div>
           </div>
 
-          {/* Row 2: action buttons — compact */}
+          {/* Row 2: action buttons */}
           <div className="flex gap-2 mt-3">
             <button
               onClick={() => openSolicitudPDF.mutate(Number(solicitud.idSolicitudVoluntariado))}
@@ -254,8 +254,6 @@ export function VolunteerViewModal({
 
         {/* ── BODY ── */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
-
-          {/* Rejection banner */}
           {solicitud.estado === "RECHAZADO" && solicitud.motivo && (
             <div className="rounded-xl bg-[#F7E9E6] border border-[#E8C5C0] p-4 flex gap-3">
               <XCircle className="w-4 h-4 text-[#8C3A33] flex-shrink-0 mt-0.5" />

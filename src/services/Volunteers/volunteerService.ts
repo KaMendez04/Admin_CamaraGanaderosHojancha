@@ -194,3 +194,14 @@ export async function getApprovedVoluntariadoDocumentsLink(params: {
   )
   return data
 }
+// Repara documentos de una solicitud aprobada cuyos URLs no se copiaron a la entidad
+export async function resyncDocuments(idSolicitud: number): Promise<{
+  message: string;
+  syncedFields: string[];
+}> {
+  const { data } = await apiConfig.patch<{
+    message: string;
+    syncedFields: string[];
+  }>(`/solicitud-voluntariado/${idSolicitud}/resync-documents`);
+  return data;
+}

@@ -99,8 +99,11 @@ export function ApprovedVolunteerViewModal({
     : null;
 
   const docsLinkMutation = useApprovedVolunteerDocsLink();
+  // ✅ FIX: pasar `open` como segundo argumento para que el query solo se
+  // dispare cuando el modal está abierto, no para cada fila de la tabla.
   const { data: hasDocs, isLoading: checkingDocs } = useApprovedHasDocs(
-    entityId ? { tipo, id: entityId } : null
+    entityId ? { tipo, id: entityId } : null,
+    open,
   );
 
   const onOpenDocs = () => {
@@ -130,12 +133,15 @@ export function ApprovedVolunteerViewModal({
 
   if (!open) return null;
 
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString("es-CR", {
+  const formatDate = (dateString?: string | null) => {
+    if (!dateString) return "—";
+    return new Intl.DateTimeFormat("es-CR", {
       year: "numeric",
       month: "long",
       day: "numeric",
-    });
+      timeZone: "UTC",
+    }).format(new Date(dateString));
+  };
 
   if (isLoading || !data) {
     return (

@@ -50,12 +50,17 @@ const STATUS_CONFIG = {
   },
 } as const;
 
-const formatDate = (dateString: string) =>
-  new Date(dateString).toLocaleDateString("es-CR", {
+const formatDate = (dateString: string) => {
+  const normalized = /^\d{4}-\d{2}-\d{2}$/.test(dateString)
+    ? `${dateString}T12:00:00`
+    : dateString;
+
+  return new Date(normalized).toLocaleDateString("es-CR", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
+};
 
 function hasValue(value: ReactNode) {
   if (value === null || value === undefined) return false;
@@ -354,7 +359,13 @@ export function SolicitudViewModal({ open, onClose, solicitud, isLoading }: Prop
 
               <Section title="Estado de la Solicitud">
                 <InfoField label="Estado" value={status.label} />
-                <InfoField label="Fecha de solicitud" value={formatDate(solicitud.createdAt)} />
+                <InfoField label="Fecha de solicitud" value={formatDate(solicitud.fechaSolicitud)} />
+                {solicitud.fechaResolucion && (
+                  <InfoField
+                    label="Fecha de resolución"
+                    value={formatDate(solicitud.fechaResolucion)}
+                  />
+                )}
               </Section>
             </>
           )}

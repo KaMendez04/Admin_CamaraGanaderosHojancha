@@ -13,13 +13,15 @@ export function useApproveSolicitud() {
       qc.invalidateQueries({ queryKey: ["solicitudes"] });
       qc.invalidateQueries({ queryKey: ["associates"] });
 
-      qc.setQueryData(["solicitud", vars.id], (old: any) => {
+      // Actualizar el detalle en caché usando la respuesta real del backend,
+      // no una fecha generada en el cliente
+      qc.setQueryData(["solicitud-complete", vars.id], (old: any) => {
         if (!old) return old;
         return {
           ...old,
-          estado: "APROBADO",
-          fechaResolucion: new Date(),
-          ...(vars.motivo !== undefined ? { motivo: vars.motivo } : {}),
+          estado: _data.estado,
+          fechaResolucion: _data.fechaResolucion ?? old.fechaResolucion,
+          motivo: _data.motivo ?? old.motivo,
         };
       });
 
@@ -27,7 +29,7 @@ export function useApproveSolicitud() {
     },
 
     onError: (error: any) => {
-      toast.error(error?.message || "Error al aprobar la solicitud");
+      toast.error(error?.response?.data?.message || error?.message || "Error al aprobar la solicitud");
     },
   });
 }
