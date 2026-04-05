@@ -28,7 +28,7 @@ export default function Home() {
           isMobile={isMobile}
         />
         <Outlet />
-        <BudgetChatbot sidebarOpen={sidebarOpen} />
+        <BudgetChatbot sidebarOpen={sidebarOpen} isMobileLayout={isMobile} />
         <Toaster position="top-right" expand richColors closeButton />
       </FiscalYearProvider>
     </NotificationProvider>

@@ -19,7 +19,7 @@ const PILL_WIDTH = 180;
 const PANEL_MAX_W = 360;
 const PANEL_MAX_H = 480;
 
-// Breakpoints (match Tailwind md = 768)
+// Breakpoints
 const MD = 768;
 
 // ============================================================
@@ -54,10 +54,12 @@ function FormattedText({ text }: { text: string }) {
 // ============================================================
 interface BudgetChatbotProps {
   sidebarOpen?: boolean;
+  isMobileLayout?: boolean;
 }
 
 export default function BudgetChatbot({
   sidebarOpen = false,
+  isMobileLayout = false,
 }: BudgetChatbotProps) {
   const [open, setOpen] = useState(false);
   const [showLauncher, setShowLauncher] = useState(true);
@@ -71,6 +73,11 @@ export default function BudgetChatbot({
     w: PANEL_MAX_W,
     h: PANEL_MAX_H,
   });
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < MD : isMobileLayout
+  );
+
+  const [hasOpenModal, setHasOpenModal] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -78,10 +85,6 @@ export default function BudgetChatbot({
   const idRef = useRef(1);
 
   const shouldReduceMotion = useReducedMotion();
-  // Track isMobile as state so it updates correctly on resize
-  const [isMobile, setIsMobile] = useState(
-    typeof window !== "undefined" ? window.innerWidth < MD : false
-  );
 
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
@@ -98,18 +101,18 @@ export default function BudgetChatbot({
   useEffect(() => {
     const updateShellSize = () => {
       if (typeof window === "undefined") return;
+
       const mobile = window.innerWidth < MD;
       setIsMobile(mobile);
 
       if (mobile) {
         setShellSize({
-          w: window.innerWidth - 16,
-          h: Math.min(window.innerHeight * 0.75, 520),
+          w: Math.min(window.innerWidth - 20, 320),
+          h: Math.min(window.innerHeight * 0.62, 430),
         });
       } else {
         setShellSize({
           w: Math.min(PANEL_MAX_W, window.innerWidth - 32),
-          // 64px navbar + 28px bottom gap + some breathing room
           h: Math.min(PANEL_MAX_H, window.innerHeight - 64 - 28 - 16),
         });
       }
@@ -134,6 +137,78 @@ export default function BudgetChatbot({
     setInput("");
   }, [lang, chatbotContext.key, ui.welcome]);
 
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    const checkModalOpen = () => {
+      const selectors = [
+        '[role="dialog"]',
+        '[aria-modal="true"]',
+        '[data-state="open"][role="dialog"]',
+        '[data-state="open"][data-slot="dialog-content"]',
+        '[data-slot="dialog-content"]',
+        '[data-slot="dialog-overlay"]',
+        '.swal2-container',
+        '.ReactModal__Overlay',
+      ];
+
+      const hasVisibleDialog = selectors.some((selector) => {
+        const elements = Array.from(document.querySelectorAll(selector));
+
+        return elements.some((el) => {
+          const style = window.getComputedStyle(el);
+          const rect = el.getBoundingClientRect();
+
+          return (
+            style.display !== "none" &&
+            style.visibility !== "hidden" &&
+            style.opacity !== "0" &&
+            rect.width > 0 &&
+            rect.height > 0
+          );
+        });
+      });
+
+      setHasOpenModal(hasVisibleDialog);
+    };
+
+    checkModalOpen();
+
+    const observer = new MutationObserver(() => {
+      checkModalOpen();
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: [
+        "class",
+        "style",
+        "data-state",
+        "aria-hidden",
+        "open",
+      ],
+    });
+
+    window.addEventListener("resize", checkModalOpen);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", checkModalOpen);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (hasOpenModal) {
+      setOpen(false);
+      setShowLauncher(false);
+      return;
+    }
+
+    setShowLauncher(true);
+  }, [hasOpenModal]);
+
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
@@ -152,9 +227,10 @@ export default function BudgetChatbot({
   }, [open, messages, scrollToBottom, shouldReduceMotion]);
 
   const openChat = useCallback(() => {
+    if (hasOpenModal) return;
     setShowLauncher(false);
     setOpen(true);
-  }, []);
+  }, [hasOpenModal]);
 
   const closeChat = useCallback(() => {
     setOpen(false);
@@ -246,8 +322,8 @@ export default function BudgetChatbot({
   const formatTime = (d: Date) =>
     d.toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit" });
 
-  const mobileRadiusOpen  = isMobile ? "16px 16px 0 0" : 24;
-  const mobileRadiusClose = isMobile ? "16px 16px 0 0" : 14;
+  const mobileRadiusOpen = isMobile ? "16px" : 24;
+  const mobileRadiusClose = isMobile ? "16px" : 14;
 
   const shellInitial = {
     width: BUTTON_SIZE,
@@ -342,6 +418,7 @@ export default function BudgetChatbot({
       };
 
   if (typeof document === "undefined") return null;
+  if (hasOpenModal) return null;
 
   return createPortal(
     <>
@@ -358,20 +435,30 @@ export default function BudgetChatbot({
         }
       `}</style>
 
-      {showLauncher && !sidebarOpen && (
+      {showLauncher && !sidebarOpen && !hasOpenModal && (
         <button
           onClick={openChat}
           title={lang === "es" ? "Ayuda" : "Help"}
           aria-label={lang === "es" ? "Abrir asistente" : "Open assistant"}
-          className="fixed bottom-5 right-5 z-[9999] flex h-[52px] w-[52px] items-center justify-center rounded-[14px] bg-[#6F8A2D] shadow-[0_4px_14px_rgba(111,138,45,0.28)] transition-all duration-200 hover:bg-[#637C27] hover:shadow-[0_8px_20px_rgba(111,138,45,0.34)] active:scale-95 md:bottom-7 md:right-7"
+          className="fixed z-[9999] flex items-center justify-center rounded-[14px] bg-[#6F8A2D] shadow-[0_4px_14px_rgba(111,138,45,0.28)] transition-all duration-200 hover:bg-[#637C27] hover:shadow-[0_8px_20px_rgba(111,138,45,0.34)] active:scale-95"
+          style={{
+            width: isMobile ? 48 : 52,
+            height: isMobile ? 48 : 52,
+            right: isMobile ? 14 : 28,
+            bottom: isMobile ? 14 : 28,
+          }}
         >
-          <MessageCircle size={22} color="white" strokeWidth={1.8} />
+          <MessageCircle
+            size={isMobile ? 20 : 22}
+            color="white"
+            strokeWidth={1.8}
+          />
         </button>
       )}
 
       <AnimatePresence onExitComplete={handleShellExitComplete}>
         {open && (
-        <motion.div
+          <motion.div
             key="budget-chatbot-shell"
             ref={chatWindowRef}
             initial={shellInitial}
@@ -379,8 +466,8 @@ export default function BudgetChatbot({
             exit={shellExit}
             className="fixed z-[9999] overflow-hidden bg-[#6F8A2D]"
             style={{
-              bottom: isMobile ? 0 : 28,
-              right: isMobile ? 8 : 28,
+              bottom: isMobile ? 14 : 28,
+              right: isMobile ? 14 : 28,
               boxShadow:
                 "0 8px 48px rgba(0,0,0,0.14), 0 1px 4px rgba(0,0,0,0.06)",
             }}
@@ -402,8 +489,7 @@ export default function BudgetChatbot({
               exit={contentExit}
               className="absolute inset-0 flex flex-col overflow-hidden rounded-2xl border border-[#DCE4CF] bg-[#F8FAF5]"
             >
-              {/* HEADER */}
-              <div className="flex h-[60px] shrink-0 items-center gap-3 bg-[#6F8A2D] px-4">
+              <div className="flex h-[56px] shrink-0 items-center gap-3 bg-[#6F8A2D] px-3">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15">
                   <MessageCircle
                     size={16}
@@ -446,8 +532,7 @@ export default function BudgetChatbot({
                 </button>
               </div>
 
-              {/* MESSAGES */}
-              <div className="chatbot-msg-area min-h-0 flex-1 overflow-y-auto bg-[#F2F5EC] p-3 md:p-4">
+              <div className="chatbot-msg-area min-h-0 flex-1 overflow-y-auto bg-[#F2F5EC] p-3">
                 <div className="flex flex-col gap-3">
                   {messages.map((msg) => (
                     <div
@@ -457,7 +542,7 @@ export default function BudgetChatbot({
                       }`}
                     >
                       <div
-                        className={`max-w-[88%] px-[13px] py-[10px] text-[13px] leading-[1.65] md:max-w-[82%] ${
+                        className={`max-w-[88%] px-[12px] py-[9px] text-[12px] leading-[1.6] md:text-[13px] ${
                           msg.role === "user"
                             ? "rounded-[12px_12px_3px_12px] bg-gradient-to-r from-[#6F8A2D] to-[#556B1A] text-[#F8FFF1] shadow-[0_4px_14px_rgba(86,107,26,0.24)]"
                             : "rounded-[12px_12px_12px_3px] border border-[#DCE4CF] bg-white text-[#27303F] shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
@@ -485,9 +570,7 @@ export default function BudgetChatbot({
                             key={i}
                             className="inline-block h-[5px] w-[5px] rounded-full bg-[#7E9444]"
                             style={{
-                              animation: `chatbotBounce 1.1s ease-in-out ${
-                                i * 0.18
-                              }s infinite`,
+                              animation: `chatbotBounce 1.1s ease-in-out ${i * 0.18}s infinite`,
                             }}
                           />
                         ))}
@@ -505,7 +588,7 @@ export default function BudgetChatbot({
                           <button
                             key={s}
                             onClick={() => sendMessage(s)}
-                            className="flex min-h-[44px] items-center justify-between gap-2 rounded-lg border border-[#DCE4CF] bg-white px-3 py-2.5 text-left text-[13px] text-[#3B4454] transition-all duration-150 hover:border-[#B8C99B] hover:bg-[#F5F9EF] hover:text-[#556B1A] md:min-h-0 md:py-2 md:text-[12px]"
+                            className="flex min-h-[42px] items-center justify-between gap-2 rounded-lg border border-[#DCE4CF] bg-white px-3 py-2 text-left text-[12px] text-[#3B4454] transition-all duration-150 hover:border-[#B8C99B] hover:bg-[#F5F9EF] hover:text-[#556B1A]"
                           >
                             <span>{s}</span>
                             <span className="shrink-0 text-[11px] text-[#A0A8B5]">
@@ -529,7 +612,7 @@ export default function BudgetChatbot({
                           <button
                             key={question}
                             onClick={() => sendMessage(question)}
-                            className="min-h-[36px] rounded-full border border-[#D6E0C7] bg-white px-3 py-1.5 text-[12px] text-[#4A5565] transition-all hover:border-[#B7C98F] hover:bg-[#F4F8EC] hover:text-[#556B1A]"
+                            className="min-h-[34px] rounded-full border border-[#D6E0C7] bg-white px-3 py-1.5 text-[11px] text-[#4A5565] transition-all hover:border-[#B7C98F] hover:bg-[#F4F8EC] hover:text-[#556B1A]"
                           >
                             {question}
                           </button>
@@ -542,10 +625,13 @@ export default function BudgetChatbot({
                 </div>
               </div>
 
-              {/* INPUT */}
               <div
-                className="flex shrink-0 items-center gap-2 border-t border-[#DCE4CF] bg-white px-3 py-2.5 md:px-[14px] md:py-3"
-                style={{ paddingBottom: isMobile ? "max(10px, env(safe-area-inset-bottom))" : undefined }}
+                className="flex shrink-0 items-center gap-2 border-t border-[#DCE4CF] bg-white px-3 py-2.5"
+                style={{
+                  paddingBottom: isMobile
+                    ? "max(10px, env(safe-area-inset-bottom))"
+                    : undefined,
+                }}
               >
                 <input
                   ref={inputRef}
@@ -556,20 +642,20 @@ export default function BudgetChatbot({
                   }
                   placeholder={ui.placeholder}
                   disabled={loading}
-                  className="flex-1 rounded-lg border border-[#DCE4CF] bg-[#FAFCF7] px-3 py-[10px] text-[14px] text-[#27303F] outline-none transition-colors placeholder:text-[#98A2B3] focus:border-[#6F8A2D] focus:bg-white md:py-[9px] md:text-[13px]"
+                  className="flex-1 rounded-lg border border-[#DCE4CF] bg-[#FAFCF7] px-3 py-[9px] text-[13px] text-[#27303F] outline-none transition-colors placeholder:text-[#98A2B3] focus:border-[#6F8A2D] focus:bg-white"
                 />
                 <button
                   onClick={() => sendMessage()}
                   disabled={!input.trim() || loading}
                   aria-label={lang === "es" ? "Enviar" : "Send"}
-                  className={`flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg transition-all md:h-[34px] md:w-[34px] ${
+                  className={`flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-lg transition-all ${
                     input.trim() && !loading
                       ? "cursor-pointer bg-[#6F8A2D] hover:bg-[#637C27]"
                       : "cursor-not-allowed bg-[#EEF2E6]"
                   }`}
                 >
                   <Send
-                    size={15}
+                    size={14}
                     color={input.trim() && !loading ? "white" : "#A0A8B5"}
                     strokeWidth={2}
                   />

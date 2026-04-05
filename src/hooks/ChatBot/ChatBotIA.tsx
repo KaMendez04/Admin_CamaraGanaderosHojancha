@@ -78,8 +78,6 @@ export async function callGroq(
   });
 
   const raw = await res.text();
-  console.log("Groq status:", res.status);
-  console.log("Groq raw response:", raw);
 
   if (!res.ok) {
     return lang === "es"

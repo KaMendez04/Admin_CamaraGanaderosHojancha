@@ -16,6 +16,7 @@ export default function CloudinaryMediaModal({ selected, onClose }: Props) {
 
   return (
     <div
+      data-chatbot-modal="true"
       className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 sm:p-6"
       onClick={onClose}
     >

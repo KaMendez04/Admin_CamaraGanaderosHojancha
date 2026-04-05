@@ -1,3 +1,4 @@
+import { toast } from "sonner"
 import { useApprovedVolunteerDocsLink, useSolicitudVoluntariadoDocsLink } from "@/hooks/Volunteers/useVolunteerDocsLink"
 
 type Props = {
@@ -21,33 +22,42 @@ export function VolunteerDocsModal({
 
   async function handleOpenFolder() {
     try {
+      let res: any
+
       if (mode === "SOLICITUD") {
         if (!idSolicitud) throw new Error("Falta idSolicitud")
-        const res = await solicitudLink.mutateAsync(idSolicitud)
-        // Ajusta según tu API: res.url / res.link / res
-        window.location.href = (res as any).url ?? (res as any).link ?? (res as any)
-        return
+        res = await solicitudLink.mutateAsync(idSolicitud)
+      } else {
+        if (!approvedParams) throw new Error("Faltan parámetros de aprobado")
+        res = await approvedLink.mutateAsync(approvedParams)
       }
 
-      // APROBADO
-      if (!approvedParams) throw new Error("Faltan parámetros de aprobado")
-      const res = await approvedLink.mutateAsync(approvedParams)
-      window.location.href = (res as any).url ?? (res as any).link ?? (res as any)
-    } catch (e) {
-      console.error(e)
-      // aquí puedes hacer toast.error(...)
+      const url = res?.url ?? res?.link
+      if (typeof url === "string" && url.length > 0) {
+        // ✅ FIX: window.open en vez de window.location.href
+        // window.location.href navega fuera del admin y puede perder la sesión
+        window.open(url, "_blank", "noopener,noreferrer")
+      } else {
+        toast.error("No se pudo obtener el enlace de documentos")
+      }
+    } catch (e: any) {
+      const msg =
+        e?.response?.data?.message ||
+        e?.message ||
+        "No se pudieron abrir los documentos"
+      toast.error(Array.isArray(msg) ? msg.join(", ") : msg)
     }
   }
 
-  // ✅ Si vas a retornar null cuando esté cerrado, OK,
-  // PERO solo si los hooks ya se llamaron arriba (como aquí).
   if (!open) return null
+
+  const isPending = solicitudLink.isPending || approvedLink.isPending
 
   return (
     <div>
       {/* tu UI del modal aquí */}
-      <button onClick={handleOpenFolder} disabled={solicitudLink.isPending || approvedLink.isPending}>
-        Ver carpeta
+      <button onClick={handleOpenFolder} disabled={isPending}>
+        {isPending ? "Abriendo..." : "Ver carpeta"}
       </button>
 
       <button onClick={() => onOpenChange(false)}>Cerrar</button>

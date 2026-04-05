@@ -156,15 +156,18 @@ export function VolunteerRequestsTable({
       columnHelper.accessor("fechaSolicitud", {
         header: "Fecha",
         size: 110,
+       // DESPUÉS
         cell: (info) => {
-          const date = new Date(info.getValue());
+          const raw: string = info.getValue() ?? ""
+          const datePart = raw.split("T")[0]
+          const [year, month, day] = datePart.split("-").map(Number)
+          const date = new Date(year, month - 1, day)
           return (
             <div className="text-sm text-slate-500">
               {new Intl.DateTimeFormat("es-CR", {
                 year: "numeric",
                 month: "2-digit",
                 day: "2-digit",
-                timeZone: "UTC",
               }).format(date)}
             </div>
           );
