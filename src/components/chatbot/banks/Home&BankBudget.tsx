@@ -1,13 +1,9 @@
-// ============================================================
-// BANCO DE PREGUNTAS Y RESPUESTAS — Sistema de Presupuesto
-// Agrega, edita o elimina entradas según necesites.
-// ============================================================
-
 import { QA_BANK_ASSOCIATES, RELATED_QUESTIONS_ASSOCIATES } from "./BankAssociates";
 import { QA_BANK_MEDIA, RELATED_QUESTIONS_MEDIA } from "./BankMedia";
 import { QA_BANK_PRINCIPAL, RELATED_QUESTIONS_PRINCIPAL } from "./BankPrincipal";
 import { QA_BANK_STAFF, RELATED_QUESTIONS_STAFF } from "./BankStaff";
 import { QA_BANK_VOLUNTEERS, RELATED_QUESTIONS_VOLUNTEERS } from "./BankVolunteers";
+import { QA_BANK_MANUALS, RELATED_QUESTIONS_MANUALS } from "./BankManuals";
 
 export type Lang = "es" | "en";
 
@@ -285,7 +281,8 @@ export type ChatbotModuleKey =
   | "staff"
   | "settings"
   | "edition"
-  | "logs";
+  | "logs"
+  | "manuals";
 
 type ModuleUI = {
   title: string;
@@ -713,6 +710,38 @@ const CHATBOT_CONTEXTS: ChatbotContextConfig[] = [
       en: "The user is in the Associates module. Answer in the context of associate requests, approvals, searches, statuses, and management.",
     },
   },
+  {
+  key: "manuals",
+  routePrefixes: ["/manuals"],
+  ui: buildUI({
+    esSubtitle: "Módulo de Manuales",
+    enSubtitle: "Manuals Module",
+    esWelcome:
+      "Hola, soy tu asistente del módulo de Manuales.\nPuedo ayudarte a buscar y descargar manuales del sistema.",
+    enWelcome:
+      "Hello, I'm your Manuals module assistant.\nI can help you search for and download system manuals.",
+  }),
+  suggestions: {
+    es: [
+      "¿Cómo busco un manual?",
+      "¿Cómo descargo un manual?",
+      "¿Qué hago si no encuentro un manual?",
+      "¿Qué puedo hacer en esta sección?",
+    ],
+    en: [
+      "How do I search for a manual?",
+      "How do I download a manual?",
+      "What do I do if I can't find a manual?",
+      "What can I do in this section?",
+    ],
+  },
+  qaBank: QA_BANK_MANUALS,
+  relatedQuestions: RELATED_QUESTIONS_MANUALS,
+  aiContext: {
+    es: "El usuario está en el módulo de Manuales. Responde únicamente sobre buscar manuales por nombre y descargar manuales disponibles. No hables de edición, carga, eliminación, previsualización ni otras acciones.",
+    en: "The user is in the Manuals module. Answer only about searching manuals by name and downloading available manuals. Do not talk about editing, uploading, deleting, previewing, or any other actions.",
+  },
+},
   {
     key: "media",
     routePrefixes: ["/media"],
