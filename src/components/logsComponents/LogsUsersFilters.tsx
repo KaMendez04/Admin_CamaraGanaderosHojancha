@@ -62,7 +62,7 @@ export function LogsUsersFilters({ value, onChange, onClear }: LogsUsersFiltersP
 
       {/* Filtros compactos en una fila */}
       <div className="px-4 py-3">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[2fr_1fr_150px_150px]">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_1fr]">
           {/* Buscar */}
           <div>
             <label className={labelClass}>Buscar</label>
@@ -88,6 +88,7 @@ export function LogsUsersFilters({ value, onChange, onClear }: LogsUsersFiltersP
               buttonClassName="rounded-xl border-[#DDD8CE] bg-[#FAFAF8] h-9 text-sm"
               searchable
               searchPlaceholder="Buscar acción..."
+              zIndex={2000}
             />
           </div>
 
@@ -95,6 +96,7 @@ export function LogsUsersFilters({ value, onChange, onClear }: LogsUsersFiltersP
           <div>
             <label className={labelClass}>Desde</label>
             <BirthDatePicker
+              side="bottom"
               value={value.from}
               onChange={(from) => onChange({ ...value, from })}
               placeholder="Inicial"
@@ -107,6 +109,7 @@ export function LogsUsersFilters({ value, onChange, onClear }: LogsUsersFiltersP
           <div>
             <label className={labelClass}>Hasta</label>
             <BirthDatePicker
+              side="bottom"
               value={value.to}
               onChange={(to) => onChange({ ...value, to })}
               placeholder="Final"

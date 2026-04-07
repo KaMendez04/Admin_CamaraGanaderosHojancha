@@ -109,7 +109,7 @@ export default function SettingsUsersPage() {
           </div>
         </div>
 
-        <div className="px-6 py-6">
+        <div className="px-6 py-6 ">
           <UsersTable
             rows={rows}
             loading={loading}

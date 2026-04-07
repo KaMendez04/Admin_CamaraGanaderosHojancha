@@ -149,29 +149,28 @@ export default function PersonalPage() {
 
         </section>
 
-          <div className="flex justify-between  gap-2">
-            <div className="flex-1">
-            {/* Filtros */}
-            <StatusFilters
-              status={status}
-              onStatusChange={setStatus}
-              search={search}
-              onSearchChange={setSearch}
-              searchPlaceholder="Buscar por cédula, nombre, apellido o email..."
-              statusOptions={["ACTIVO", "INACTIVO"]}
-              showAllOption={true}
-              hideDownloadButton={true}
-            />
-            </div>
-            <div className="flex gap-2">
-            <KPICard label="Total" value={totalCount} />
-            <KPICard label="Activos" value={activeCount} tone="gold" />
-            </div>
-          </div>
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        <div className="min-w-0 flex-1">
+          <StatusFilters
+            status={status}
+            onStatusChange={setStatus}
+            search={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Buscar por cédula, nombre, apellido o email..."
+            statusOptions={["ACTIVO", "INACTIVO"]}
+            showAllOption={true}
+            hideDownloadButton={true}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 xl:shrink-0">
+          <KPICard label="Total" value={totalCount} />
+          <KPICard label="Activos" value={activeCount} tone="gold" />
+        </div>
+      </div>
 
         {/* Tabla */}
-        <section className="rounded-3xl border border-[#E6E1D6] bg-white shadow-sm overflow-hidden">
-          <div className="overflow-hidden rounded-3xl border border-[#E8ECDD] bg-white shadow-sm">
+        <section>
             <PersonalTable
               data={pagedItems}
               isLoading={false}
@@ -181,7 +180,6 @@ export default function PersonalPage() {
                 if (!isReadOnly) setEditPersonalPage(item);
               }}
             />
-          </div>
         </section>
 
         {/* Footer inferior */}
