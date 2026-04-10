@@ -2,7 +2,6 @@ import type { ViewMode } from "@/utils/cloudinaryMediaUtils";
 import { isVideoUrl, videoMp4Url, videoPosterJpg } from "@/utils/cloudinaryMediaUtils";
 import { Button } from "../ui/button";
 import { Eye, Loader2, Trash2, Copy, Check } from "lucide-react";
-import { showConfirmDeleteAlert } from "@/utils/alerts";
 
 type Selected = { url: string; public_id: string; isVideo: boolean };
 
@@ -99,10 +98,7 @@ export default function CloudinaryMediaGrid({
               <Button
                 type="button"
                 className="inline-flex items-center justify-center rounded-xl bg-[#FFFDFC] text-[#A14B43] transition hover:bg-[#FCF1EF] disabled:opacity-50 disabled:cursor-not-allowed h-8 w-8"
-                onClick={async () => {
-                  const ok = await showConfirmDeleteAlert("¿Eliminar?", "Esta acción no se puede deshacer.", "Sí, eliminar");
-                  if (ok) onDelete(it.public_id);
-                }}
+                onClick={() => onDelete(it.public_id)}
                 disabled={isDeleting}
                 title="Eliminar"
               >
