@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import Swal from "sweetalert2"
+import { showConfirmDeleteAlert, showSuccessAlert, showErrorAlertEmpty } from "@/utils/alerts"
 
 import { useUsers } from "@/hooks/settings/useUsers"
 import { useUserMutations } from "@/hooks/settings/useUserMutations"
@@ -30,47 +30,20 @@ export default function SettingsUsersPage() {
   const rows = useMemo(() => users, [users])
 
   const onDeactivate = async (id: number) => {
-    const r = await Swal.fire({
-      title: "¿Desactivar usuario?",
-      html: `El usuario no podrá iniciar sesión hasta que lo actives de nuevo.`,
-      icon: "warning",
-      iconColor: "#CDBF6A",
-      background: "#F7F3E8",
-      color: "#1F3D2C",
-      showCancelButton: true,
-      confirmButtonText: "Sí, desactivar",
-      cancelButtonText: "Cancelar",
-      buttonsStyling: false,
-      scrollbarPadding: false,
-      customClass: {
-        popup: "rounded-[32px] px-8 py-10",
-        title: "!text-[#1F3D2C] !text-3xl !font-extrabold",
-        htmlContainer: "!text-[#556B2F] !text-lg !leading-relaxed",
-        actions: "!mt-8 !flex !gap-6",
-        confirmButton:
-          "!bg-[#E3342F] !text-white !font-bold !rounded-full !px-8 !py-4 !shadow-[0_10px_25px_rgba(227,52,47,0.22)] hover:!bg-[#cf2e2a] transition",
-        cancelButton:
-          "!bg-[#789A3B] !text-white !font-bold !rounded-full !px-8 !py-4 !shadow-[0_10px_25px_rgba(120,154,59,0.22)] hover:!bg-[#6c8c34] transition",
-      },
-    })
+    const ok = await showConfirmDeleteAlert(
+      "¿Desactivar usuario?",
+      "El usuario no podrá iniciar sesión hasta que lo actives de nuevo.",
+      "Sí, desactivar"
+    )
 
-    if (!r.isConfirmed) return
+    if (!ok) return
 
     try {
       await m.deactivate.mutateAsync(id)
 
-      await Swal.fire({
-        icon: "success",
-        title: "Usuario desactivado",
-        timer: 1200,
-        showConfirmButton: false,
-      })
+      await showSuccessAlert("Usuario desactivado", "Usuario desactivado")
     } catch (e: any) {
-      await Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: getApiErrorMessage(e),
-      })
+      await showErrorAlertEmpty(getApiErrorMessage(e))
     }
   }
 
@@ -78,18 +51,9 @@ export default function SettingsUsersPage() {
     try {
       await m.activate.mutateAsync(id)
 
-      await Swal.fire({
-        icon: "success",
-        title: "Usuario activado",
-        timer: 1200,
-        showConfirmButton: false,
-      })
+      await showSuccessAlert("Usuario activado", "Usuario activado")
     } catch (e: any) {
-      await Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: getApiErrorMessage(e),
-      })
+      await showErrorAlertEmpty(getApiErrorMessage(e))
     }
   }
 

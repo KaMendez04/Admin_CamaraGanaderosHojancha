@@ -2,14 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import {
   ImagePlus,
   UploadCloud,
-  X,
   Loader2,
   CheckCircle2,
   AlertCircle,
-  Trash2,
-  RefreshCcw,
 } from "lucide-react";
 import type { UploadQueueItem } from "@/hooks/Cloudinary/useCloudinaryUploadQueue";
+import { ActionButtons } from "@/components/ActionButtons";
+
 
 type Props = {
   open: boolean;
@@ -18,6 +17,7 @@ type Props = {
   queue: UploadQueueItem[];
   onRemove: (id: string) => void;
   onRetry: (id: string) => void;
+  onConfirmOverwrite: (id: string) => void;
   onClearFinished: () => void;
   isUploading?: boolean;
 };
@@ -27,8 +27,8 @@ export default function CloudinaryUploadSheet({
   onClose,
   onAddFiles,
   queue,
-  onRemove,
   onRetry,
+  onConfirmOverwrite,
   onClearFinished,
   isUploading = false,
 }: Props) {
@@ -78,9 +78,8 @@ export default function CloudinaryUploadSheet({
             ? "opacity 320ms cubic-bezier(0.4, 0, 1, 1)"
             : "opacity 480ms cubic-bezier(0.0, 0, 0.2, 1)",
         }}
-        className={`absolute inset-0 bg-black/35 backdrop-blur-[1.5px] ${
-          isVisible ? "opacity-100" : "opacity-0"
-        }`}
+        className={`absolute inset-0 bg-black/35 backdrop-blur-[1.5px] ${isVisible ? "opacity-100" : "opacity-0"
+          }`}
         onClick={() => {
           if (!isUploading) onClose();
         }}
@@ -92,9 +91,8 @@ export default function CloudinaryUploadSheet({
             ? "transform 340ms cubic-bezier(0.4, 0, 0.6, 1)"
             : "transform 560ms cubic-bezier(0.16, 1, 0.3, 1)",
         }}
-        className={`absolute right-0 top-0 flex h-full w-full max-w-[520px] flex-col border-l border-[#E5E7EB] bg-white shadow-2xl will-change-transform ${
-          isVisible ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`absolute right-0 top-0 flex h-full w-full max-w-[520px] flex-col border-l border-[#E5E7EB] bg-white shadow-2xl will-change-transform ${isVisible ? "translate-x-0" : "translate-x-full"
+          }`}
       >
         <div className="flex items-start justify-between border-b border-[#E5E7EB] bg-[#FAF9F5] px-5 py-3">
           <div className="flex items-start gap-3">
@@ -109,16 +107,15 @@ export default function CloudinaryUploadSheet({
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
+          <ActionButtons
+            size="sm"
+            onCancel={() => {
               if (!isUploading) onClose();
             }}
+            showCancel={true}
             disabled={isUploading}
-            className="rounded-lg border border-[#E5E7EB] p-2 text-[#6B7280] transition hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          />
+
         </div>
 
         <div className="overflow-y-auto px-5 pb-5 pt-4">
@@ -133,11 +130,10 @@ export default function CloudinaryUploadSheet({
               setIsDragging(false);
               handleFiles(e.dataTransfer.files);
             }}
-            className={`rounded-2xl border-2 border-dashed px-6 pb-6 pt-3 text-center transition ${
-              isDragging
-                ? "border-[#7A9538] bg-[#F3F8EA]"
-                : "border-[#D6DDE5] bg-[#FAF9F5]"
-            }`}
+            className={`rounded-2xl border-2 border-dashed px-6 pb-6 pt-3 text-center transition ${isDragging
+              ? "border-[#7A9538] bg-[#F3F8EA]"
+              : "border-[#D6DDE5] bg-[#FAF9F5]"
+              }`}
           >
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-white">
               <UploadCloud className="h-7 w-7 text-[#556B2F]" />
@@ -148,16 +144,20 @@ export default function CloudinaryUploadSheet({
             </h3>
 
             <p className="mt-1 text-sm text-[#6B7280]">
-              o presioná el botón para explorar archivos
+              o presioná el botón para explorar archivos en el equipo
             </p>
 
-            <button
-              type="button"
-              onClick={() => inputRef.current?.click()}
-              className="mt-4 inline-flex items-center rounded-xl bg-[#6E8B3D] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#5E7834]"
-            >
-              Seleccionar archivos
-            </button>
+            <div className="mt-4">
+              <ActionButtons
+                onUpload={() => inputRef.current?.click()}
+                showUpload={true}
+                showText={true}
+                uploadText="Seleccionar archivos"
+                isUploading={isUploading}
+              />
+            </div>
+
+
 
             <input
               ref={inputRef}
@@ -181,14 +181,15 @@ export default function CloudinaryUploadSheet({
               Cola de subida
             </h4>
 
-            <button
-              type="button"
-              onClick={onClearFinished}
+            <ActionButtons
+              size="sm"
+              onCancelAlt={onClearFinished}
+              showCancelAlt={true}
+              showText={true}
+              cancelAltText="Limpiar terminados"
               disabled={isUploading}
-              className="text-sm font-medium text-[#556B2F] transition hover:underline disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Limpiar terminados
-            </button>
+            />
+
           </div>
 
           <div className="mt-4 space-y-3">
@@ -233,33 +234,27 @@ export default function CloudinaryUploadSheet({
                             <Loader2 className="h-4 w-4 animate-spin text-[#556B2F]" />
                           )}
                           {item.status === "success" && (
-                            <CheckCircle2 className="h-4 w-4 text-green-600" />
+                            <CheckCircle2 className="h-4 w-4 text-[#7A9538]" />
                           )}
                           {item.status === "error" && (
                             <AlertCircle className="h-4 w-4 text-red-600" />
                           )}
-
-                          {item.status !== "uploading" && (
-                            <button
-                              type="button"
-                              onClick={() => onRemove(item.id)}
-                              className="rounded-md p-1 text-[#6B7280] transition hover:bg-[#F8FAFC]"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
+                          {item.status === "conflict" && (
+                            <AlertCircle className="h-4 w-4 text-amber-500" />
                           )}
                         </div>
                       </div>
 
                       <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-[#EDF2E7]">
                         <div
-                          className={`h-full rounded-full transition-all duration-300 ${
-                            item.status === "error"
-                              ? "bg-red-400"
+                          className={`h-full rounded-full transition-all duration-300 ${item.status === "error"
+                            ? "bg-red-400"
+                            : item.status === "conflict"
+                              ? "bg-[#C19A3D]"
                               : item.status === "success"
-                              ? "bg-green-500"
-                              : "bg-[#7A9538]"
-                          }`}
+                                ? "bg-[#7A9538]"
+                                : "bg-[#C19A3D]"
+                            }`}
                           style={{ width: `${item.progress}%` }}
                         />
                       </div>
@@ -273,15 +268,28 @@ export default function CloudinaryUploadSheet({
                         </span>
 
                         {item.status === "error" && (
-                          <button
-                            type="button"
-                            onClick={() => onRetry(item.id)}
-                            className="inline-flex items-center gap-1 text-xs font-medium text-[#556B2F] hover:underline"
-                          >
-                            <RefreshCcw className="h-3.5 w-3.5" />
-                            Reintentar
-                          </button>
+                          <ActionButtons
+                            size="sm"
+                            onRefresh={() => onRetry(item.id)}
+                            showRefresh={true}
+                            showText={true}
+                            refreshText="Reintentar"
+                          />
                         )}
+
+                        {item.status === "conflict" && (
+                          <div className="flex flex-row gap-2 items-center">
+                            <p className="text-[10px] text-amber-600">Al presionar sobrescribir se borrará la versión anterior.</p>
+                            <ActionButtons
+                              size="sm"
+                              onUpload={() => onConfirmOverwrite(item.id)}
+                              showUpload={true}
+                              showText={true}
+                              uploadText="Sobrescribir"
+                            />
+                          </div>
+                        )}
+
                       </div>
 
                       {item.error && (

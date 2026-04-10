@@ -55,16 +55,20 @@ export const cloudinaryServiceQueue = {
     } as CloudinaryAsset;
   },
 
-  async uploadSafe(file: File) {
+  async uploadSafe(file: File, overwrite = false) {
     const form = new FormData();
     form.append("file", file);
 
-    const { data } = await apiConfig.post<any>("/cloudinary/upload-safe", form, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-      timeout: 60000,
-    });
+    const { data } = await apiConfig.post<any>(
+      `/cloudinary/upload-safe${overwrite ? "?overwrite=true" : ""}`,
+      form,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        timeout: 60000,
+      }
+    );
 
     const url = data?.url ?? data?.secure_url;
 
@@ -77,5 +81,15 @@ export const cloudinaryServiceQueue = {
 
   async remove(publicId: string) {
     return apiConfig.delete(`/cloudinary/${encodeURIComponent(publicId)}`);
+  },
+
+  async checkExists(publicId: string) {
+    try {
+      await apiConfig.get(`/cloudinary/${encodeURIComponent(publicId)}`);
+      return true;
+    } catch (error: any) {
+      if (error?.response?.status === 404) return false;
+      throw error;
+    }
   },
 };

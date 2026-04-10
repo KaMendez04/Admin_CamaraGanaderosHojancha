@@ -9,16 +9,22 @@ import {
   Upload,
   RefreshCw,
   Save,
+  Check,
+  Copy,
   Plus,
   Send,
+
   X,
   ChevronLeft,
   ChevronRight,
+  BrushCleaning,
 } from "lucide-react";
-import Swal from "sweetalert2";
 import { Loader2 } from "lucide-react";
+import { showConfirmAlert, showConfirmDeleteAlert, showErrorAlertEmpty } from "@/utils/alerts";
 
-type ActionButtonSize = "sm" | "md" | "lg";
+
+
+type ActionButtonSize = "xs" | "sm" | "md" | "lg";
 
 type ActionButtonsProps = {
   onView?: () => void;
@@ -119,10 +125,15 @@ type ActionButtonsProps = {
   cancelAltConfirmTitle?: string;
   cancelAltConfirmText?: string;
 
-validateCreateAlt?: () => string | null | Promise<string | null>;
-createAltBlockedTitle?: string;
+  validateCreateAlt?: () => string | null | Promise<string | null>;
+  createAltBlockedTitle?: string;
 
+  onCopy?: () => void;
+  showCopy?: boolean;
+  isCopied?: boolean;
+  copyText?: string;
 };
+
 export function ActionButtons({
   onView,
   onEdit,
@@ -222,23 +233,22 @@ export function ActionButtons({
   cancelAltConfirmText = "¿Desea continuar?",
 
   validateCreateAlt,
-  createAltBlockedTitle = "No se puede crear",
+  onCopy,
+  showCopy = false,
+  isCopied = false,
+  copyText = "Copiar",
 }: ActionButtonsProps) {
-  const swalBase = {
-    background: "#FAF9F5",
-    scrollbarPadding: false,
-    heightAuto: false,
-    focusConfirm: false,
-    focusCancel: true,
-    returnFocus: false,
-    customClass: {
-      popup: "rounded-2xl",
-      confirmButton: "rounded-xl px-6 py-3 font-semibold",
-      cancelButton: "rounded-xl px-6 py-3 font-semibold",
-    },
-  };
+
+
 
   const sizeMap = {
+    xs: {
+      icon: "h-3 w-3",
+      iconOnly: "h-8 w-8",
+      withText: "h-8 px-2.5 text-xs font-semibold",
+      gap: "gap-1",
+      wrapperGap: "gap-1",
+    },
     sm: {
       icon: "h-4 w-4",
       iconOnly: "h-9 w-9",
@@ -276,23 +286,17 @@ export function ActionButtons({
     "inline-flex items-center justify-center rounded-xl border border-[#E6D8A8] bg-[#FFFDF7] text-[#9B7A29] transition hover:bg-[#FFF7E8] disabled:opacity-50 disabled:cursor-not-allowed";
   const baseSuccessSoft =
     "inline-flex items-center justify-center rounded-xl border border-[#D6E3B2] bg-[#FBFDF7] text-[#5F7728] transition hover:bg-[#F2F7E7] disabled:opacity-50 disabled:cursor-not-allowed";
-const baseBack =
+  const baseBack =
     "inline-flex items-center justify-center rounded-3xl bg-[#5B732E] text-white transition hover:bg-[#51682A] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm";
-  
+
   const handleApprove = async () => {
     if (requireConfirmApprove) {
-      const result = await Swal.fire({
-        ...swalBase,
-        title: approveConfirmTitle,
-        text: approveConfirmText,
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonColor: "#6F8C1F",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Sí, aprobar",
-        cancelButtonText: "Cancelar",
-      });
-      if (result.isConfirmed) onApprove?.();
+      const ok = await showConfirmAlert(
+        approveConfirmTitle,
+        approveConfirmText
+      );
+      if (ok) onApprove?.();
+
     } else {
       onApprove?.();
     }
@@ -300,21 +304,12 @@ const baseBack =
 
   const handleReject = async () => {
     if (requireConfirmReject) {
-      const result = await Swal.fire({
-        ...swalBase,
-        title: rejectConfirmTitle,
-        text: rejectConfirmText,
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#5B732E",
-        confirmButtonText: "Sí, rechazar",
-        cancelButtonText: "Cancelar",
-        allowOutsideClick: false,
-        allowEscapeKey: true,
-        stopKeydownPropagation: false,
-      });
-      if (result.isConfirmed) onReject?.();
+      const ok = await showConfirmAlert(
+        rejectConfirmTitle,
+        rejectConfirmText
+      );
+      if (ok) onReject?.();
+
     } else {
       onReject?.();
     }
@@ -322,18 +317,12 @@ const baseBack =
 
   const handleDelete = async () => {
     if (requireConfirmDelete) {
-      const result = await Swal.fire({
-        ...swalBase,
-        title: deleteConfirmTitle,
-        text: deleteConfirmText,
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#B85C4C",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Sí, eliminar",
-        cancelButtonText: "Cancelar",
-      });
-      if (result.isConfirmed) onDelete?.();
+      const ok = await showConfirmDeleteAlert(
+        deleteConfirmTitle,
+        deleteConfirmText
+      );
+      if (ok) onDelete?.();
+
     } else {
       onDelete?.();
     }
@@ -341,18 +330,12 @@ const baseBack =
 
   const handleCancel = async () => {
     if (requireConfirmCancel) {
-      const result = await Swal.fire({
-        ...swalBase,
-        title: cancelConfirmTitle,
-        text: cancelConfirmText,
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#5B732E",
-        confirmButtonText: "Sí, cancelar",
-        cancelButtonText: "No, continuar",
-      });
-      if (result.isConfirmed) onCancel?.();
+      const ok = await showConfirmAlert(
+        cancelConfirmTitle,
+        cancelConfirmText
+      );
+      if (ok) onCancel?.();
+
     } else {
       onCancel?.();
     }
@@ -360,74 +343,50 @@ const baseBack =
 
   const handleSave = async () => {
     if (requireConfirmSave) {
-      const result = await Swal.fire({
-        ...swalBase,
-        title: saveConfirmTitle,
-        text: saveConfirmText,
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonColor: "#5B732E",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Sí, guardar",
-        cancelButtonText: "Cancelar",
-      });
-      if (result.isConfirmed) onSave?.();
+      const ok = await showConfirmAlert(
+        saveConfirmTitle,
+        saveConfirmText
+      );
+      if (ok) onSave?.();
+
     } else {
       onSave?.();
     }
   };
 
   const handleCreateAlt = async () => {
-  const blockedMessage = await validateCreateAlt?.();
+    const blockedMessage = await validateCreateAlt?.();
 
-  if (blockedMessage) {
-    await Swal.fire({
-      ...swalBase,
-      title: createAltBlockedTitle,
-      text: blockedMessage,
-      icon: "warning",
-      confirmButtonColor: "#5B732E",
-      confirmButtonText: "Entendido",
-    });
-    return;
-  }
+    if (blockedMessage) {
+      await showErrorAlertEmpty(blockedMessage);
+      return;
 
-  if (requireConfirmCreateAlt) {
-    const result = await Swal.fire({
-      ...swalBase,
-      title: createAltConfirmTitle,
-      text: createAltConfirmText,
-      icon: "question",
-      iconColor: "#C19A3D",
-      showCancelButton: true,
-      confirmButtonColor: "#5B732E",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Sí, crear",
-      cancelButtonText: "Cancelar",
-    });
+    }
 
-    if (result.isConfirmed) {
+    if (requireConfirmCreateAlt) {
+      const ok = await showConfirmAlert(
+        createAltConfirmTitle,
+        createAltConfirmText
+      );
+
+      if (ok) {
+        await onCreateAlt?.();
+      }
+
+    } else {
       await onCreateAlt?.();
     }
-  } else {
-    await onCreateAlt?.();
-  }
-};
+  };
 
   const handleCancelAlt = async () => {
     if (requireConfirmCancelAlt) {
-      const result = await Swal.fire({
-        ...swalBase,
-        title: cancelAltConfirmTitle,
-        text: cancelAltConfirmText,
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#5B732E",
-        confirmButtonText: "Sí, cerrar",
-        cancelButtonText: "No, continuar",
-      });
-      if (result.isConfirmed) onCancelAlt?.();
+      const ok = await showConfirmAlert(
+        cancelAltConfirmTitle,
+        cancelAltConfirmText
+      );
+
+      if (ok) onCancelAlt?.();
+
     } else {
       onCancelAlt?.();
     }
@@ -535,12 +494,13 @@ const baseBack =
         <button
           type="button"
           onClick={handleCancelAlt}
-          disabled={isSaving}
+          disabled={isSaving || disabled}
           className={`${baseWarn} ${showText ? `${current.withText} w-full sm:w-auto` : current.iconOnly} ${current.gap}`}
+
           title={cancelAltText}
           aria-label={cancelAltText}
         >
-          <XCircle className={iconSize} />
+          <BrushCleaning className={iconSize} />
           {showText && <span>{cancelAltText}</span>}
         </button>
       )}
@@ -551,6 +511,7 @@ const baseBack =
           onClick={handleCreateAlt}
           disabled={isSaving || disabled}
           className={`${basePrimary} ${showText ? `${current.withText} w-full sm:w-auto` : current.iconOnly} ${current.gap}`}
+
           title={createAltText}
           aria-label={createAltText}
         >
@@ -637,7 +598,7 @@ const baseBack =
           type="button"
           onClick={onUpload}
           disabled={isUploading || disabled}
-          className={`${baseGhost} ${buttonSize} ${current.gap}`}
+          className={`${basePrimary} ${buttonSize} ${current.gap}`}
           title="Subir"
           aria-label="Subir"
         >
@@ -660,7 +621,25 @@ const baseBack =
         </button>
       )}
 
+      {showCopy && onCopy && (
+        <button
+          type="button"
+          onClick={onCopy}
+          className={`${baseGhost} ${buttonSize} ${current.gap}`}
+          title={copyText}
+          aria-label={copyText}
+        >
+          {isCopied ? (
+            <Check className={`${iconSize} text-green-600`} />
+          ) : (
+            <Copy className={iconSize} />
+          )}
+          {showText && <span>{isCopied ? "Copiado" : copyText}</span>}
+        </button>
+      )}
+
       {showBack && onBack && (
+
         <button
           type="button"
           onClick={onBack}

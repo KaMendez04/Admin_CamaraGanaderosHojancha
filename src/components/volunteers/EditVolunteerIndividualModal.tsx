@@ -7,7 +7,7 @@ import {
 } from "../../utils/alerts";
 import { useZodValidation } from "../../hooks/Volunteers/useZodValidation";
 import { UpdateVoluntarioIndividualSchema } from "../../schemas/updateVolunteerSchema";
-import Swal from "sweetalert2";
+import { showConfirmDeleteAlert, showWarningAlert } from "../../utils/alerts";
 import { useToggleVolunteerStatus } from "../../hooks/Volunteers/individual/useToggleVolunteerStatus";
 import { ActionButtons } from "../../components/ActionButtons";
 import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll";
@@ -59,34 +59,17 @@ export function EditVolunteerIndividualModal({
   const handleToggleClick = async () => {
     const currentStatus = voluntario.isActive ?? false;
 
-    const result = await Swal.fire({
-      title: currentStatus ? "¿Desactivar voluntario?" : "¿Activar voluntario?",
-      html: currentStatus
-        ? `Estás a punto de <span style="color:#dc2626;font-weight:700;">desactivar</span> a <span style="color:#1F3D2C;font-weight:700;">${voluntario.persona.nombre} ${voluntario.persona.apellido1}</span>. El voluntario no podrá acceder a la plataforma hasta que sea reactivado.`
-        : `Estás a punto de <span style="color:#5B732E;font-weight:700;">activar</span> a <span style="color:#1F3D2C;font-weight:700;">${voluntario.persona.nombre} ${voluntario.persona.apellido1}</span>. El voluntario podrá acceder a la plataforma.`,
-      icon: "warning",
-      iconColor: "#CDBF6A",
-      background: "#F7F3E8",
-      color: "#1F3D2C",
-      showCancelButton: true,
-      confirmButtonText: currentStatus ? "Sí, desactivar" : "Sí, activar",
-      cancelButtonText: "Cancelar",
-      buttonsStyling: false,
-      customClass: {
-        popup: "rounded-[32px] px-8 py-10",
-        title: "!text-[#1F3D2C] !text-3xl !font-extrabold",
-        htmlContainer: "!text-[#556B2F] !text-lg !leading-relaxed",
-        actions: "!mt-8 !flex !gap-6",
-        confirmButton: currentStatus
-          ? "!bg-[#E3342F] !text-white !font-bold !rounded-full !px-8 !py-4 !shadow-[0_10px_25px_rgba(227,52,47,0.22)] hover:!bg-[#cf2e2a] transition"
-          : "!bg-[#789A3B] !text-white !font-bold !rounded-full !px-8 !py-4 !shadow-[0_10px_25px_rgba(120,154,59,0.22)] hover:!bg-[#6c8c34] transition",
-        cancelButton: currentStatus
-          ? "!bg-[#789A3B] !text-white !font-bold !rounded-full !px-8 !py-4 !shadow-[0_10px_25px_rgba(120,154,59,0.22)] hover:!bg-[#6c8c34] transition"
-          : "!bg-[#E3342F] !text-white !font-bold !rounded-full !px-8 !py-4 !shadow-[0_10px_25px_rgba(227,52,47,0.22)] hover:!bg-[#cf2e2a] transition",
-      },
-    });
+    const result = currentStatus 
+      ? await showConfirmDeleteAlert(
+          "¿Desactivar voluntario?",
+          `Estás a punto de desactivar a ${voluntario.persona.nombre} ${voluntario.persona.apellido1}. El voluntario no podrá acceder a la plataforma hasta que sea reactivado.`,
+          "Sí, desactivar"
+        )
+      : await showWarningAlert(
+          `Estás a punto de activar a ${voluntario.persona.nombre} ${voluntario.persona.apellido1}. El voluntario podrá acceder a la plataforma.`
+        );
 
-    if (result.isConfirmed) {
+    if (result) {
       await toggleStatus.mutateAsync(voluntario.idVoluntario);
       onSaved?.();
       onClose();

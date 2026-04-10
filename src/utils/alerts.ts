@@ -12,6 +12,13 @@ import Swal from 'sweetalert2';
   const style = document.createElement('style');
   style.textContent = `
     .no-border-button { border: 0 !important; box-shadow: none !important; }
+    div.swal2-popup { border-radius: 16px !important; }
+    button.swal2-confirm, button.swal2-cancel { 
+      border-radius: 9999px !important; 
+      padding: 10px 24px !important; 
+      font-weight: 600 !important; 
+      font-size: 15px !important;
+    }
   `;
   document.head.appendChild(style);
   
@@ -19,7 +26,9 @@ import Swal from 'sweetalert2';
 
 // ─── Configuración base de apariencia (solo fondo + tipografía + icono) ───────
 
-const LIGHT_BG = '#FFFCE6';
+const LIGHT_BG = '#FAF9F5';
+const COLOR_VERDE = '#708C3E';
+const COLOR_ROJO = '#8C3A33';
 
 const lightClass = {
   popup: 'camara-popup',
@@ -67,7 +76,7 @@ export const showErrorAlertLogin = (message: string) => {
     icon: 'error',
     title: 'Inicio de sesión fallido',
     text: message,
-    confirmButtonColor: '#48a6a7',
+    confirmButtonColor: COLOR_ROJO,
     allowOutsideClick: false,
     allowEscapeKey: false,
     customClass: { ...lightClass, confirmButton: 'no-border-button', icon: 'camara-icon-error' },
@@ -98,13 +107,14 @@ export const showSuccessAlertRegister = (message: string) => {
   });
 };
 
-export const showErrorAlertEmpty = (message: string) => {
+export const showErrorAlertEmpty = (message: string, title: string = 'Error') => {
   return BaseSwal.fire({
     icon: 'error',
-    title: 'Formulario inválido',
+    title,
     text: message,
+    confirmButtonColor: COLOR_ROJO,
     background: LIGHT_BG,
-    customClass: { ...lightClass, icon: 'camara-icon-error' },
+    customClass: { ...lightClass, icon: 'camara-icon-error', confirmButton: 'no-border-button' },
     heightAuto: false,
     scrollbarPadding: false,
     allowOutsideClick: false,
@@ -118,7 +128,7 @@ export const showErrorDuplicateEmail = (message: string) => {
     icon: 'warning',
     title: 'Email duplicado',
     text: message,
-    confirmButtonColor: '#48a6a7',
+    confirmButtonColor: COLOR_ROJO,
     customClass: { ...lightClass, confirmButton: 'no-border-button', icon: 'camara-icon-error' },
     background: LIGHT_BG,
     heightAuto: false,
@@ -135,12 +145,12 @@ export const showWarningAlert = (message: string) => {
     text: message,
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#48a6a7',
-    customClass: { ...lightClass, confirmButton: 'no-border-button', icon: 'camara-icon-error' },
-    cancelButtonColor: '#d33',
+    confirmButtonColor: COLOR_VERDE,
+    cancelButtonColor: COLOR_ROJO,
     confirmButtonText: 'Sí, continuar',
     cancelButtonText: 'No, cancelar',
     reverseButtons: false,
+    customClass: { ...lightClass, confirmButton: 'no-border-button', cancelButton: 'no-border-button', icon: 'camara-icon-error' },
     background: LIGHT_BG,
     heightAuto: false,
     scrollbarPadding: false,
@@ -150,12 +160,12 @@ export const showWarningAlert = (message: string) => {
   });
 };
 
-export const showErrorAlertRegister = (message: string) => {
+export const showErrorAlertRegister = (message: string, title: string = 'Error') => {
   return BaseSwal.fire({
     icon: 'error',
-    title: 'Error al registrar',
+    title,
     text: message,
-    confirmButtonColor: '#48a6a7',
+    confirmButtonColor: COLOR_ROJO,
     customClass: { ...lightClass, confirmButton: 'no-border-button', icon: 'camara-icon-error' },
     background: LIGHT_BG,
     heightAuto: false,
@@ -174,13 +184,13 @@ export const showConfirmAlert = async (title: string, text: string) => {
     text,
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#708C3E',
-    cancelButtonColor: '#d33',
+    confirmButtonColor: COLOR_VERDE,
+    cancelButtonColor: COLOR_ROJO,
     confirmButtonText: 'Sí, continuar',
     cancelButtonText: 'Cancelar',
     reverseButtons: false,
     background: LIGHT_BG,
-    customClass: { ...lightClass, icon: 'camara-icon-error' },
+    customClass: { ...lightClass, confirmButton: 'no-border-button', cancelButton: 'no-border-button', icon: 'camara-icon-error' },
     heightAuto: false,
     scrollbarPadding: false,
     allowOutsideClick: false,
@@ -191,21 +201,19 @@ export const showConfirmAlert = async (title: string, text: string) => {
   return result.isConfirmed;
 };
 
-export const showConfirmDeleteAlert = async (title: string, text: string) => {
+export const showConfirmDeleteAlert = async (title: string, text: string, confirmButtonText: string = "Sí, eliminar") => {
   const result = await BaseSwal.fire({
     title,
     text,
     icon: "warning",
     showCancelButton: true,
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#708C3E",
-    confirmButtonText: "Sí, eliminar",
+    confirmButtonColor: COLOR_ROJO,
+    cancelButtonColor: COLOR_VERDE,
+    confirmButtonText,
     cancelButtonText: "Cancelar",
     reverseButtons: false,
-
-    // 👇 ESTO ES LO QUE LO HACE IGUAL
     background: LIGHT_BG,
-    customClass: { ...lightClass, icon: "camara-icon-error" },
+    customClass: { ...lightClass, confirmButton: 'no-border-button', cancelButton: 'no-border-button', icon: "camara-icon-error" },
     heightAuto: false,
     scrollbarPadding: false,
     allowOutsideClick: false,
@@ -222,12 +230,13 @@ export const showConfirmApproveRejectedAlert = async () => {
     text: '¿Estás seguro de querer aprobar a este solicitante que había sido rechazado?',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#708C3E',
-    cancelButtonColor: '#8C3A33',
+    confirmButtonColor: COLOR_VERDE,
+    cancelButtonColor: COLOR_ROJO,
     confirmButtonText: 'Sí, aprobar',
     cancelButtonText: 'Cancelar',
+    reverseButtons: false,
     background: LIGHT_BG,
-    customClass: { ...lightClass, confirmButton: 'no-border-button', icon: 'camara-icon-error' },
+    customClass: { ...lightClass, confirmButton: 'no-border-button', cancelButton: 'no-border-button', icon: 'camara-icon-error' },
     heightAuto: false,
     scrollbarPadding: false,
     allowOutsideClick: false,
@@ -244,13 +253,13 @@ export const showConfirmOutAlert = async (title: string, text: string) => {
     text,
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#d33',
-    cancelButtonColor: '#708C3E',
+    confirmButtonColor: COLOR_ROJO,
+    cancelButtonColor: COLOR_VERDE,
     confirmButtonText: 'Sí, salir',
     cancelButtonText: 'Cancelar',
     reverseButtons: false,
     background: LIGHT_BG,
-    customClass: { ...lightClass, icon: 'camara-icon-error' },
+    customClass: { ...lightClass, confirmButton: 'no-border-button', cancelButton: 'no-border-button', icon: 'camara-icon-error' },
     heightAuto: false,
     scrollbarPadding: false,
     allowOutsideClick: false,
@@ -263,17 +272,17 @@ export const showConfirmOutAlert = async (title: string, text: string) => {
 
 // ─── Éxito genérico ───────────────────────────────────────────────────────────
 
-export const showSuccessAlert = (message: string) => {
+export const showSuccessAlert = (message: string, title: string = 'Éxito') => {
   return BaseSwal.fire({
     icon: 'success',
-    title: 'Guardado con éxito',
+    title,
     text: message,
     timer: 2000,
     timerProgressBar: true,
     showConfirmButton: false,
     allowOutsideClick: false,
     allowEscapeKey: false,
-    confirmButtonColor: '#708C3E',
+    confirmButtonColor: COLOR_VERDE,
     background: LIGHT_BG,
     customClass: { ...lightClass, icon: 'camara-icon-success' },
     heightAuto: false,
@@ -292,11 +301,11 @@ export const showSuccessDeleteAlert = (message: string) => {
     showConfirmButton: false,
     allowOutsideClick: false,
     allowEscapeKey: false,
-    confirmButtonColor: '#708C3E',
+    confirmButtonColor: COLOR_VERDE,
     background: LIGHT_BG,
     customClass: { ...lightClass, icon: 'camara-icon-success' },
     heightAuto: false,
     scrollbarPadding: false,
     backdrop: true,
   });
-};
+};

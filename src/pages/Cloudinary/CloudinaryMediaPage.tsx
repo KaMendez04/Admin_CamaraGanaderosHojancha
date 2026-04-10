@@ -23,6 +23,7 @@ export default function CloudinaryMediaPage() {
     removeFromQueue,
     retryUpload,
     clearFinished,
+    confirmOverwrite,
     isUploading,
     pendingCount,
   } = useCloudinaryUploadQueue();
@@ -205,9 +206,11 @@ export default function CloudinaryMediaPage() {
         queue={queue}
         onRemove={removeFromQueue}
         onRetry={retryUpload}
+        onConfirmOverwrite={confirmOverwrite}
         onClearFinished={clearFinished}
         isUploading={isUploading}
       />
+
     </div>
   );
 }

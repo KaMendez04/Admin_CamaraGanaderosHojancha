@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import Swal from "sweetalert2"
+import { showSuccessAlert, showErrorAlertEmpty } from "@/utils/alerts"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/auth/AuthProvider"
@@ -80,9 +80,9 @@ export function AccountProfileSection() {
       updateUserSession(updated)
 
       setEditing(false)
-      await Swal.fire({ icon: "success", title: "Username actualizado", timer: 1200, showConfirmButton: false })
+      await showSuccessAlert("Username actualizado", "Username actualizado")
     } catch (e: any) {
-      await Swal.fire({ icon: "error", title: "Error", text: e?.message ?? "Ocurrió un error" })
+      await showErrorAlertEmpty(e?.message ?? "Ocurrió un error")
     }
   }
 

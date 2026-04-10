@@ -1,4 +1,4 @@
-import Swal from "sweetalert2"
+import { showSuccessAlert, showErrorAlertEmpty } from "@/utils/alerts"
 import { z } from "zod"
 import { useForm } from "@tanstack/react-form"
 import { Input } from "@/components/ui/input"
@@ -42,27 +42,17 @@ export default function ChangeEmailSection() {
 
         await m.mutateAsync({ id: user!.id, newEmail: parsed.data.newEmail })
 
-        await Swal.fire({
-          icon: "success",
-          title: "Revisa tu correo",
-          text: "Te enviamos un enlace de confirmación al nuevo correo.",
-          confirmButtonColor: "#708C3E",
-          background: "#FFFCE6",
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-        })
+        await showSuccessAlert(
+          "Te enviamos un enlace de confirmación al nuevo correo.",
+          "Revisa tu correo"
+        )
 
         form.reset()
       } catch (e: any) {
-        await Swal.fire({
-          icon: "error",
-          title: "No se pudo solicitar el cambio",
-          text: e?.message ?? "Error",
-          confirmButtonColor: "#708C3E",
-          background: "#FFFCE6",
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-        })
+        await showErrorAlertEmpty(
+          e?.message ?? "Error",
+          "No se pudo solicitar el cambio"
+        )
       }
     },
   })

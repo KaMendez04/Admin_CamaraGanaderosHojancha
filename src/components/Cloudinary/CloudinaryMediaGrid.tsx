@@ -1,5 +1,6 @@
-import { Check, Copy, Eye, Trash2 } from "lucide-react";
+import { ActionButtons } from "../ActionButtons";
 import type { ViewMode } from "@/utils/cloudinaryMediaUtils";
+
 import { isVideoUrl, videoMp4Url, videoPosterJpg } from "@/utils/cloudinaryMediaUtils";
 
 type Selected = { url: string; public_id: string; isVideo: boolean };
@@ -27,15 +28,15 @@ export default function CloudinaryMediaGrid({
     view === "small"
       ? "grid-cols-3 sm:grid-cols-4 lg:grid-cols-6"
       : view === "medium"
-      ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
-      : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
+        ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+        : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
 
   const aspect =
     view === "small"
       ? "aspect-square"
       : view === "medium"
-      ? "aspect-[4/3]"
-      : "aspect-[16/10]";
+        ? "aspect-[4/3]"
+        : "aspect-[16/10]";
 
   return (
     <div className={`grid gap-3 sm:gap-4 ${gridCols}`}>
@@ -77,36 +78,28 @@ export default function CloudinaryMediaGrid({
               )}
             </div>
 
-            <div className="flex items-center justify-between px-2.5 sm:px-3 py-2 sm:py-2.5 lg:px-8">
-              <button
-                onClick={() => onCopy(url, it.public_id)}
-                className="inline-flex items-center text-sm font-medium text-[#33361D] hover:text-[#708C3E] transition"
-                title="Copiar enlace"
-              >
-                {copiedId === it.public_id ? (
-                  <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600" />
-                ) : (
-                  <Copy className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                )}
-              </button>
-
-              <button
-                onClick={() => onOpen({ url, public_id: it.public_id, isVideo })}
-                className="inline-flex items-center text-sm font-medium text-[#33361D] hover:text-[#708C3E] transition"
-                title="Ver"
-              >
-                <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              </button>
-
-              <button
-                onClick={() => onDelete(it.public_id)}
-                disabled={!!isDeleting}
-                className="inline-flex items-center text-sm font-medium text-[#6B7280] hover:text-red-700 transition disabled:opacity-60"
-                title="Eliminar"
-              >
-                <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              </button>
+            <div className="flex justify-between p-2 border-t border-[#F8F9F3] bg-[#FCFDF9]/50">
+              <ActionButtons
+                size="xs"
+                onView={() =>
+                  onOpen({ url, public_id: it.public_id, isVideo })
+                }
+              />
+              <ActionButtons
+                size="xs"
+                showDelete={true}
+                onDelete={() => onDelete(it.public_id)}
+                isDeleting={isDeleting}
+                requireConfirmDelete={true}
+              />
+              <ActionButtons
+                size="xs"
+                showCopy={true}
+                onCopy={() => onCopy(url, it.public_id)}
+                isCopied={copiedId === it.public_id}
+              />
             </div>
+
           </div>
         );
       })}

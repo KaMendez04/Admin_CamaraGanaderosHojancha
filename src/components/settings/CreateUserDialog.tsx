@@ -16,6 +16,7 @@ import { strongPasswordSchema } from "@/shared/validators/password"
 import { PasswordInput } from "../ChangePassword/PasswordInput"
 import { CharCounter } from "../CharCounter"
 import { showSuccessAlertRegister } from "@/utils/alerts"
+import { ActionButtons } from "../ActionButtons"
 
 const schema = z.object({
   username: z
@@ -112,8 +113,8 @@ export default function CreateUserDialog({
           Array.isArray(err?.response?.data?.message)
             ? err.response.data.message.join(", ")
             : err?.response?.data?.message ||
-              err?.message ||
-              "No se pudo crear el usuario."
+            err?.message ||
+            "No se pudo crear el usuario."
 
         setSubmitError(msg)
       } finally {
@@ -348,22 +349,21 @@ export default function CreateUserDialog({
           </section>
 
           <div className="flex justify-end gap-3 pt-5 border-t border-[#E6E1D6]">
-            <button
-              type="button"
-              onClick={handleClose}
-              disabled={isSubmitting}
-              className="rounded-full border border-[#DCD6C9] bg-white px-6 py-3 font-semibold text-[#556B2F] transition hover:bg-[#F5F3EA] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Cancelar
-            </button>
 
-            <button
-              type="submit"
+            <ActionButtons
+              saveButtonType="submit"
+              showSave={true}
+              onSave={() => {}}
+              saveText={isSubmitting ? "Creando..." : "Crear usuario"}
+              isSaving={isSubmitting}
+              size="md"
+              showText={true}
+              onCancel={handleClose}
+              showCancel={true}
+              cancelText="Cancelar"
               disabled={isSubmitting}
-              className="rounded-full bg-[#789A3B] px-6 py-3 font-bold text-white shadow-[0_10px_25px_rgba(120,154,59,0.22)] transition hover:bg-[#6c8c34] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? "Creando..." : "Crear usuario"}
-            </button>
+            />
+
           </div>
         </form>
       </DialogContent>
