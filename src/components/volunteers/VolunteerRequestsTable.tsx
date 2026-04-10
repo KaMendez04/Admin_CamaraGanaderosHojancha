@@ -118,7 +118,7 @@ export function VolunteerRequestsTable({
         {
           id: "email",
           header: "Email",
-          size: 220,
+          size: 180,
           cell: (info) => (
             <div
               className="max-w-[240px] truncate text-sm text-slate-600"
@@ -156,7 +156,7 @@ export function VolunteerRequestsTable({
       columnHelper.accessor("fechaSolicitud", {
         header: "Fecha",
         size: 110,
-       // DESPUÉS
+
         cell: (info) => {
           const raw: string = info.getValue() ?? ""
           const datePart = raw.split("T")[0]

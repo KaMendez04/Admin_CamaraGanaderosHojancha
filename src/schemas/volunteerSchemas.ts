@@ -82,6 +82,7 @@ export const VoluntarioIndividualSchema = z.object({
   cartaUrl: z.string().nullable().optional(),
   areasInteres: z.array(AreaInteresSchema).optional().default([]),
   disponibilidades: z.array(DisponibilidadSchema).optional().default([]),
+  solicitud: SolicitudMinimalSchema,
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -141,6 +142,7 @@ export const OrganizacionSchema = z.object({
   razonesSociales: z.array(RazonSocialSchema).optional(),
   areasInteres: z.array(AreaInteresSchema).optional(),
   disponibilidades: z.array(DisponibilidadSchema).optional(),
+  solicitud: SolicitudMinimalSchema,
   createdAt: z.string(),
   updatedAt: z.string(),
 });

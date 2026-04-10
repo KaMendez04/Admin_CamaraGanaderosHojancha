@@ -14,6 +14,7 @@ export type UnifiedVolunteerRow = {
   telefono: string;
   email: string;
   estado: boolean;
+  fechaResolucion: string | null;
   original: VoluntarioIndividual | Organizacion;
 };
 
@@ -107,6 +108,30 @@ export function UnifiedVolunteersTable({
           {info.getValue()}
         </div>
       ),
+    }),
+
+    columnHelper.accessor("fechaResolucion", {
+      header: "Aprobación",
+      size: 130,
+      cell: (info) => {
+        const val = info.getValue();
+        if (!val) return <div className="text-sm text-slate-400">—</div>;
+        try {
+          const date = new Date(val);
+          return (
+            <div className="text-sm text-slate-600">
+              {date.toLocaleDateString("es-CR", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                timeZone: "UTC",
+              })}
+            </div>
+          );
+        } catch {
+          return <div className="text-sm text-slate-600">{val}</div>;
+        }
+      },
     }),
 
     columnHelper.accessor("estado", {

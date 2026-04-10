@@ -363,6 +363,10 @@ export function ApprovedVolunteerViewModal({
                       />
                     )}
                     <InfoField label="Nacionalidad" value={voluntario.nacionalidad} />
+                    <InfoField
+                      label="Fecha de Aprobación"
+                      value={formatDate(voluntario.solicitud?.fechaResolucion)}
+                    />
                   </Section>
 
                   <div className="border-t border-[#EAEFE0]" />
@@ -391,6 +395,10 @@ export function ApprovedVolunteerViewModal({
                       value={String(organizacion.numeroVoluntarios ?? "—")}
                     />
                     <InfoField label="Dirección" value={organizacion.direccion} wide />
+                    <InfoField
+                      label="Fecha de Aprobación"
+                      value={formatDate(organizacion.solicitud?.fechaResolucion)}
+                    />
                   </Section>
 
                   {organizacion.representantes && organizacion.representantes.length > 0 && (

@@ -93,6 +93,7 @@ export default function VolunteersApprovedPage() {
         telefono: v.persona.telefono,
         email: v.persona.email,
         estado: v.isActive ?? false,
+        fechaResolucion: v.solicitud?.fechaResolucion ?? null,
         original: v,
       })
     );
@@ -107,6 +108,7 @@ export default function VolunteersApprovedPage() {
       telefono: o.telefono,
       email: o.email,
       estado: o.isActive ?? false,
+      fechaResolucion: o.solicitud?.fechaResolucion ?? null,
       original: o,
     }));
 
