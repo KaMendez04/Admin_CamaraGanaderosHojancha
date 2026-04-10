@@ -29,9 +29,9 @@ const MODULE_OPTIONS = [
 const ENTITY_TYPE_OPTIONS = [
   { value: "ALL", label: "Todas las entidades" },
   { value: "INCOME", label: "Ingresos" },
-  { value: "SPEND", label: "Gastos" },
+  { value: "SPEND", label: "Egresos" },
   { value: "P_INCOME", label: "Proyección ingresos" },
-  { value: "P_SPEND", label: "Proyección gastos" },
+  { value: "P_SPEND", label: "Proyección egresos" },
   { value: "EXTRAORDINARY", label: "Extraordinarios" },
 ]
 
