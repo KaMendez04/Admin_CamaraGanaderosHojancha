@@ -56,12 +56,6 @@ const normalizeCreate = (p: CreatePayload) => {
 const normalizeUpdate = (p: UpdatePayload) => {
   const body: any = { ...p };
 
-  // No se actualizan identificadores por tu regla
-  delete body.IDE;
-  delete body.name;
-  delete body.lastname1;
-  delete body.lastname2;
-
   // No enviar estos
   delete body.id;
   delete body.IdUser;

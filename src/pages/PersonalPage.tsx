@@ -18,7 +18,7 @@ import { PaginationBar, usePagination } from "@/components/ui/pagination";
 // ===== API -> UI =====
 function mapApiToUi(p: any): PersonalPageType {
   return {
-    IdUser: p.IdUser ?? p.id ?? 0,
+    IdUser: p.IdUser ?? p.id ?? p.idPersona ?? 0,
     IDE: p.IDE,
     name: p.name,
     lastname1: p.lastname1,

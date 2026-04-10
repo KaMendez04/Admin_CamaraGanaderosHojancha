@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import type { PersonalPageType } from "../../models/PersonalPageType";
 import { usePersonalPdf } from "../../hooks/Personal/usePersonalPageState";
 import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll";
+import { formatLongDate } from "@/utils/dateUtils";
 import { ActionButtons } from "../ActionButtons";
 
 interface PersonalPageInfoModalProps {
@@ -11,16 +12,7 @@ interface PersonalPageInfoModalProps {
 }
 
 function formatDate(dateString?: string | null) {
-  if (!dateString || String(dateString).trim() === "") return "—";
-
-  const date = new Date(dateString);
-  if (Number.isNaN(date.getTime())) return String(dateString);
-
-  return date.toLocaleDateString("es-CR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  return formatLongDate(dateString);
 }
 
 function InfoField({

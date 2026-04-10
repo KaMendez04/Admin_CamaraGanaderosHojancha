@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { parseISOLocal } from "../utils/dateUtils";
 
 const todayYMD = () => {
   const d = new Date();
@@ -11,7 +12,7 @@ export const personalSchema = z
     IDE: z.string().optional(),
     name: z.string().trim().min(1, "Requerido"),
     lastname1: z.string().trim().min(1, "Requerido"),
-    lastname2: z.string().trim().min(1, "Requerido"),
+    lastname2: z.string().trim().optional(),
     birthDate: z.string().min(1, "Requerido"),
     email: z.string().trim().min(1, "Requerido").email("Correo inválido"),
     phone: z.string().regex(/^\d{8}$/, "Debe tener 8 dígitos"),
@@ -35,7 +36,9 @@ export const personalSchema = z
           message: `No se permiten fechas del año ${currentYear} o posteriores`,
         });
       } else {
-        const birth = new Date(data.birthDate);
+        const birth = parseISOLocal(data.birthDate);
+        if (!birth) return;
+
         const now = new Date();
         const age = now.getFullYear() - birth.getFullYear();
         const hasBirthdayPassed =
@@ -69,18 +72,16 @@ export const personalSchema = z
       });
     }
 
-    if (data.endWorkDate && data.startWorkDate) {
-      const startDate = new Date(data.startWorkDate);
-      const endDate = new Date(data.endWorkDate);
+    const startDate = parseISOLocal(data.startWorkDate);
+    const endDate = parseISOLocal(data.endWorkDate);
 
-      if (endDate <= startDate) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["endWorkDate"],
-          message:
-            "La fecha de salida debe ser al menos 1 día después de la fecha de inicio",
-        });
-      }
+    if (startDate && endDate && endDate <= startDate) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["endWorkDate"],
+        message:
+          "La fecha de salida debe ser al menos 1 día después de la fecha de inicio",
+      });
     }
   });
 

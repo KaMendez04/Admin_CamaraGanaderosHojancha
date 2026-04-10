@@ -10,6 +10,7 @@ import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll";
 import { CustomSelect } from "../CustomSelect";
 import { usePersonalPersonaLookup } from "../../hooks/Personal/usePersonalPersonaLookup";
 import { personalSchema } from "@/schemas/PersonalSchema";
+import { getTodayLocalISO } from "@/utils/dateUtils";
 
 interface EditPersonalPageModalProps {
   personalPage: PersonalPageType;
@@ -45,7 +46,7 @@ export function EditPersonalPageModal({
   const DIRECTION_MAX = 100;
   const OCCUPATION_MAX = 75;
 
-  const todayISO = () => new Date().toISOString().slice(0, 10);
+  const todayISO = () => getTodayLocalISO();
 
   const statusOptions = [
     { value: "activo", label: "Activo" },
@@ -71,7 +72,7 @@ export function EditPersonalPageModal({
   const pad = (n: number) => String(n).padStart(2, "0");
   const formatYMD = (d: Date) =>
     `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-  const todayStr = formatYMD(new Date());
+  const todayStr = getTodayLocalISO();
 
   const today = new Date();
   today.setDate(today.getDate() - 1); // ayer
@@ -115,6 +116,10 @@ const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   });
 
   if (!parsed.success) {
+    await showErrorAlertRegister(
+      "Por favor, revise los campos marcados en rojo.",
+      "Datos incompletos o inválidos"
+    );
     return;
   }
 
@@ -143,8 +148,8 @@ const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     setPersonalPage(null);
   } catch (err: any) {
     const msg =
-      err?.response?.data?.message ||
       err?.message ||
+      err?.response?.data?.message ||
       (isNew ? "No se pudo registrar." : "No se pudieron guardar los cambios.");
     await showErrorAlertRegister(msg);
   } finally {
