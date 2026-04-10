@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { showSuccessAlert, showErrorAlertEmpty } from "@/utils/alerts";
 import { rejectVolunteerSolicitud } from "../../../services/Volunteers/volunteerService";
 
 export function useRejectVolunteerSolicitud() {
@@ -25,14 +25,14 @@ export function useRejectVolunteerSolicitud() {
         };
       });
 
-      toast.success("Solicitud de voluntariado rechazada correctamente");
+      void showSuccessAlert("Solicitud de voluntariado rechazada correctamente");
     },
 
     onError: (error: any) => {
-      toast.error(
+      void showErrorAlertEmpty(
         error?.response?.data?.message ||
-          error?.message ||
-          "Error al rechazar la solicitud de voluntariado"
+        error?.message ||
+        "Error al rechazar la solicitud de voluntariado"
       );
     },
   });

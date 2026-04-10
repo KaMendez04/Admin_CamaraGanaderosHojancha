@@ -1,6 +1,6 @@
 // hooks/Volunteers/useToggleOrganizacionStatus.ts
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { showSuccessAlert, showErrorAlertEmpty } from "@/utils/alerts";
 import { toggleOrganizacionStatus } from "../../../services/Volunteers/organizationApprovedService";
 
 interface ToggleOrganizacionStatusResponse {
@@ -21,11 +21,11 @@ export function useToggleOrganizacionStatus() {
         ? "Organización activada correctamente"
         : "Organización desactivada correctamente";
       
-      toast.success(mensaje);
+      void showSuccessAlert(mensaje);
     },
     onError: (error: any) => {
       const mensaje = error?.response?.data?.message || error?.message || "Error al cambiar el estado de la organización";
-      toast.error(mensaje);
+      void showErrorAlertEmpty(mensaje);
     },
   });
 }

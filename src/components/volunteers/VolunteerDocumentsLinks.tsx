@@ -1,4 +1,4 @@
-import { toast } from "sonner"
+import { showErrorAlertEmpty } from "@/utils/alerts"
 import { useApprovedVolunteerDocsLink, useSolicitudVoluntariadoDocsLink } from "@/hooks/Volunteers/useVolunteerDocsLink"
 
 type Props = {
@@ -38,14 +38,14 @@ export function VolunteerDocsModal({
         // window.location.href navega fuera del admin y puede perder la sesión
         window.open(url, "_blank", "noopener,noreferrer")
       } else {
-        toast.error("No se pudo obtener el enlace de documentos")
+        void showErrorAlertEmpty("No se pudo obtener el enlace de documentos")
       }
     } catch (e: any) {
       const msg =
         e?.response?.data?.message ||
         e?.message ||
         "No se pudieron abrir los documentos"
-      toast.error(Array.isArray(msg) ? msg.join(", ") : msg)
+      void showErrorAlertEmpty(Array.isArray(msg) ? msg.join(", ") : msg)
     }
   }
 

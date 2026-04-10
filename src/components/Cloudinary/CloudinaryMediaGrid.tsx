@@ -1,7 +1,8 @@
-import { ActionButtons } from "../ActionButtons";
 import type { ViewMode } from "@/utils/cloudinaryMediaUtils";
-
 import { isVideoUrl, videoMp4Url, videoPosterJpg } from "@/utils/cloudinaryMediaUtils";
+import { Button } from "../ui/button";
+import { Eye, Loader2, Trash2, Copy, Check } from "lucide-react";
+import { showConfirmDeleteAlert } from "@/utils/alerts";
 
 type Selected = { url: string; public_id: string; isVideo: boolean };
 
@@ -78,28 +79,36 @@ export default function CloudinaryMediaGrid({
               )}
             </div>
 
-            <div className="flex justify-between p-2 border-t border-[#F8F9F3] bg-[#FCFDF9]/50">
-              <ActionButtons
-                size="xs"
-                onView={() =>
+            <div className="flex justify-around p-1 border-t border-[#F8F9F3] bg-[#FCFDF9]/50">
+              <Button
+                type="button"
+                className="inline-flex items-center justify-center rounded-xl bg-[#FDFEF9] text-[#586174] transition hover:bg-[#F5F8EE] disabled:opacity-50 disabled:cursor-not-allowed h-8 w-8"
+                onClick={() => onCopy(url, it.public_id)}
+                title="Copiar"
+              >
+                {copiedId === it.public_id ? <Check className="h-4 w-4 text-[#708C3E] " /> : <Copy className="h-4 w-4" />}
+              </Button>
+              <Button
+                onClick={() =>
                   onOpen({ url, public_id: it.public_id, isVideo })
                 }
-              />
-              <ActionButtons
-                size="xs"
-                showDelete={true}
-                onDelete={() => onDelete(it.public_id)}
-                isDeleting={isDeleting}
-                requireConfirmDelete={true}
-              />
-              <ActionButtons
-                size="xs"
-                showCopy={true}
-                onCopy={() => onCopy(url, it.public_id)}
-                isCopied={copiedId === it.public_id}
-              />
+                className="inline-flex items-center gap-1.5 px-2 py-1.5 rounded-md  border border-none text-[#A3853D] text-sm font-medium hover:bg-[#F5E6C5] hover:text-[#8B6C2E]"
+              >
+                <Eye />
+              </Button>
+              <Button
+                type="button"
+                className="inline-flex items-center justify-center rounded-xl bg-[#FFFDFC] text-[#A14B43] transition hover:bg-[#FCF1EF] disabled:opacity-50 disabled:cursor-not-allowed h-8 w-8"
+                onClick={async () => {
+                  const ok = await showConfirmDeleteAlert("¿Eliminar?", "Esta acción no se puede deshacer.", "Sí, eliminar");
+                  if (ok) onDelete(it.public_id);
+                }}
+                disabled={isDeleting}
+                title="Eliminar"
+              >
+                {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+              </Button>
             </div>
-
           </div>
         );
       })}

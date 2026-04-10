@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateAssociate } from "../../services/Associates/adminAssociatesService";
 import type { UpdateAssociateValues } from "../../schemas/adminSolicitudes";
-import { toast } from "sonner";
+import { showSuccessAlert, showErrorAlertEmpty } from "@/utils/alerts";
 
 export function useUpdateAssociate() {
   const qc = useQueryClient();
@@ -12,10 +12,10 @@ export function useUpdateAssociate() {
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ["associates"] });
       qc.invalidateQueries({ queryKey: ["associate", vars.id] });
-      toast.success("Asociado actualizado correctamente");
+      void showSuccessAlert("Asociado actualizado correctamente");
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Error al actualizar el asociado");
+      void showErrorAlertEmpty(error?.message || "Error al actualizar el asociado");
     },
   });
 }

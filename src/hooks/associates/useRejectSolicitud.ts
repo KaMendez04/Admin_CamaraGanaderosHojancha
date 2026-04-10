@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { showSuccessAlert, showErrorAlertEmpty } from "@/utils/alerts";
 import { rejectSolicitud } from "../../services/Associates/adminSolicitudesService";
 
 export function useRejectSolicitud() {
@@ -24,11 +24,11 @@ export function useRejectSolicitud() {
         };
       });
 
-      toast.success("Solicitud rechazada correctamente");
+      void showSuccessAlert("Solicitud rechazada correctamente");
     },
 
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || error?.message || "Error al rechazar la solicitud");
+      void showErrorAlertEmpty(error?.response?.data?.message || error?.message || "Error al rechazar la solicitud");
     },
   });
 }

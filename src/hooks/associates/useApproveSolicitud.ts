@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { showSuccessAlert, showErrorAlertEmpty } from "@/utils/alerts";
 import { approveSolicitud } from "../../services/Associates/adminSolicitudesService";
 
 export function useApproveSolicitud() {
@@ -25,11 +25,11 @@ export function useApproveSolicitud() {
         };
       });
 
-      toast.success("Solicitud aprobada correctamente");
+      void showSuccessAlert("Solicitud aprobada correctamente");
     },
 
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || error?.message || "Error al aprobar la solicitud");
+      void showErrorAlertEmpty(error?.response?.data?.message || error?.message || "Error al aprobar la solicitud");
     },
   });
 }

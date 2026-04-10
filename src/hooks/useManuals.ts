@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { showErrorAlertEmpty } from "@/utils/alerts";
 import type { ManualItem } from "@/types/manualsTypes";
 import { downloadManualFile, getManuals } from "@/services/manualsService";
 
@@ -21,7 +21,7 @@ export function useManuals() {
       return manual;
     },
     onError: () => {
-      toast.error("No se pudo descargar el manual");
+      void showErrorAlertEmpty("No se pudo descargar el manual");
     },
   });
 

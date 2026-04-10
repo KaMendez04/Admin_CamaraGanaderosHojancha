@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { showSuccessAlert, showErrorAlertEmpty } from "@/utils/alerts";
 import { toggleAssociateStatus } from "../../services/Associates/adminAssociatesService";
 
 export function useToggleAssociateStatus() {
@@ -15,11 +15,11 @@ export function useToggleAssociateStatus() {
         ? "Asociado activado correctamente" 
         : "Asociado desactivado correctamente";
       
-      toast.success(mensaje);
+      void showSuccessAlert(mensaje);
     },
     onError: (error: any) => {
       const mensaje = error?.response?.data?.message || error?.message || "Error al cambiar el estado del asociado";
-      toast.error(mensaje);
+      void showErrorAlertEmpty(mensaje);
     },
   });
 }

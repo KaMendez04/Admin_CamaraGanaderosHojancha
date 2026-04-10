@@ -7,7 +7,7 @@ import {
   useApprovedHasDocs,
   useApprovedVolunteerDocsLink,
 } from "@/hooks/Volunteers/useVolunteerDocsLink";
-import { toast } from "sonner";
+import { showErrorAlertEmpty } from "@/utils/alerts";
 import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll";
 import { ActionButtons } from "../ActionButtons";
 
@@ -117,7 +117,7 @@ export function ApprovedVolunteerViewModal({
           if (typeof url === "string" && url.length > 0) {
             window.open(url, "_blank", "noopener,noreferrer");
           } else {
-            toast.error("No se pudo obtener el enlace de documentos");
+            void showErrorAlertEmpty("No se pudo obtener el enlace de documentos");
           }
         },
         onError: (err: any) => {
@@ -125,7 +125,7 @@ export function ApprovedVolunteerViewModal({
             err?.response?.data?.message ||
             err?.message ||
             "No se pudieron abrir los documentos";
-          toast.error(Array.isArray(msg) ? msg.join(", ") : msg);
+          void showErrorAlertEmpty(Array.isArray(msg) ? msg.join(", ") : msg);
         },
       }
     );

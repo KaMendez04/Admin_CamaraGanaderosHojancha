@@ -7,7 +7,7 @@ import {
   useAsociadoHasDocs,
   useDocsLinkByAsociado,
 } from "../../hooks/associates/useSolicitudDocsLink";
-import { toast } from "sonner";
+import { showErrorAlertEmpty } from "@/utils/alerts";
 import { useLockBodyScroll } from "@/hooks/modals/useLockBodyScroll";
 import { ActionButtons } from "../ActionButtons";
 
@@ -227,7 +227,7 @@ export function AssociateViewModal({
                         err?.response?.data?.message ||
                         err?.message ||
                         "No se pudieron abrir los documentos";
-                      toast.error(Array.isArray(msg) ? msg.join(", ") : msg);
+                      void showErrorAlertEmpty(Array.isArray(msg) ? msg.join(", ") : msg);
                     },
                   });
                 }}

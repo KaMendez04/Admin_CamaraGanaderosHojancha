@@ -1,6 +1,6 @@
 // hooks/Volunteers/useToggleVolunteerStatus.ts
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { showSuccessAlert, showErrorAlertEmpty } from "@/utils/alerts";
 import { toggleVolunteerStatus } from "../../../services/Volunteers/volunteerApprovedService";
 
 interface ToggleVolunteerStatusResponse {
@@ -21,11 +21,11 @@ export function useToggleVolunteerStatus() {
         ? "Voluntario activado correctamente"
         : "Voluntario desactivado correctamente";
       
-      toast.success(mensaje);
+      void showSuccessAlert(mensaje);
     },
     onError: (error: any) => {
       const mensaje = error?.response?.data?.message || error?.message || "Error al cambiar el estado del voluntario";
-      toast.error(mensaje);
+      void showErrorAlertEmpty(mensaje);
     },
   });
 }

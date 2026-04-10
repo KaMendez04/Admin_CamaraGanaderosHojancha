@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { showSuccessAlert, showErrorAlertEmpty } from "@/utils/alerts";
 import { approveVolunteerSolicitud } from "../../../services/Volunteers/volunteerService";
 
 export function useApproveVolunteerSolicitud() {
@@ -25,14 +25,14 @@ export function useApproveVolunteerSolicitud() {
         };
       });
 
-      toast.success("Solicitud de voluntariado aprobada correctamente");
+      void showSuccessAlert("Solicitud de voluntariado aprobada correctamente");
     },
 
     onError: (error: any) => {
-      toast.error(
+      void showErrorAlertEmpty(
         error?.response?.data?.message ||
-          error?.message ||
-          "Error al aprobar la solicitud de voluntariado"
+        error?.message ||
+        "Error al aprobar la solicitud de voluntariado"
       );
     },
   });
