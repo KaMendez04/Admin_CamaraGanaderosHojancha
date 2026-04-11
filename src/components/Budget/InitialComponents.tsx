@@ -36,35 +36,41 @@ export function StatCard({
         {icon === "up" && <TrendingUp className={`h-5 w-5 ${palette.icon}`} />}
         {icon === "bars" && <BarChart3 className={`h-5 w-5 ${palette.icon}`} />}
       </div>
-      <div className={`mt-2 min-w-0 font-bold leading-tight whitespace-nowrap text-[clamp(0.8rem,1.8vw,2rem)] ${palette.text}`}>{crc(value)}</div>
+      <div className={`mt-2 min-w-0 font-bold leading-tight whitespace-nowrap text-[clamp(0.8rem,1.8vw,2rem)] ${palette.text}`}>
+        {crc(value)}
+      </div>
     </div>
   )
 }
 
-/* ✅ NUEVA LÓGICA:
-   Positivo = verde
-   Negativo = amarillo
-   Igual para Ingresos y Egresos
-*/
-export function DiffBadge({ value }: { value: number }) {
-  const isPositive = value >= 0
+export function DiffBadge({
+  value,
+  kind,
+}: {
+  value: number
+  kind: "income" | "expense"
+}) {
+  const isIncome = kind === "income"
+  const isGood = isIncome ? value >= 0 : value <= 0
+  const displayValue = isIncome ? value : Math.abs(value)
 
   return (
     <span
       className={[
         "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-        isPositive
-          ? "bg-[#EAEFE0] text-[#556B2F] ring-1 ring-[#5B732E]/20" // verde
-          : "bg-[#FEF6E0] text-[#C19A3D] ring-1 ring-[#C6A14B]/20", // amarillo
+        isGood
+          ? "bg-[#EAEFE0] text-[#556B2F] ring-1 ring-[#5B732E]/20"
+          : "bg-[#FEF6E0] text-[#C19A3D] ring-1 ring-[#C6A14B]/20",
       ].join(" ")}
     >
-      {crc(value)}
+      {crc(displayValue)}
     </span>
   )
 }
 
 export function DataTable({
   title,
+  kind,
   rows,
   realLabel,
   projLabel,
@@ -73,6 +79,7 @@ export function DataTable({
   totalDiff,
 }: {
   title: string
+  kind: "income" | "expense"
   rows: Row[]
   realLabel: string
   projLabel: string
@@ -82,7 +89,6 @@ export function DataTable({
 }) {
   type TableRow = Row & { __isTotal?: boolean }
 
-  // Desktop: incluye Totales dentro de la tabla
   const dataDesktop: TableRow[] = [
     ...(rows ?? []),
     {
@@ -93,7 +99,6 @@ export function DataTable({
     } as TableRow,
   ]
 
-  // Mobile: solo filas normales
   const dataMobile: TableRow[] = [...(rows ?? [])] as TableRow[]
 
   const columns: ColumnDef<TableRow, any>[] = [
@@ -127,7 +132,7 @@ export function DataTable({
           ? totalDiff
           : row.original.spent - row.original.projected
 
-        return <DiffBadge value={value} />
+        return <DiffBadge value={value} kind={kind} />
       },
     },
   ]
@@ -137,7 +142,6 @@ export function DataTable({
       <h3 className="mb-3 text-lg font-bold text-[#33361D]">{title}</h3>
 
       <div className="overflow-hidden rounded-2xl ring-1 ring-[#EAEFE0] bg-white shadow-sm">
-        {/* Desktop */}
         <div className="hidden md:block">
           <GenericTable<TableRow>
             data={dataDesktop}
@@ -146,7 +150,6 @@ export function DataTable({
           />
         </div>
 
-        {/* Mobile */}
         <div className="block md:hidden">
           <GenericTable<TableRow>
             data={dataMobile}
@@ -156,7 +159,6 @@ export function DataTable({
         </div>
       </div>
 
-      {/* Totales SOLO en mobile */}
       <div className="md:hidden mt-3 rounded-2xl border border-[#EAEFE0] bg-[#F8F9F3] p-3 shadow-sm">
         <div className="grid grid-cols-12 gap-2 items-start">
           <div className="col-span-5 text-[11px] font-bold text-[#5B732E] uppercase tracking-wider">
@@ -190,7 +192,7 @@ export function DataTable({
             Diferencia
           </div>
           <div className="col-span-7">
-            <DiffBadge value={totalDiff} />
+            <DiffBadge value={totalDiff} kind={kind} />
           </div>
         </div>
       </div>
