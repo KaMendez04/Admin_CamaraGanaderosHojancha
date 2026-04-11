@@ -174,7 +174,7 @@ export default function CloudinaryMediaPage() {
                       onCopy={copyToClipboard}
                       onOpen={openItem}
                       onDelete={onDelete}
-                      isDeleting={remove.isPending}
+                      deletingId={remove.isPending ? remove.variables : null}
                     />
 
                     <div className="mt-6">

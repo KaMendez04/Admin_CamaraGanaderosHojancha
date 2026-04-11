@@ -12,7 +12,7 @@ type Props = {
   onCopy: (url: string, publicId: string) => void;
   onOpen: (sel: Selected) => void;
   onDelete: (publicId: string) => void;
-  isDeleting?: boolean;
+  deletingId?: string | null;
 };
 
 export default function CloudinaryMediaGrid({
@@ -22,7 +22,7 @@ export default function CloudinaryMediaGrid({
   onCopy,
   onOpen,
   onDelete,
-  isDeleting,
+  deletingId,
 }: Props) {
   const gridCols =
     view === "small"
@@ -99,10 +99,10 @@ export default function CloudinaryMediaGrid({
                 type="button"
                 className="inline-flex items-center justify-center rounded-xl bg-[#FFFDFC] text-[#A14B43] transition hover:bg-[#FCF1EF] disabled:opacity-50 disabled:cursor-not-allowed h-8 w-8"
                 onClick={() => onDelete(it.public_id)}
-                disabled={isDeleting}
+                disabled={!!deletingId}
                 title="Eliminar"
               >
-                {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                {deletingId === it.public_id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
               </Button>
             </div>
           </div>
