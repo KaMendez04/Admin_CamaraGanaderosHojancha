@@ -61,12 +61,20 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
 
   const typeParsed = parseOriginId(typeKey);
 
+  // Si se selecciona un tipo Real, buscamos si hay uno igual en Proyección para obtener sus subtipos también
+  const equivalentProjTypeId = useMemo(() => {
+    if (!typeParsed || typeParsed.origin === "p") return null;
+    const realTypeName = realTypes.data?.find((t) => t.id === typeParsed.id)?.name;
+    if (!realTypeName) return null;
+    return projTypes.data?.find((p) => p.name.toUpperCase() === realTypeName.toUpperCase())?.id;
+  }, [typeParsed, realTypes.data, projTypes.data]);
+
   const realSubTypes = useIncomeSubTypes(
     typeParsed?.origin === "r" ? typeParsed.id : undefined,
     current?.id
   );
   const projSubTypes = usePIncomeSubTypes(
-    typeParsed?.origin === "p" ? typeParsed.id : undefined,
+    typeParsed?.origin === "p" ? typeParsed.id : (equivalentProjTypeId ?? undefined),
     current?.id
   );
 
@@ -76,31 +84,55 @@ export default function IncomeForm({ onSuccess, disabled }: Props) {
   );
 
   const typeOptions = useMemo(() => {
-    const real = (realTypes.data ?? []).map((t) => ({
-      label: t.name,
-      value: `r:${t.id}` as OriginId,
-    }));
+    const map = new Map<string, { label: string; value: OriginId }>();
 
-    const proj = (projTypes.data ?? []).map((s) => ({
-      label: s.name,
-      value: `p:${s.id}` as OriginId,
-    }));
+    // Priorizar catálogos Reales
+    (realTypes.data ?? []).forEach((t) => {
+      map.set(t.name.toUpperCase(), {
+        label: t.name,
+        value: `r:${t.id}` as OriginId,
+      });
+    });
 
-    return [...real, ...proj];
+    // Agregar de Proyección solo si no existen con el mismo nombre
+    (projTypes.data ?? []).forEach((s) => {
+      const key = s.name.toUpperCase();
+      if (!map.has(key)) {
+        map.set(key, {
+          label: s.name,
+          value: `p:${s.id}` as OriginId,
+        });
+      }
+    });
+
+    return Array.from(map.values());
   }, [realTypes.data, projTypes.data]);
 
   const subTypeOptions = useMemo(() => {
     if (!typeParsed) return [];
-    if (typeParsed.origin === "r") {
-      return (realSubTypes.data ?? []).map((s) => ({
+
+    const map = new Map<string, { label: string; value: OriginId }>();
+
+    // Subtipos Reales
+    (realSubTypes.data ?? []).forEach((s) => {
+      map.set(s.name.toUpperCase(), {
         label: s.name,
         value: `r:${s.id}` as OriginId,
-      }));
-    }
-    return (projSubTypes.data ?? []).map((s) => ({
-      label: s.name,
-      value: `p:${s.id}` as OriginId,
-    }));
+      });
+    });
+
+    // Subtipos de Proyección
+    (projSubTypes.data ?? []).forEach((s) => {
+      const key = s.name.toUpperCase();
+      if (!map.has(key)) {
+        map.set(key, {
+          label: s.name,
+          value: `p:${s.id}` as OriginId,
+        });
+      }
+    });
+
+    return Array.from(map.values());
   }, [typeParsed, realSubTypes.data, projSubTypes.data]);
 
   useEffect(() => {
