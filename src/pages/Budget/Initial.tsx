@@ -9,9 +9,12 @@ export default function InitialPage() {
 
   if (loading)
     return <div className="min-h-screen flex items-center justify-center text-[#5A5A4A]">Cargando información...</div>
+
   if (error)
     return (
-      <div className="min-h-screen flex items-center justify-center text-[#8B4513]">Error al cargar los datos.</div>
+      <div className="min-h-screen flex items-center justify-center text-[#8B4513]">
+        Error al cargar los datos.
+      </div>
     )
 
   const incomeTotalReal = incomeRows.reduce((s, r) => s + r.spent, 0)
@@ -24,22 +27,21 @@ export default function InitialPage() {
 
   return (
     <div key={current?.id ?? "nofy"} className="min-h-screen bg-[#f3f8ef]">
-      <div className="mx-auto max-w-6xl p-4 md:p-8 bg-[#f3f8ef]" >
+      <div className="mx-auto max-w-6xl p-4 md:p-8 bg-[#f3f8ef]">
         <div className="rounded-2xl bg-white shadow-sm p-6 md:p-10">
           <div className="flex justify-end mb-6">
             <FiscalYearSelector />
           </div>
 
-          {/* ====== Cards métricas ====== */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <StatCard title="Total de egresos" value={cards.totalGastado} color="red" icon="down" />
             <StatCard title="Total de Ingresos" value={cards.totalIngresos} color="green" icon="up" />
             <StatCard title="Saldo Restante" value={cards.saldoRestante} color="blue" icon="bars" />
           </div>
 
-          {/* ====== Tablas ====== */}
           <DataTable
             title="Ingresos"
+            kind="income"
             rows={incomeRows}
             realLabel="Ingresos Reales"
             projLabel="Proyección de Ingresos"
@@ -47,8 +49,10 @@ export default function InitialPage() {
             totalProjected={incomeTotalProjected}
             totalDiff={incomeTotalDiff}
           />
+
           <DataTable
             title="Egresos"
+            kind="expense"
             rows={spendRows}
             realLabel="Egresos Reales"
             projLabel="Proyección de Egresos"
