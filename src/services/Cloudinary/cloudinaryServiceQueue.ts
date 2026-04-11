@@ -12,7 +12,7 @@ function ensureArray<T = any>(x: any): T[] {
 
 function normalizeAsset(r: any): CloudinaryAsset | null {
   const public_id = r?.public_id;
-  const url = r?.url ?? r?.secure_url;
+  const url = r?.displayUrl ?? r?.url ?? r?.secure_url;
   if (!public_id || !url) return null;
 
   const resource_type =
@@ -35,7 +35,9 @@ export const cloudinaryServiceQueue = {
     const { data } = await apiConfig.get<any>("/cloudinary/gallery");
 
     const arr = ensureArray<any>(data);
-    const normalized = arr.map(normalizeAsset).filter(Boolean) as CloudinaryAsset[];
+    const normalized = arr
+      .map(normalizeAsset)
+      .filter(Boolean) as CloudinaryAsset[];
 
     return normalized;
   },
@@ -80,12 +82,16 @@ export const cloudinaryServiceQueue = {
   },
 
   async remove(publicId: string) {
-    return apiConfig.delete(`/cloudinary/${encodeURIComponent(publicId)}`);
+    return apiConfig.delete("/cloudinary/asset", {
+      params: { publicId },
+    });
   },
 
   async checkExists(publicId: string) {
     try {
-      await apiConfig.get(`/cloudinary/${encodeURIComponent(publicId)}`);
+      await apiConfig.get("/cloudinary/asset", {
+        params: { publicId },
+      });
       return true;
     } catch (error: any) {
       if (error?.response?.status === 404) return false;
