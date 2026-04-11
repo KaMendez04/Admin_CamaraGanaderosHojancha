@@ -3,6 +3,7 @@ export type FiltersBase = {
   start?: string;
   end?: string;
   departmentId?: number;
+  fiscalYearId?: number;
 };
 
 export type IncomeFilters = FiltersBase & {

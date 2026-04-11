@@ -37,7 +37,7 @@ const styles: Record<
   }
 > = {
   small: {
-    wrapper: "rounded-[26px] border border-[#E8E2D4] bg-white p-4",
+    wrapper: "rounded-[26px] border border-[#E5E7EB] bg-white p-4",
     iconWrap: "h-10 w-10 rounded-2xl",
     icon: "h-4 w-4",
     title: "text-sm min-h-[40px]",
@@ -45,7 +45,7 @@ const styles: Record<
     button: "mt-4 rounded-2xl px-3 py-2 text-xs",
   },
   medium: {
-    wrapper: "rounded-[28px] border border-[#E8E2D4] bg-white p-5",
+    wrapper: "rounded-[28px] border border-[#E5E7EB] bg-white p-5",
     iconWrap: "h-11 w-11 rounded-2xl",
     icon: "h-5 w-5",
     title: "text-[15px] min-h-[44px]",
@@ -53,7 +53,7 @@ const styles: Record<
     button: "mt-4 rounded-2xl px-4 py-2.5 text-sm",
   },
   large: {
-    wrapper: "rounded-[30px] border border-[#E8E2D4] bg-white p-6",
+    wrapper: "rounded-[30px] border border-[#E5E7EB] bg-white p-6",
     iconWrap: "h-12 w-12 rounded-2xl",
     icon: "h-5 w-5",
     title: "text-base min-h-[48px]",
@@ -75,15 +75,15 @@ export default function ManualCard({
       <div className="flex h-full flex-col">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div
-            className={`flex items-center justify-center bg-[#EEF5DF] ${current.iconWrap}`}
+            className={`flex items-center justify-center bg-[#EEF4E6] ${current.iconWrap}`}
           >
             <FileText
-              className={`${current.icon} text-[#6F8A2D]`}
+              className={`${current.icon} text-[#708C3E]`}
               strokeWidth={1.8}
             />
           </div>
 
-          <span className="rounded-full bg-[#FAF1DF] px-2.5 py-1 text-[11px] font-semibold text-[#A3853D]">
+          <span className="rounded-full bg-[#EEF4E6] px-2.5 py-1 text-[11px] font-semibold text-[#556B2F]">
             {manual.extension.toUpperCase()}
           </span>
         </div>
@@ -106,7 +106,7 @@ export default function ManualCard({
           type="button"
           onClick={() => onDownload(manual)}
           disabled={isDownloading}
-          className={`inline-flex w-full items-center justify-center gap-2 bg-[#6F8A2D] font-medium text-white transition hover:bg-[#5E781F] disabled:cursor-not-allowed disabled:opacity-60 ${current.button}`}
+          className={`inline-flex w-full items-center justify-center gap-2 bg-[#708C3E] font-medium text-white transition hover:bg-[#5D741C] disabled:cursor-not-allowed disabled:opacity-60 ${current.button}`}
         >
           <Download className="h-4 w-4" />
           {isDownloading ? "Descargando..." : "Descargar"}

@@ -33,6 +33,7 @@ export default function CloudinaryMediaPage() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isUploadSheetOpen, setIsUploadSheetOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
   const shownUploadErrorsRef = useRef<Set<string>>(new Set());
 
@@ -81,12 +82,21 @@ export default function CloudinaryMediaPage() {
 
   const items = useMemo(() => {
     const arr = Array.isArray(gallery.data) ? gallery.data : [];
-    return [...arr].sort((a: any, b: any) => {
+    const sorted = [...arr].sort((a: any, b: any) => {
       const da = a?.created_at ? new Date(a.created_at).getTime() : 0;
       const db = b?.created_at ? new Date(b.created_at).getTime() : 0;
       return db - da;
     });
-  }, [gallery.data]);
+
+    if (!search.trim()) return sorted;
+
+    const lowerSearch = search.toLowerCase();
+    return sorted.filter((item: any) => {
+      const nameMatch = item?.public_id?.toLowerCase().includes(lowerSearch);
+      const urlMatch = item?.url?.toLowerCase().includes(lowerSearch);
+      return nameMatch || urlMatch;
+    });
+  }, [gallery.data, search]);
 
   const pageSize = view === "small" ? 24 : view === "medium" ? 12 : 8;
 
@@ -128,6 +138,8 @@ export default function CloudinaryMediaPage() {
           onOpenPicker={() => setIsUploadSheetOpen(true)}
           isUploading={isUploading}
           pendingCount={pendingCount}
+          search={search}
+          onSearchChange={setSearch}
         />
 
         <div className="rounded-xl sm:rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">

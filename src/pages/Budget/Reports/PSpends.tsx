@@ -47,6 +47,7 @@ export default function PSpendProjectionsPage() {
       departmentId: departmentId || undefined,
       spendTypeId: spendTypeId || undefined,
       spendSubTypeId: spendSubTypeId || undefined,
+      fiscalYearId: fiscalYear.id,
     })
   }, [start, end, departmentId, spendTypeId, spendSubTypeId, fiscalYear?.id])
 
@@ -56,6 +57,7 @@ export default function PSpendProjectionsPage() {
     departmentId,
     spendTypeId,
     spendSubTypeId,
+    fiscalYearId: fiscalYear?.id,
   }
 
   const { data: departmentsData = [], isFetching: depsLoading } = useQuery({

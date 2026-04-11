@@ -70,6 +70,7 @@ export default function PIncomeProjectionsPage() {
       departmentId: departmentId || undefined,
       incomeTypeId: incomeTypeId || undefined,
       incomeSubTypeId: incomeSubTypeId || undefined,
+      fiscalYearId: fiscalYear.id,
     })
   }, [start, end, departmentId, incomeTypeId, incomeSubTypeId, fiscalYear?.id])
 
@@ -77,6 +78,7 @@ export default function PIncomeProjectionsPage() {
     ...filters,
     start: start || fiscalYear?.start_date || undefined,
     end: end || fiscalYear?.end_date || undefined,
+    fiscalYearId: fiscalYear?.id,
   }
 
   const { data: departmentsData = [] } = useQuery({

@@ -1,12 +1,6 @@
-import {
-  ChevronDown,
-  Grid2X2,
-  Grid3X3,
-  LayoutGrid,
-  Loader2,
-  Plus,
-} from "lucide-react";
+
 import type { ViewMode } from "@/utils/cloudinaryMediaUtils";
+import { ChevronDown, Grid2X2, Grid3X3, LayoutGrid, Loader2, Plus } from "lucide-react";
 
 type HeaderProps = {
   view: ViewMode;
@@ -54,7 +48,8 @@ export default function CloudinaryMediaHeader({
         </div>
       </div>
 
-      <div className="flex items-end justify-end gap-2 sm:gap-3">
+      <div className="flex w-full items-center justify-end gap-2 sm:w-auto sm:gap-3">
+
         {/* Dropdown de vista */}
         <div className="relative">
           <button
@@ -71,9 +66,8 @@ export default function CloudinaryMediaHeader({
             </span>
 
             <ChevronDown
-              className={`h-4 w-4 text-[#6B7280] transition-transform ${
-                isDropdownOpen ? "rotate-180" : ""
-              }`}
+              className={`h-4 w-4 text-[#6B7280] transition-transform ${isDropdownOpen ? "rotate-180" : ""
+                }`}
             />
           </button>
 
@@ -93,11 +87,10 @@ export default function CloudinaryMediaHeader({
                       setView(option.value);
                       setIsDropdownOpen(false);
                     }}
-                    className={`flex w-full items-center gap-3 px-4 py-3 text-left transition ${
-                      view === option.value
-                        ? "bg-[#F8F9F3] text-[#708C3E]"
-                        : "text-[#33361D] hover:bg-[#FAF9F5]"
-                    }`}
+                    className={`flex w-full items-center gap-3 px-4 py-3 text-left transition ${view === option.value
+                      ? "bg-[#F8F9F3] text-[#708C3E]"
+                      : "text-[#33361D] hover:bg-[#FAF9F5]"
+                      }`}
                   >
                     <option.icon className="h-4 w-4" />
                     <span className="text-sm">{option.label}</span>
