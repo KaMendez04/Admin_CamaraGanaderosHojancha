@@ -2,6 +2,7 @@ import type { ViewMode } from "@/utils/cloudinaryMediaUtils";
 import { isVideoUrl, videoMp4Url, videoPosterJpg } from "@/utils/cloudinaryMediaUtils";
 import { Button } from "../ui/button";
 import { Eye, Loader2, Trash2, Copy, Check } from "lucide-react";
+import { getCurrentUser } from "@/auth/auth";
 
 type Selected = { url: string; public_id: string; isVideo: boolean };
 
@@ -37,6 +38,9 @@ export default function CloudinaryMediaGrid({
       : view === "medium"
         ? "aspect-[4/3]"
         : "aspect-[16/10]";
+
+  const role = getCurrentUser()?.role?.name?.toUpperCase();
+  const isReadOnly = role === "JUNTA";
 
   return (
     <div className={`grid gap-3 sm:gap-4 ${gridCols}`}>
@@ -95,15 +99,17 @@ export default function CloudinaryMediaGrid({
               >
                 <Eye />
               </Button>
-              <Button
-                type="button"
-                className="inline-flex items-center justify-center rounded-xl bg-[#FFFDFC] text-[#A14B43] transition hover:bg-[#FCF1EF] disabled:opacity-50 disabled:cursor-not-allowed h-8 w-8"
-                onClick={() => onDelete(it.public_id)}
-                disabled={!!deletingId}
-                title="Eliminar"
-              >
-                {deletingId === it.public_id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-              </Button>
+              {!isReadOnly && (
+                <Button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-xl bg-[#FFFDFC] text-[#A14B43] transition hover:bg-[#FCF1EF] disabled:opacity-50 disabled:cursor-not-allowed h-8 w-8"
+                  onClick={() => onDelete(it.public_id)}
+                  disabled={!!deletingId}
+                  title="Eliminar"
+                >
+                  {deletingId === it.public_id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                </Button>
+              )}
             </div>
           </div>
         );
