@@ -1,6 +1,13 @@
 import type { CloudinaryAsset } from "@/models/Cloudinary/CloudinaryType";
 import apiConfig from "../../apiConfig/apiConfig";
 
+type CloudinaryDeleteResponse = {
+  result: string;
+  public_id?: string;
+  resource_type?: "image" | "video";
+  tried?: string[];
+};
+
 function ensureArray<T = any>(x: any): T[] {
   if (Array.isArray(x)) return x;
   if (!x || typeof x !== "object") return [];
@@ -82,9 +89,18 @@ export const cloudinaryServiceQueue = {
   },
 
   async remove(publicId: string) {
-    return apiConfig.delete("/cloudinary/asset", {
-      params: { publicId },
-    });
+    const response = await apiConfig.delete<CloudinaryDeleteResponse>(
+      "/cloudinary/asset",
+      {
+        params: { publicId },
+      }
+    );
+
+    if (response.data.result !== "ok") {
+      throw new Error("No se pudo eliminar la imagen en Cloudinary.");
+    }
+
+    return response.data;
   },
 
   async checkExists(publicId: string) {
