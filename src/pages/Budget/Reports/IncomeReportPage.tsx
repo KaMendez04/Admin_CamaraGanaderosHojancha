@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
+import type { ColumnDef } from "@tanstack/react-table"
 import {
   useIncomeReport,
   useIncomeReportExcel,
@@ -6,13 +7,16 @@ import {
 } from "../../../hooks/Budget/reports/useIncomeReport"
 
 import { CustomSelect } from "../../../components/CustomSelect"
-
+import { GenericTable } from "../../../components/GenericTable"
+import { KPICard } from "../../../components/KPICard"
 import {
   usePagination,
   PaginationBar,
 } from "../../../components/ui/pagination"
 import { BirthDatePicker } from "@/components/ui/birthDayPicker"
 import { useFiscalYear } from "@/hooks/Budget/useFiscalYear"
+import { FileText, Download, FileSpreadsheet } from "lucide-react"
+import { SummaryListCard } from "@/components/SummaryListCard"
 
 const crc = (n: number) =>
   new Intl.NumberFormat("es-CR", {
@@ -37,7 +41,6 @@ export default function IncomeReportPage() {
   const [incomeType, setIncomeType] = useState<string | undefined>()
   const [incomeSubType, setIncomeSubType] = useState<string | undefined>()
 
-  // null = no ejecutar query todavía (esperar al año fiscal)
   const [submitted, setSubmitted] = useState<any>(null)
 
   const { data, isFetching } = useIncomeReport(submitted)
@@ -50,7 +53,6 @@ export default function IncomeReportPage() {
   const totals: any = data?.totals ?? {}
   const [isDownloading, setIsDownloading] = useState(false)
 
-  // Solo dispara cuando fiscalYear ya llegó
   useEffect(() => {
     if (!fiscalYear) return
     setSubmitted({
@@ -80,7 +82,11 @@ export default function IncomeReportPage() {
     const filtered = department
       ? rows.filter((r: any) => String(r.department ?? "") === department)
       : rows
-    const types = uniqSorted(filtered.map((r: any) => String(r.incomeType ?? "")))
+
+    const types = uniqSorted(
+      filtered.map((r: any) => String(r.incomeType ?? ""))
+    )
+
     return [
       { value: "", label: "Todos" },
       ...types.map((t) => ({ value: t, label: t })),
@@ -93,7 +99,11 @@ export default function IncomeReportPage() {
       const typeOk = incomeType ? String(r.incomeType ?? "") === incomeType : true
       return deptOk && typeOk
     })
-    const subs = uniqSorted(filtered.map((r: any) => String(r.incomeSubType ?? "")))
+
+    const subs = uniqSorted(
+      filtered.map((r: any) => String(r.incomeSubType ?? ""))
+    )
+
     return [
       { value: "", label: "Todos" },
       ...subs.map((s) => ({ value: s, label: s })),
@@ -104,7 +114,10 @@ export default function IncomeReportPage() {
     return rows.filter((r: any) => {
       const deptOk = department ? String(r.department ?? "") === department : true
       const typeOk = incomeType ? String(r.incomeType ?? "") === incomeType : true
-      const subOk = incomeSubType ? String(r.incomeSubType ?? "") === incomeSubType : true
+      const subOk = incomeSubType
+        ? String(r.incomeSubType ?? "") === incomeSubType
+        : true
+
       return deptOk && typeOk && subOk
     })
   }, [rows, department, incomeType, incomeSubType])
@@ -140,196 +153,242 @@ export default function IncomeReportPage() {
     [department, incomeType, incomeSubType, start, end, rows]
   )
 
+  const columns = useMemo<ColumnDef<any>[]>(
+    () => [
+      {
+        accessorKey: "department",
+        header: "Departamento",
+        cell: ({ row }) => (
+          <span className="font-medium text-[#2F3A1C]">
+            {row.original.department || "—"}
+          </span>
+        ),
+        size: 180,
+      },
+      {
+        accessorKey: "incomeType",
+        header: "Tipo",
+        cell: ({ row }) => (
+          <span className="font-medium text-[#2F3A1C]">
+            {row.original.incomeType || "—"}
+          </span>
+        ),
+        size: 220,
+      },
+      {
+        accessorKey: "incomeSubType",
+        header: "Subtipo",
+        cell: ({ row }) => (
+          <span className="font-medium text-[#2F3A1C]">
+            {row.original.incomeSubType || "—"}
+          </span>
+        ),
+        size: 260,
+      },
+      {
+        accessorKey: "date",
+        header: "Fecha",
+        cell: ({ row }) => (
+          <span className="text-[#3C4628]">
+            {row.original?.date
+              ? new Date(row.original.date).toLocaleDateString("es-CR")
+              : "—"}
+          </span>
+        ),
+        size: 80,
+      },
+      {
+        accessorKey: "amount",
+        header: "Monto",
+        cell: ({ row }) => (
+          <div className="text-left md:text-right font-semibold tabular-nums text-[#5B732E]">
+            {crc(Number(row.original.amount ?? 0))}
+          </div>
+        ),
+        size: 170,
+      },
+    ],
+    []
+  )
+
   return (
-    <div className="min-h-screen">
-      <div className="mx-auto max-w-6xl p-4 md:p-8">
-        <div className="">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div className="rounded-2xl bg-[#F8F9F3] p-5 shadow-sm">
-              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">Total Ingresos</div>
-              <div className="mt-2 font-bold text-[#5B732E] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">
-                {crc(totals?.total ?? 0)}
-              </div>
+    <div className="min-h-screen bg-[#F6F8F2] rounded-2xl">
+      <div className="mx-auto max-w-7xl px-4 py-4 md:px-6 md:py-6">
+        <div className="space-y-4">
+          <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="text-xl font-bold text-[#2F3A1C]">
+                Reporte de ingresos
+              </h1>
+              <p className="text-sm text-[#6E7C55]">
+                Consulta general de ingresos registrados
+              </p>
             </div>
 
-            <div className="rounded-2xl bg-[#EAEFE0] p-5 shadow-sm">
-              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">Departamentos</div>
-              {(totals?.byDepartment ?? []).length > 0 ? (
-                <ul className="mt-3 text-sm text-[#33361D] space-y-1.5">
-                  {(totals.byDepartment as any[]).map((r: any, i: number) => (
-                    <li key={i} className="flex justify-between">
-                      <span className="font-medium">{r.department}</span>
-                      <span className="font-bold text-[#5B732E]">{crc(r.total)}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="mt-2 font-bold text-[#5B732E] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">
-                  {crc(0)}
-                </div>
-              )}
-            </div>
-
-            <div className="rounded-2xl bg-[#FEF6E0] p-5 shadow-sm">
-              <div className="text-xs font-bold text-[#C6A14B] tracking-wider uppercase">Tipos de Ingreso</div>
-              {(totals?.byType ?? []).length > 0 ? (
-                <ul className="mt-3 text-sm text-[#33361D] space-y-1.5">
-                  {(totals.byType as any[]).map((r: any, i: number) => (
-                    <li key={i} className="flex justify-between">
-                      <span className="font-medium">{r.type}</span>
-                      <span className="font-bold text-[#C19A3D]">{crc(r.total)}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="mt-2 font-bold text-[#C19A3D] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">
-                  {crc(0)}
-                </div>
-              )}
+            <div className="text-xs font-medium text-[#6E7C55]">
+              Año fiscal:{" "}
+              <span className="font-semibold text-[#33411B]">
+                {fiscalYear?.year ?? "..."}
+              </span>
             </div>
           </div>
 
-          <div className="mt-6 rounded-2xl bg-[#F8F9F3] p-5 shadow-sm">
-            <div className="text-sm font-bold text-[#33361D] mb-4">Filtros</div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-[#33361D] mb-1.5">Departamento</label>
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+            <KPICard
+              label="Total ingresos"
+              value={crc(totals?.total ?? 0)}
+              tone="base"
+            />
+
+            <SummaryListCard
+              title="Departamentos"
+              tone="base"
+              items={(totals?.byDepartment ?? []).map((r: any) => ({
+                label: r.department,
+                value: crc(r.total),
+              }))}
+              maxItems={4}
+            />
+
+            <SummaryListCard
+              title="Tipos de ingreso"
+              tone="gold"
+              items={(totals?.byType ?? []).map((r: any) => ({
+                label: r.type,
+                value: crc(r.total),
+              }))}
+              maxItems={4}
+            />
+          </div>
+
+          <div className="rounded-2xl border border-[#E3EAD5] bg-white p-4 shadow-sm">
+            <div className="mb-3 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+              <div className="text-sm font-semibold text-[#2F3A1C]">
+                Filtros
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={handlePreviewPDF}
+                  disabled={isPdfGenerating || isDownloading}
+                  className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-[#E8D7A8] bg-[#FFF9EA] px-3 text-xs font-semibold text-[#A27A1D] transition hover:bg-[#FFF2CF] disabled:opacity-60"
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                  {isPdfGenerating && !isDownloading ? "Abriendo..." : "Ver PDF"}
+                </button>
+
+                <button
+                  onClick={handleDownloadPDF}
+                  disabled={isDownloading}
+                  className="inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-[#C19A3D] px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-[#AF8A31] disabled:opacity-60"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  {isDownloading ? "Descargando..." : "PDF"}
+                </button>
+
+                <button
+                  onClick={handleDownloadExcel}
+                  disabled={isExcelGenerating}
+                  className="inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-[#4F6B2D] px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-[#425926] disabled:opacity-60"
+                >
+                  <FileSpreadsheet className="h-3.5 w-3.5" />
+                  {isExcelGenerating ? "Generando..." : "Excel"}
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <div className="xl:col-span-2">
+                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.04em] text-[#6E7C55]">
+                  Departamento
+                </label>
                 <CustomSelect
                   value={department ?? ""}
                   onChange={(v) => setDepartment(v === "" ? undefined : String(v))}
                   options={departmentOptions}
                   placeholder="Todos"
                   zIndex={50}
+                  buttonClassName="h-10 rounded-xl text-sm"
                 />
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-[#33361D] mb-1.5">Tipo</label>
+
+              <div className="xl:col-span-2">
+                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.04em] text-[#6E7C55]">
+                  Tipo
+                </label>
                 <CustomSelect
                   value={incomeType ?? ""}
                   onChange={(v) => setIncomeType(v === "" ? undefined : String(v))}
                   options={typeOptions}
                   placeholder="Todos"
-                  disabled={false}
                   zIndex={40}
-                  searchable={true}
+                  searchable
                   searchPlaceholder="Buscar tipo..."
+                  buttonClassName="h-10 rounded-xl text-sm"
                 />
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-[#33361D] mb-1.5">Subtipo</label>
+
+              <div className="xl:col-span-2">
+                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.04em] text-[#6E7C55]">
+                  Subtipo
+                </label>
                 <CustomSelect
                   value={incomeSubType ?? ""}
                   onChange={(v) => setIncomeSubType(v === "" ? undefined : String(v))}
                   options={subTypeOptions}
                   placeholder="Todos"
-                  disabled={false}
                   zIndex={30}
-                  searchable={true}
+                  searchable
                   searchPlaceholder="Buscar subtipo..."
+                  buttonClassName="h-10 rounded-xl text-sm"
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-semibold text-[#33361D] mb-1.5">Fecha de inicio</label>
+                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.04em] text-[#6E7C55]">
+                  Inicio
+                </label>
                 <BirthDatePicker
                   value={start}
                   onChange={(date) => setStart(date || undefined)}
-                  placeholder="Seleccione fecha de inicio"
+                  placeholder="Seleccione fecha"
                   helperText=""
-                  triggerClassName="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition hover:bg-white"
+                  triggerClassName="h-10 rounded-xl border-[#E6E1D6] bg-white px-3 text-sm"
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-semibold text-[#33361D] mb-1.5">Fecha de fin</label>
+                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.04em] text-[#6E7C55]">
+                  Fin
+                </label>
                 <BirthDatePicker
                   value={end}
                   onChange={(date) => setEnd(date || undefined)}
                   minDate={start}
-                  placeholder="Seleccione fecha de fin"
-                  helperText={start ? "La fecha final no puede ser anterior a la fecha de inicio." : ""}
-                  triggerClassName="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition hover:bg-white"
+                  placeholder="Seleccione fecha"
+                  helperText=""
+                  triggerClassName="h-10 rounded-xl border-[#E6E1D6] bg-white px-3 text-sm"
                 />
               </div>
             </div>
           </div>
 
-          <div className="mt-6 rounded-3xl bg-[#FBFDF7] ring-1 ring-[#E8EEDB] p-5 md:p-6 mb-6">
-            <div className="mt-2 flex flex-col md:flex-row md:items-center gap-3">
-              <div className="md:ml-auto flex flex-wrap gap-3">
-                <button
-                  onClick={handlePreviewPDF}
-                  disabled={isPdfGenerating || isDownloading}
-                  className="flex-1 min-w-[140px] md:flex-none px-5 py-3 rounded-xl border-2 border-[#C19A3D] text-[#C19A3D] font-semibold hover:bg-[#FEF6E0] transition disabled:opacity-60"
-                >
-                  {isPdfGenerating && !isDownloading ? "Abriendo..." : "Ver PDF"}
-                </button>
-                <button
-                  onClick={handleDownloadPDF}
-                  disabled={isDownloading}
-                  className="flex-1 min-w-[160px] md:flex-none px-5 py-3 rounded-xl bg-[#C19A3D] text-white font-semibold hover:bg-[#C6A14B] transition disabled:opacity-50 shadow-sm"
-                >
-                  {isDownloading ? "Descargando…" : "Descargar PDF"}
-                </button>
-                <button
-                  onClick={handleDownloadExcel}
-                  disabled={isExcelGenerating}
-                  className="flex-1 min-w-[170px] md:flex-none px-5 py-3 rounded-xl border-2 border-[#2d6a4f] text-white bg-[#376a2d] font-semibold hover:bg-[#3c5c35] transition disabled:opacity-60"
-                >
-                  {isExcelGenerating ? "Generando…" : "Descargar Excel"}
-                </button>
-              </div>
-            </div>
-          </div>
+          <div className="rounded-2xl border border-[#E3EAD5] bg-white p-3 shadow-sm">
+            <GenericTable
+              data={pagedItems}
+              columns={columns}
+              isLoading={isFetching}
+              emptyMessage="No hay resultados para los filtros seleccionados."
+            />
 
-          <div className="mt-6 rounded-2xl bg-[#F8F9F3] overflow-hidden shadow-sm">
-            <div className="hidden md:block bg-[#EAEFE0] px-4 py-3">
-              <div className="grid grid-cols-[1.5fr_1.5fr_2fr_1fr_0.9fr] gap-4 text-sm font-bold text-[#33361D]">
-                <div>Departamento</div>
-                <div>Tipo</div>
-                <div>Subtipo</div>
-                <div>Fecha</div>
-                <div className="text-right">Monto</div>
-              </div>
-            </div>
-            <div className="bg-white">
-              {pagedItems.map((r: any, i: number) => (
-                <div
-                  key={i}
-                  className="border-b border-[#EAEFE0] px-4 py-3 text-sm text-[#33361D] hover:bg-[#F8F9F3] transition grid grid-cols-1 gap-2 md:grid-cols-[1.5fr_1.5fr_2fr_1fr_0.9fr] md:gap-4"
-                >
-                  <div>
-                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">Departamento</span>
-                    <span className="font-medium">{r.department}</span>
-                  </div>
-                  <div>
-                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">Tipo</span>
-                    <span className="font-medium">{r.incomeType}</span>
-                  </div>
-                  <div>
-                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">Subtipo</span>
-                    <span className="font-medium">{r.incomeSubType}</span>
-                  </div>
-                  <div>
-                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">Fecha</span>
-                    <span className="font-medium">
-                      {r?.date ? new Date(r.date).toLocaleDateString("es-CR") : "—"}
-                    </span>
-                  </div>
-                  <div className="md:text-right">
-                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">Monto</span>
-                    <span className="font-bold text-[#5B732E] tabular-nums whitespace-nowrap">{crc(r.amount)}</span>
-                  </div>
-                </div>
-              ))}
-              {filteredRows.length === 0 && !isFetching && (
-                <div className="py-8 text-center text-gray-400 font-medium">Sin resultados</div>
-              )}
-              {isFetching && (
-                <div className="py-8 text-center text-gray-400 font-medium">Cargando...</div>
-              )}
-            </div>
             {!isFetching && filteredRows.length > 0 && totalPages > 1 && (
-              <div className="bg-white px-4 py-4 border-t border-[#EAEFE0]">
-                <PaginationBar page={page} totalPages={totalPages} pageItems={pageItems} onPageChange={setPage} />
+              <div className="mt-3 border-t border-[#EEF2E7] px-1 pt-3">
+                <PaginationBar
+                  page={page}
+                  totalPages={totalPages}
+                  pageItems={pageItems}
+                  onPageChange={setPage}
+                />
               </div>
             )}
           </div>

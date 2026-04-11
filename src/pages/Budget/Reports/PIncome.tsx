@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
+import type { ColumnDef } from "@tanstack/react-table"
 import {
   useIncomeReport,
   useIncomeReportFilters,
@@ -16,12 +17,17 @@ import {
 } from "../../../services/Budget/projectionIncomeService"
 
 import { CustomSelect } from "../../../components/CustomSelect"
-
+import { GenericTable } from "../../../components/GenericTable"
 import { usePagination, PaginationBar } from "../../../components/ui/pagination"
 import { BirthDatePicker } from "@/components/ui/birthDayPicker"
 import { useFiscalYear } from "@/hooks/Budget/useFiscalYear"
+import { FileText, Download, FileSpreadsheet } from "lucide-react"
+
+// Ajusta esta ruta si tu KPICard está en otra carpeta
+import { KPICard } from "../../../components/KPICard"
 
 type AnyObj = Record<string, unknown>
+
 function ensureArray<T = any>(x: unknown): T[] {
   if (Array.isArray(x)) return x as T[]
   if (x && typeof x === "object") {
@@ -58,12 +64,11 @@ export default function PIncomeProjectionsPage() {
     setIncomeSubTypeId,
   } = useIncomeReportFilters()
 
-  // null = no ejecutar query todavía (esperar al año fiscal)
   const [submitted, setSubmitted] = useState<any>(null)
 
-  // Solo dispara cuando fiscalYear ya llegó
   useEffect(() => {
     if (!fiscalYear) return
+
     setSubmitted({
       start: start || fiscalYear.start_date || undefined,
       end: end || fiscalYear.end_date || undefined,
@@ -141,30 +146,130 @@ export default function PIncomeProjectionsPage() {
     [start, end, departmentId, incomeTypeId, incomeSubTypeId, reportQuery.data]
   )
 
+  const columns = useMemo<ColumnDef<any>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: "Subtipo",
+        cell: ({ row }) => (
+          <span className="font-medium text-[#2F3A1C]">
+            {row.original.name}
+          </span>
+        ),
+        size: 320,
+      },
+      {
+        accessorKey: "real",
+        header: "Real",
+        cell: ({ row }) => (
+          <div className="text-left md:text-right tabular-nums text-[#3C4628]">
+            {crc(Number(row.original.real))}
+          </div>
+        ),
+        size: 180,
+      },
+      {
+        accessorKey: "projected",
+        header: "Proyectado",
+        cell: ({ row }) => (
+          <div className="text-left md:text-right tabular-nums font-semibold text-[#5B732E]">
+            {crc(Number(row.original.projected))}
+          </div>
+        ),
+        size: 180,
+      },
+      {
+        accessorKey: "difference",
+        header: "Diferencia",
+        cell: ({ row }) => (
+          <div className="text-left md:text-right tabular-nums font-semibold text-[#B38728]">
+            {crc(Number(row.original.difference))}
+          </div>
+        ),
+        size: 180,
+      },
+    ],
+    []
+  )
+
   return (
-    <div className="min-h-screen">
-      <div className="mx-auto max-w-6xl p-4 md:p-8">
-        <div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-            <div className="rounded-2xl bg-[#F8F9F3] p-6 ring-1 ring-[#EAEFE0]">
-              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">Total ingresos (Proyectado)</div>
-              <div className="mt-2 font-bold text-[#5B732E] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">{crc(totals.projected)}</div>
+    <div className="min-h-screen bg-[#F6F8F2] rounded-2xl">
+      <div className="mx-auto max-w-7xl px-4 py-4 md:px-6 md:py-6">
+        <div className="space-y-4">
+          <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="text-xl font-bold text-[#2F3A1C]">
+                Reporte de ingresos proyectados
+              </h1>
+              <p className="text-sm text-[#6E7C55]">
+                Comparativo proyectado vs real
+              </p>
             </div>
-            <div className="rounded-2xl bg-[#EAEFE0] p-6 ring-1 ring-[#EAEFE0]">
-              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">Total real</div>
-              <div className="mt-2 font-bold text-[#5B732E] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">{crc(totals.real)}</div>
-            </div>
-            <div className="rounded-2xl bg-[#FEF6E0] p-6 ring-1 ring-[#F3E8C8]">
-              <div className="text-xs font-bold text-[#556B2F] tracking-wider uppercase">Diferencia (Proy - Real)</div>
-              <div className="mt-2 font-bold text-[#C19A3D] text-[clamp(1.1rem,2.4vw,1.875rem)] leading-tight break-words">{crc(totals.difference)}</div>
+
+            <div className="text-xs font-medium text-[#6E7C55]">
+              Año fiscal:{" "}
+              <span className="font-semibold text-[#33411B]">
+                {fiscalYear?.year ?? "..."}
+              </span>
             </div>
           </div>
 
-          <div className="rounded-3xl bg-[#FBFDF7] ring-1 ring-[#E8EEDB] p-5 md:p-6 mb-6">
-            <div className="text-sm font-bold text-[#33361D] mb-3">Filtros</div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-[#33361D] mb-1.5">Departamento</label>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <KPICard
+              label="Proyectado"
+              value={crc(totals.projected)}
+              tone="base"
+            />
+            <KPICard
+              label="Real"
+              value={crc(totals.real)}
+              tone="base"
+            />
+            <KPICard
+              label="Diferencia"
+              value={crc(totals.difference)}
+              tone="gold"
+            />
+          </div>
+
+          <div className="rounded-2xl border border-[#E3EAD5] bg-white p-4 shadow-sm">
+            <div className="mb-3 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+              <div className="text-sm font-semibold text-[#2F3A1C]">
+                Filtros
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={handlePreviewPDF}
+                  className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-[#E8D7A8] bg-[#FFF9EA] px-3 text-xs font-semibold text-[#A27A1D] transition hover:bg-[#FFF2CF] disabled:opacity-60"
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                  Ver PDF
+                </button>
+
+                <button
+                  onClick={handleDownloadPDF}
+                  className="inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-[#C19A3D] px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-[#AF8A31] disabled:opacity-60"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  PDF
+                </button>
+
+                <button
+                  onClick={handleExcelComparativo}
+                  className="inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-[#4F6B2D] px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-[#425926] disabled:opacity-60"
+                >
+                  <FileSpreadsheet className="h-3.5 w-3.5" />
+                  Excel
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <div className="xl:col-span-2">
+                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.04em] text-[#6E7C55]">
+                  Departamento
+                </label>
                 <CustomSelect
                   value={departmentId ?? ""}
                   onChange={(v) => {
@@ -176,10 +281,14 @@ export default function PIncomeProjectionsPage() {
                   options={departmentOptions}
                   placeholder="Todos"
                   zIndex={50}
+                  buttonClassName="h-10 rounded-xl text-sm"
                 />
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-[#33361D] mb-1.5">Tipo</label>
+
+              <div className="xl:col-span-2">
+                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.04em] text-[#6E7C55]">
+                  Tipo
+                </label>
                 <CustomSelect
                   value={incomeTypeId ?? ""}
                   onChange={(v) => {
@@ -191,12 +300,16 @@ export default function PIncomeProjectionsPage() {
                   placeholder={!departmentId ? "Seleccione un departamento" : "Todos"}
                   disabled={!departmentId}
                   zIndex={40}
-                  searchable={true}
+                  searchable
                   searchPlaceholder="Buscar tipo..."
+                  buttonClassName="h-10 rounded-xl text-sm"
                 />
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-[#33361D] mb-1.5">Subtipo</label>
+
+              <div className="xl:col-span-2">
+                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.04em] text-[#6E7C55]">
+                  Subtipo
+                </label>
                 <CustomSelect
                   value={incomeSubTypeId ?? ""}
                   onChange={(v) => setIncomeSubTypeId(v === "" ? undefined : Number(v))}
@@ -204,90 +317,57 @@ export default function PIncomeProjectionsPage() {
                   placeholder={!incomeTypeId ? "Seleccione un tipo" : "Todos"}
                   disabled={!incomeTypeId}
                   zIndex={30}
-                  searchable={true}
+                  searchable
                   searchPlaceholder="Buscar subtipo..."
+                  buttonClassName="h-10 rounded-xl text-sm"
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-semibold text-[#33361D] mb-1.5">Fecha de inicio</label>
+                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.04em] text-[#6E7C55]">
+                  Inicio
+                </label>
                 <BirthDatePicker
                   value={start}
                   onChange={(date) => setStart(date || undefined)}
-                  placeholder="Seleccione fecha inicio"
+                  placeholder="Seleccione fecha"
                   helperText=""
-                  triggerClassName="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition hover:bg-white"
+                  triggerClassName="h-10 rounded-xl border-[#E6E1D6] bg-white px-3 text-sm"
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-semibold text-[#33361D] mb-1.5">Fecha de fin</label>
+                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.04em] text-[#6E7C55]">
+                  Fin
+                </label>
                 <BirthDatePicker
                   value={end}
                   onChange={(date) => setEnd(date || undefined)}
                   minDate={start}
-                  placeholder="Seleccione fecha fin"
-                  helperText={start ? "La fecha final no puede ser anterior a la fecha de inicio." : ""}
-                  triggerClassName="w-full rounded-xl border-2 border-[#EAEFE0] bg-white p-3 text-[#33361D] focus:ring-2 focus:ring-[#5B732E] focus:border-[#5B732E] outline-none transition hover:bg-white"
+                  placeholder="Seleccione fecha"
+                  helperText=""
+                  triggerClassName="h-10 rounded-xl border-[#E6E1D6] bg-white px-3 text-sm"
                 />
               </div>
             </div>
           </div>
 
-          <div className="rounded-3xl bg-[#FBFDF7] ring-1 ring-[#E8EEDB] p-5 md:p-6 mb-6">
-            <div className="mt-2 flex flex-col md:flex-row md:items-center gap-3">
-              <div className="md:ml-auto flex flex-wrap gap-3">
-                <button onClick={handlePreviewPDF} className="flex-1 min-w-[140px] md:flex-none px-5 py-3 rounded-xl border-2 border-[#C19A3D] text-[#C19A3D] font-semibold hover:bg-[#FEF6E0] transition disabled:opacity-60">
-                  Ver PDF
-                </button>
-                <button onClick={handleDownloadPDF} className="flex-1 min-w-[160px] md:flex-none px-5 py-3 rounded-xl bg-[#C19A3D] text-white font-semibold hover:bg-[#C6A14B] transition disabled:opacity-50 shadow-sm">
-                  Descargar PDF
-                </button>
-                <button onClick={handleExcelComparativo} className="flex-1 min-w-[170px] md:flex-none px-5 py-3 rounded-xl border-2 border-[#2d6a4f] text-white bg-[#376a2d] font-semibold hover:bg-[#3c5c35] transition disabled:opacity-60">
-                  Descargar Excel
-                </button>
-              </div>
-            </div>
-          </div>
+          <div className="rounded-2xl border border-[#E3EAD5] bg-white p-3 shadow-sm">
+            <GenericTable
+              data={pagedItems}
+              columns={columns}
+              isLoading={reportQuery.isLoading}
+              emptyMessage="No hay resultados para los filtros seleccionados."
+            />
 
-          <div className="rounded-2xl bg-[#F8F9F3] overflow-hidden shadow-sm">
-            <div className="hidden md:block bg-[#EAEFE0] px-4 py-3">
-              <div className="grid grid-cols-[1fr_1fr_1fr_1fr] gap-4 text-sm font-bold text-[#33361D]">
-                <div>Subtipo</div>
-                <div className="text-right">Real</div>
-                <div className="text-right">Proyectado</div>
-                <div className="text-right">Diferencia</div>
-              </div>
-            </div>
-            <div className="bg-white">
-              {pagedItems.map((r: any, i: number) => (
-                <div key={i} className="border-b border-[#EAEFE0] px-4 py-3 text-sm text-[#33361D] hover:bg-[#F8F9F3] transition grid grid-cols-1 gap-2 md:grid-cols-[1fr_1fr_1fr_1fr] md:gap-4">
-                  <div>
-                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">Subtipo</span>
-                    <span className="font-medium">{r.name}</span>
-                  </div>
-                  <div className="md:text-right">
-                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">Real</span>
-                    <span className="tabular-nums whitespace-nowrap">{crc(r.real)}</span>
-                  </div>
-                  <div className="md:text-right">
-                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">Proyectado</span>
-                    <span className="font-medium text-[#5B732E] tabular-nums whitespace-nowrap">{crc(r.projected)}</span>
-                  </div>
-                  <div className="md:text-right">
-                    <span className="md:hidden block text-xs font-semibold text-[#6B7280]">Diferencia</span>
-                    <span className="font-bold text-[#C19A3D] tabular-nums whitespace-nowrap">{crc(r.difference)}</span>
-                  </div>
-                </div>
-              ))}
-              {rows.length === 0 && !reportQuery.isLoading && (
-                <div className="py-10 text-center text-gray-400 font-medium">Sin resultados</div>
-              )}
-              {reportQuery.isLoading && (
-                <div className="py-10 text-center text-gray-400 font-medium">Cargando...</div>
-              )}
-            </div>
             {!reportQuery.isLoading && rows.length > 0 && totalPages > 1 && (
-              <div className="bg-white px-4 py-4 border-t border-[#EAEFE0]">
-                <PaginationBar page={page} totalPages={totalPages} pageItems={pageItems} onPageChange={setPage} />
+              <div className="mt-3 border-t border-[#EEF2E7] px-1 pt-3">
+                <PaginationBar
+                  page={page}
+                  totalPages={totalPages}
+                  pageItems={pageItems}
+                  onPageChange={setPage}
+                />
               </div>
             )}
           </div>
