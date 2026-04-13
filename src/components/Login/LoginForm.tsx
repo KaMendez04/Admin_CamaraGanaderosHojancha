@@ -1,5 +1,5 @@
 import React from "react"
-import { Mail, Lock, AlertCircle, Eye, EyeOff, Check, X } from "lucide-react"
+import { Mail, Lock, AlertCircle, Eye, EyeOff} from "lucide-react"
 import { Link } from "@tanstack/react-router"
 import { useLoginTanForm } from "../../hooks/useLoginTanform"
 import { loginSchema, zodFieldValidator } from "../../schemas/loginSchema"

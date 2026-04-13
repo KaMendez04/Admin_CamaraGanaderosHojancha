@@ -2,7 +2,7 @@ import type React from "react"
 import { createContext, useContext, useEffect, useState } from "react"
 import type { AddNotificationType, NotificationContextType, Notification } from "../../models/notification/Notification"
 import { toast } from "sonner"
-import { Bell, X } from "lucide-react"
+import { X } from "lucide-react"
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined)
 

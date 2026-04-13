@@ -1,21 +1,11 @@
 import React, { useRef, useEffect } from "react"
-import { Bell, Trash2, CheckCheck, X } from "lucide-react"
+import { Bell, Trash2, X } from "lucide-react"
 import { useNotifications } from "./NotificationContext"
 
 export function NotificationDropdown() {
   const [isOpen, setIsOpen] = React.useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, clearAll } = useNotifications()
-
-  const getTimeAgo = (date: Date) => {
-    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000)
-
-    if (seconds < 60) return "hace un momento"
-    if (seconds < 3600) return `hace ${Math.floor(seconds / 60)} min`
-    if (seconds < 86400) return `hace ${Math.floor(seconds / 3600)} h`
-    if (seconds < 604800) return `hace ${Math.floor(seconds / 86400)} d`
-    return date.toLocaleDateString("es-CR")
-  }
+  const { notifications, unreadCount, markAsRead, deleteNotification, clearAll } = useNotifications()
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

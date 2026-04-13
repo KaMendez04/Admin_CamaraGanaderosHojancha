@@ -1,5 +1,3 @@
-import React from "react";
-
 type ErrorStateProps = {
   error?: string | null;
   title?: string;

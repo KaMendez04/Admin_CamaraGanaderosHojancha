@@ -51,6 +51,7 @@ export type ApiError = {
   remaining?: number;
   isUnauthorized?: boolean;
   isForbidden?: boolean;
+  response?: any;
   raw?: any;
 };
 
