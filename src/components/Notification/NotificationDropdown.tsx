@@ -50,85 +50,72 @@ export function NotificationDropdown() {
         <div
           className="
             fixed sm:absolute
-            top-16 sm:top-auto
-            left-2 right-2 sm:left-auto sm:right-0
-            mt-0 sm:mt-2
-            w-auto sm:w-96
-            max-h-[calc(100dvh-5rem)] sm:max-h-[600px]
-            rounded-lg bg-white shadow-lg border border-gray-200 z-50 overflow-hidden
+            top-[4.5rem] sm:top-12
+            left-4 right-4 sm:left-auto sm:right-0
+            w-auto sm:w-[320px]
+            max-h-[80vh]
+            rounded-xl bg-white shadow-[0_8px_32px_rgba(46,50,27,0.08)] border border-[#E6E1D6] z-50 overflow-hidden
           "
         >
-          <div className="px-4 py-3 border-b border-gray-200 bg-[#f7f8f5]">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Bell className="w-4 h-4 text-[#5B732E]" />
-                <h3 className="font-semibold text-[#33361D] text-sm">Notificaciones</h3>
-                {unreadCount > 0 && <span className="text-xs text-[#5B732E] font-medium">({unreadCount})</span>}
-              </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
+          <div className="px-5 py-4 flex items-center justify-between border-b border-[#E6E1D6] bg-[#F7F8F5]">
+            <div className="flex items-center gap-2">
+              <Bell className="w-3.5 h-3.5 text-[#708C3E]" />
+              <h3 className="text-[13px] font-semibold text-[#2E321B] tracking-tight">Notificaciones</h3>
             </div>
-
-            {notifications.length > 0 && (
-              <div className="flex gap-2 mt-2">
-                {unreadCount > 0 && (
-                  <button
-                    onClick={markAllAsRead}
-                    className="text-xs text-[#5B732E] hover:underline font-medium flex items-center gap-1"
-                  >
-                    <CheckCheck className="w-3 h-3" />
-                    Marcar todas
-                  </button>
-                )}
+            <div className="flex items-center gap-3">
+              {notifications.length > 0 && (
                 <button
                   onClick={clearAll}
-                  className="text-xs text-gray-500 hover:text-red-600 hover:underline font-medium flex items-center gap-1 ml-auto"
+                  className="text-[11px] text-[#2E321B]/85 hover:text-[#7E342E] active:text-[#7E342E] transition-colors tracking-tight font-medium flex items-center gap-1 group/clear"
                 >
-                  <Trash2 className="w-3 h-3" />
+                  <Trash2 className="w-3 h-3 text-[#2E321B]/75 group-hover/clear:text-[#7E342E] transition-colors" />
                   Limpiar
                 </button>
-              </div>
-            )}
+              )}
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-[#2E321B]/40 hover:text-[#2E321B] transition-colors"
+                aria-label="Cerrar panel"
+              >
+                <X className="w-3.5 h-3.5 stroke-[1.5]" />
+              </button>
+            </div>
           </div>
 
-          <div className="max-h-[calc(100dvh-11rem)] sm:max-h-[500px] overflow-y-auto">
+          <div className="overflow-y-auto overflow-x-hidden max-h-[400px] scrollbar-hide bg-white">
             {notifications.length === 0 ? (
-              <div className="py-12 text-center">
-                <Bell className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-                <p className="text-sm text-gray-400">No hay notificaciones</p>
+              <div className="py-10 text-center">
+                <p className="text-[12px] text-[#2E321B]/40 font-light italic">Silencio total por aquí...</p>
               </div>
             ) : (
               notifications.map((notification) => (
                 <div
                   key={notification.id}
                   onClick={() => handleNotificationClick(notification.id)}
-                  className={`px-4 py-3 border-b border-gray-100 hover:bg-[#F8F9F3] transition-colors cursor-pointer group ${
-                    !notification.read ? "bg-[#FEF6E0]/30" : "bg-white"
-                  }`}
+                  className="relative px-5 py-4 transition-all duration-300 cursor-pointer group hover:bg-[#F3F5EA]/50 border-b border-[#F7F8F5] last:border-0"
                 >
-                  <div className="flex items-start gap-3">
-                    {!notification.read && <div className="w-2 h-2 rounded-full bg-[#5B732E] mt-1.5 flex-shrink-0" />}
-
+                  <div className="flex items-start gap-4">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-0.5">
-                        <h4 className="font-semibold text-sm text-[#33361D]">{notification.title}</h4>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            deleteNotification(notification.id)
-                          }}
-                          className="text-gray-300 hover:text-red-600 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        {!notification.read && <div className="w-1.5 h-1.5 rounded-full bg-[#708C3E]" />}
+                        <h4 className={`text-[12px] ${!notification.read ? "font-semibold text-[#2E321B]" : "font-medium text-[#2E321B]/75"} truncate`}>
+                          {notification.title}
+                        </h4>
                       </div>
-                      <p className="text-sm text-gray-600 mb-1">{notification.message}</p>
-                      <p className="text-xs text-gray-400">{getTimeAgo(notification.timestamp)}</p>
+                      <p className="text-[11px] text-[#2E321B]/70 line-clamp-2 leading-normal">
+                        {notification.message}
+                      </p>
                     </div>
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        deleteNotification(notification.id)
+                      }}
+                      className="opacity-100 p-1 text-[#2E321B]/20 hover:text-red-400 transition-colors"
+                    >
+                      <X className="w-3 h-3 stroke-[1.5]" />
+                    </button>
                   </div>
                 </div>
               ))

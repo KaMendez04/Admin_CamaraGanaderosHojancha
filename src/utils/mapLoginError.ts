@@ -1,14 +1,16 @@
 function isAxiosErr(err: unknown): err is {
-  isAxiosError: true;
+  isAxiosError?: boolean;
   message?: string;
   response?: { status?: number };
 } {
-  return typeof err === 'object'
-    && err !== null
-    && (err as any).isAxiosError === true;
+  if (typeof err !== 'object' || err === null) return false;
+  const e = err as any;
+  // Es error de Axios si tiene isAxiosError O si tiene la estructura de response (para errores interceptados)
+  return e.isAxiosError === true || (e.response && typeof e.response.status === 'number');
 }
 
 export function mapLoginError(err: unknown): string {
+  console.log("DEBUG mapLoginError:", err);
   if (isAxiosErr(err)) {
     const status = err.response?.status;
     switch (status) {

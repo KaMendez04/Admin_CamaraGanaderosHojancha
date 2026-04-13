@@ -2,7 +2,7 @@ import type React from "react"
 import { createContext, useContext, useEffect, useState } from "react"
 import type { AddNotificationType, NotificationContextType, Notification } from "../../models/notification/Notification"
 import { toast } from "sonner"
-import { Bell} from "lucide-react"
+import { Bell, X } from "lucide-react"
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined)
 
@@ -56,17 +56,26 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     })
     
     toast.custom(
-      () => (
-        <div className="bg-white rounded-lg shadow-lg border-l-4 border-[#5B732E] p-3 flex items-start gap-3 min-w-[320px]">
-          <Bell className="w-4 h-4 text-[#5B732E] mt-0.5 flex-shrink-0" />
-          <div className="flex-1 min-w-0">
-            <div className="font-semibold text-[#33361D] mb-0.5 text-sm">{notification.title}</div>
-            <div className="text-sm text-gray-600">{notification.message}</div>
+      (t) => (
+        <div className="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border-b-2 border-[#5B732E]/70 p-3.5 w-[320px] relative transition-all duration-300 group">
+          <div className="flex flex-col gap-0.5 pr-6">
+            <h4 className="text-[13px] font-bold text-[#33361D] flex items-center">
+              {notification.title}
+            </h4>
+            <p className="text-[12px] text-slate-500 leading-snug truncate">
+              {notification.message}
+            </p>
           </div>
+          <button
+            onClick={() => toast.dismiss(t)}
+            className="absolute right-2.5 top-2.5 p-1 rounded-lg text-slate-300 hover:text-slate-500 transition-colors"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
         </div>
       ),
       {
-        duration: 4000,
+        duration: 8000,
         position: "top-right",
       },
     )

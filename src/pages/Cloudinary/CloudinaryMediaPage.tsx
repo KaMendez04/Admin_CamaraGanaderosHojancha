@@ -10,6 +10,7 @@ import CloudinaryMediaHeader from "@/components/Cloudinary/CloudinaryMediaHeader
 import CloudinaryMediaGrid from "@/components/Cloudinary/CloudinaryMediaGrid";
 import CloudinaryMediaModal from "@/components/Cloudinary/CloudinaryMediaModal";
 import CloudinaryUploadSheet from "@/components/Cloudinary/CloudinaryUploadSheet";
+import { ErrorState } from "@/components/common/ErrorState";
 
 type Selected = { url: string; public_id: string; isVideo: boolean };
 
@@ -127,6 +128,10 @@ export default function CloudinaryMediaPage() {
 
   const openItem = (sel: Selected) => setSelected(sel);
 
+  if (gallery.isError) {
+    return <ErrorState error={gallery.error?.message} message="Error cargando la galería." />;
+  }
+
   return (
     <div className="min-h-screen w-full bg-[#FAF9F5] px-4 sm:px-6 py-6 sm:py-10">
       <div className="max-w-7xl mx-auto">
@@ -162,12 +167,6 @@ export default function CloudinaryMediaPage() {
             {gallery.isLoading && (
               <div className="text-sm text-[#6B7280] text-center py-8">
                 Cargando…
-              </div>
-            )}
-
-            {gallery.isError && (
-              <div className="text-sm text-red-700 text-center py-8">
-                Error cargando la galería.
               </div>
             )}
 

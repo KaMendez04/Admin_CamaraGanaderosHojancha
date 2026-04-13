@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useManuals } from "../hooks/useManuals";
 import { PaginationBar, usePagination } from "@/components/ui/pagination";
+import { ErrorState } from "@/components/common/ErrorState";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -73,33 +74,6 @@ function LoadingState() {
               ))}
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ErrorState() {
-  return (
-    <div className="min-h-screen w-full bg-[#FAF9F5] px-4 py-6 sm:px-6 sm:py-10">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-[#374321] sm:text-3xl">
-            Manuales
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#6B7280] md:text-base">
-            Aquí puedes descargar los manuales de usuario para entender mejor
-            cómo usar el sistema y otras funciones disponibles.
-          </p>
-        </div>
-
-        <div className="rounded-xl sm:rounded-2xl border border-[#E5E7EB] bg-white p-8 text-center shadow-sm">
-          <h2 className="text-xl font-semibold text-[#374321]">
-            No se pudieron cargar los manuales
-          </h2>
-          <p className="mt-2 text-sm text-[#6B7280]">
-            Revisa la conexión con el backend o con Dropbox.
-          </p>
         </div>
       </div>
     </div>
@@ -178,7 +152,12 @@ export default function ManualPage() {
   );
 
   if (isLoading) return <LoadingState />;
-  if (isError) return <ErrorState />;
+  if (isError) return (
+    <ErrorState 
+      title="No se pudieron cargar los manuales"
+      message="Revisa la conexión con el backend o la integración."
+    />
+  );
 
   return (
     <div className="min-h-screen w-full bg-[#FAF9F5] px-4 py-6 sm:px-6 sm:py-10">

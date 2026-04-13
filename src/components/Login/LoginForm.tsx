@@ -1,5 +1,5 @@
 import React from "react"
-import { Mail, Lock, AlertCircle } from "lucide-react"
+import { Mail, Lock, AlertCircle, Eye, EyeOff, Check, X } from "lucide-react"
 import { Link } from "@tanstack/react-router"
 import { useLoginTanForm } from "../../hooks/useLoginTanform"
 import { loginSchema, zodFieldValidator } from "../../schemas/loginSchema"
@@ -19,6 +19,8 @@ interface LoginFormProps {
 }
 
 export default function LoginForm(props: LoginFormProps) {
+  const [showPassword, setShowPassword] = React.useState(false)
+
   const {
     email,
     setEmail,
@@ -117,7 +119,7 @@ export default function LoginForm(props: LoginFormProps) {
                 </div>
 
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => {
@@ -126,7 +128,7 @@ export default function LoginForm(props: LoginFormProps) {
                   }}
                   onBlur={field.handleBlur}
                   className={[
-                    "w-full h-11 pl-10 pr-3 text-[15px] rounded-md",
+                    "w-full h-11 pl-10 pr-10 text-[15px] rounded-md",
                     "border bg-white outline-none transition",
                     "placeholder:text-slate-400",
                     err
@@ -137,6 +139,15 @@ export default function LoginForm(props: LoginFormProps) {
                   aria-invalid={!!err}
                   aria-describedby="password-error"
                 />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-[#708C3E] focus:outline-none"
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
 
               {err && (
@@ -153,18 +164,38 @@ export default function LoginForm(props: LoginFormProps) {
       <form.Field name="remember">
         {(field) => (
           <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 text-sm text-slate-700 select-none">
-              <input
-                type="checkbox"
-                checked={remember}
-                onChange={(e) => {
-                  setRemember(e.target.checked)
-                  field.handleChange(e.target.checked)
-                }}
-                className="h-4 w-4 rounded border-slate-300 accent-[#7FB347]"
-              />
-              Recordarme
-            </label>
+            <div
+              className="flex items-center gap-2 text-sm text-slate-700 select-none cursor-pointer"
+              onClick={() => {
+                const next = !remember
+                setRemember(next)
+                field.handleChange(next)
+              }}
+            >
+              <button
+                type="button"
+                id="remember-toggle"
+                role="switch"
+                aria-checked={remember}
+                tabIndex={0}
+                className={[
+                  "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7FB347] focus-visible:ring-offset-2",
+                  remember ? "bg-[#708C3E]" : "bg-slate-300", 
+                ].join(" ")}
+              >
+                <span className="sr-only">Recordarme</span>
+
+                <span
+                  aria-hidden="true"
+                  className={[
+                    "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out",
+                    remember ? "translate-x-4" : "translate-x-0",
+                  ].join(" ")}
+                />
+              </button>
+              <span>Recordarme</span>
+            </div>
 
             <Link
               to="/forgot-password"

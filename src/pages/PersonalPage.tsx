@@ -14,6 +14,7 @@ import type { PersonalPageType } from "../models/PersonalPageType";
 import { StatusFilters } from "../components/StatusFilters";
 import { KPICard } from "../components/KPICard";
 import { PaginationBar, usePagination } from "@/components/ui/pagination";
+import { ErrorState } from "../components/common/ErrorState";
 
 // ===== API -> UI =====
 function mapApiToUi(p: any): PersonalPageType {
@@ -112,11 +113,7 @@ export default function PersonalPage() {
   }
 
   if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-red-600">
-        Error: {error}
-      </div>
-    );
+    return <ErrorState error={error} />;
   }
 
   return (

@@ -113,7 +113,15 @@ apiConfig.interceptors.request.use(
 apiConfig.interceptors.response.use(
   (res) => res,
   (error) => {
-    const status = error?.response?.status;
+    // Si Axios no tiene response (err.response es undefined), es un error de red/cors/servidor caído.
+    // Pero si el error viene con un objeto Error normal, Axios lo envuelve.
+    if (!error.response) {
+      return Promise.reject(error);
+    }
+
+    const status = error.response.status;
+    const url = error.config?.url || "";
+    const isLogin = url.includes("/auth/login");
 
     // 429
     if (status === 429) {
@@ -121,8 +129,12 @@ apiConfig.interceptors.response.use(
       const errObj: ApiError = {
         isRateLimited: true,
         status: 429,
-        message: "Demasiados intentos. Intenta nuevamente más tarde.",
+        // En login, permitimos que el hook use mapLoginError o su lógica
+        message: isLogin 
+          ? "Demasiados intentos. Intenta nuevamente más tarde." 
+          : "Demasiados intentos. Intenta nuevamente más tarde.",
         ...rl,
+        response: error.response, // AÑADIDO
         raw: error,
       };
       return Promise.reject(errObj);
@@ -130,11 +142,18 @@ apiConfig.interceptors.response.use(
 
     // 401 -> token inválido/expirado
     if (status === 401) {
-      clearSession();
+      // Si NO es login, limpiamos sesión. Si ES login, dejamos que pase el error
+      if (!isLogin) {
+        clearSession();
+      }
+      
       const errObj: ApiError = {
         isUnauthorized: true,
         status: 401,
-        message: "Tu sesión expiró. Inicia sesión de nuevo.",
+        message: isLogin 
+          ? "Correo o contraseña incorrecta." 
+          : "Tu sesión expiró. Inicia sesión de nuevo.",
+        response: error.response, // AÑADIDO para que mapLoginError lo detecte
         raw: error,
       };
       return Promise.reject(errObj);
@@ -146,6 +165,7 @@ apiConfig.interceptors.response.use(
         isForbidden: true,
         status: 403,
         message: "No tienes permisos para esta acción.",
+        response: error.response, // AÑADIDO
         raw: error,
       };
       return Promise.reject(errObj);

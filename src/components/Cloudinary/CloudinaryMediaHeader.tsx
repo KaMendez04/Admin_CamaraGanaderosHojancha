@@ -10,6 +10,8 @@ type HeaderProps = {
   onOpenPicker: () => void;
   isUploading?: boolean;
   pendingCount?: number;
+  search?: string;
+  onSearchChange?: (val: string) => void;
 };
 
 const viewOptions = [
@@ -26,6 +28,8 @@ export default function CloudinaryMediaHeader({
   onOpenPicker,
   isUploading = false,
   pendingCount = 0,
+  search = "",
+  onSearchChange,
 }: HeaderProps) {
   const currentView = viewOptions.find((opt) => opt.value === view);
 
@@ -48,10 +52,23 @@ export default function CloudinaryMediaHeader({
         </div>
       </div>
 
-      <div className="flex w-full items-center justify-end gap-2 sm:w-auto sm:gap-3">
+      <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-3 justify-end">
+        {/* Búsqueda */}
+        {onSearchChange && (
+          <div className="relative flex-1 sm:w-64">
+            <input
+              type="text"
+              placeholder="Buscar archivo (URL/ID)..."
+              value={search}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#33361D] placeholder:text-[#9CA3AF] transition hover:border-[#D1D5DB] focus:border-[#708C3E] focus:outline-none focus:ring-1 focus:ring-[#708C3E] sm:h-11 sm:px-4"
+            />
+          </div>
+        )}
 
-        {/* Dropdown de vista */}
-        <div className="relative">
+        {/* Dropdown de vista y botones agrupados */}
+        <div className="flex w-full items-center justify-between sm:w-auto sm:justify-end gap-2 sm:gap-3">
+          <div className="relative">
           <button
             type="button"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -105,7 +122,7 @@ export default function CloudinaryMediaHeader({
         <button
           type="button"
           onClick={onOpenPicker}
-          className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#708C3E] text-white shadow-sm transition hover:bg-[#5D741C] disabled:opacity-70 sm:h-11 sm:w-11"
+          className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#708C3E] text-white shadow-sm transition hover:bg-[#5D741C] disabled:opacity-70 sm:h-11 sm:w-11"
           title="Agregar archivos"
         >
           {isUploading ? (
@@ -120,6 +137,7 @@ export default function CloudinaryMediaHeader({
             </span>
           )}
         </button>
+        </div>
       </div>
     </div>
   );
