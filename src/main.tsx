@@ -2,7 +2,6 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider } from "@tanstack/react-router";
 import "./index.css";
-
 import { router } from "./router/Router";
 import { AuthProvider, useAuth } from "@/auth/AuthProvider";
 
